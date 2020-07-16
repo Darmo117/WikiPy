@@ -3,6 +3,8 @@ import importlib as _importlib
 import logging as _logging
 import typing as _typ
 
+from .. import apps
+
 
 class Skin(_abc.ABC):
     def __init__(self, name, label):
@@ -34,7 +36,7 @@ _LOADED_SKINS = {}
 
 def load_skin(name: str):
     try:
-        module = _importlib.import_module('._' + name, package='django_wiki.skins')
+        module = _importlib.import_module('._' + name, package=__name__)
         skin = module.load_skin()
         _LOADED_SKINS[skin.name] = skin
     except ModuleNotFoundError:
