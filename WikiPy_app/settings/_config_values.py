@@ -1,0 +1,45 @@
+##########
+# Groups #
+##########
+
+GROUP_ANONYMOUS = 'anonymous'
+GROUP_NEW_ACCOUNT = 'new_account'
+GROUP_EMAIL_CONFIRMED = 'email_confirmed'
+GROUP_AUTOPATROLLED = 'autopatrolled'
+GROUP_ADMINISTRATOR = 'administrator'
+
+USER_GROUPS_IDS = [
+    GROUP_ANONYMOUS,
+    GROUP_NEW_ACCOUNT,
+    GROUP_EMAIL_CONFIRMED,
+    GROUP_AUTOPATROLLED,
+    GROUP_ADMINISTRATOR,
+]
+
+##########
+# Rights #
+##########
+
+RIGHT_EDIT_PAGE = 'edit_page'
+RIGHT_DELETE_PAGE = 'delete_page'
+RIGHT_RENAME_PAGE = 'rename_page'
+
+RIGHT_HIDE_REVISION = 'hide_revision'
+RIGHT_PROTECT_PAGES = 'protect_pages'
+RIGHT_RENAME_USERS = 'rename_users'
+RIGHT_EDIT_USERS_GROUPS = 'edit_user_groups'
+RIGHT_BAN_USERS = 'ban_users'
+
+PAGE_EDIT_RIGHTS = [
+    RIGHT_EDIT_PAGE,
+    RIGHT_DELETE_PAGE,
+    RIGHT_RENAME_PAGE,
+]
+
+OTHER_RIGHTS = [
+    RIGHT_HIDE_REVISION,
+    RIGHT_RENAME_USERS,
+    RIGHT_EDIT_USERS_GROUPS,
+    RIGHT_BAN_USERS,
+    RIGHT_PROTECT_PAGES,
+]
