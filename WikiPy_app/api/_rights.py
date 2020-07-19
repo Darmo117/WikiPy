@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import typing as typ
+
 from .. import settings
 
 _GROUPS = {}
@@ -15,11 +16,12 @@ def get_group_for_id(group_id: int) -> typ.Optional[int]:
 
 
 class UserGroup:
-    def __init__(self, name: str, namespace_edit_rights: typ.Dict[int, typ.List[str]], *rights: str):
+    def __init__(self, name: str, bot: bool, namespace_edit_rights: typ.Dict[int, typ.List[str]], *rights: str):
         self.__name = name
-        self.__label = settings.l10n.USER_GROUPS_NAMES[name]
+        self.__label = settings.l10n.trans(f'group.{name}.name')
         self.__namespace_edit_rights = namespace_edit_rights
         self.__rights = rights
+        self.__bot = bot
 
     @property
     def name(self) -> str:
@@ -37,7 +39,7 @@ class UserGroup:
         :type page: django_wiki.models.Page
         :return: True if this group can edit the given page.
         """
-        return self.__check_page_right(page, settings.RIGHT_EDIT_PAGE)
+        return self.__check_page_right(page, settings.RIGHT_EDIT_PAGES)
 
     def can_delete_page(self, page) -> bool:
         """
@@ -47,7 +49,7 @@ class UserGroup:
         :type page: django_wiki.models.Page
         :return: True if this group can delete the given page.
         """
-        return self.__check_page_right(page, settings.RIGHT_DELETE_PAGE)
+        return self.__check_page_right(page, settings.RIGHT_DELETE_PAGES)
 
     def can_rename_page(self, page) -> bool:
         """
@@ -57,7 +59,7 @@ class UserGroup:
         :type page: django_wiki.models.Page
         :return: True if this group can rename the given page.
         """
-        return self.__check_page_right(page, settings.RIGHT_RENAME_PAGE)
+        return self.__check_page_right(page, settings.RIGHT_RENAME_PAGES)
 
     def can_hide_revisions(self) -> bool:
         """Checks whether this group can hide page revisions."""
@@ -77,7 +79,7 @@ class UserGroup:
 
     def can_ban_users(self) -> bool:
         """Checks whether this group can ban users."""
-        return settings.RIGHT_BAN_USERS in self.__rights
+        return settings.RIGHT_BLOCK_USERS in self.__rights
 
     def __check_page_right(self, page, right: str) -> bool:
         ns_id = page.namespace_id

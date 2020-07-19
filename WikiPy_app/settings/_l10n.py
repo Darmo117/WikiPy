@@ -1,8 +1,17 @@
-USER_GROUPS_NAMES = {
-    'anonymous': 'Anonymous',
-    'new_account': 'New Account',
-    'email_confirmed': 'Email Confirmed',
-    'autopatrolled': 'Autopatrolled',
-    'administrator': 'Administrator',
-    'interface_administrator': 'Interface Administrator',
+_ENTRIES = {
+    # Group names
+    'group.all.name': 'All',
+    'group.users.name': 'Users',
+    'group.email_confirmed.name': 'Email Confirmed',
+    'group.autoconfirmed.name': 'Autoconfirmed users',
+    'group.patrollers.name': 'Patrollers',
+    'group.administrators.name': 'Administrators',
+    'group.bureaucrats.name': 'Bureaucrats',
+
+    # Error pages
+    'error.bad_title.title': 'Bad title',
 }
+
+
+def trans(key: str, **kwargs) -> str:
+    return _ENTRIES.get(key, key) % kwargs

@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block page_title %}{% endblock %} &mdash; {{ project_name }}</title>
+</head>
+<body>
+  <h1>{% block main_title %}{% endblock %}</h1>
+  <hr/>
+  {% block content %}{% endblock %}
+</body>
+</html>

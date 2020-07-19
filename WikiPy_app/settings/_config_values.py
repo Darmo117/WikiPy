@@ -2,44 +2,47 @@
 # Groups #
 ##########
 
-GROUP_ANONYMOUS = 'anonymous'
-GROUP_NEW_ACCOUNT = 'new_account'
+GROUP_ALL = 'all'
+GROUP_USERS = 'user'
 GROUP_EMAIL_CONFIRMED = 'email_confirmed'
-GROUP_AUTOPATROLLED = 'autopatrolled'
-GROUP_ADMINISTRATOR = 'administrator'
+GROUP_AUTOCONFIRMED = 'autoconfirmed'
+GROUP_PATROLLERS = 'patrollers'
+GROUP_ADMINISTRATORS = 'administrator'
+GROUP_BUREAUCRATS = 'bureaucrats'
 
 USER_GROUPS_IDS = [
-    GROUP_ANONYMOUS,
-    GROUP_NEW_ACCOUNT,
+    GROUP_ALL,
+    GROUP_USERS,
     GROUP_EMAIL_CONFIRMED,
-    GROUP_AUTOPATROLLED,
-    GROUP_ADMINISTRATOR,
+    GROUP_AUTOCONFIRMED,
+    GROUP_ADMINISTRATORS,
+    GROUP_BUREAUCRATS,
 ]
 
 ##########
 # Rights #
 ##########
 
-RIGHT_EDIT_PAGE = 'edit_page'
-RIGHT_DELETE_PAGE = 'delete_page'
-RIGHT_RENAME_PAGE = 'rename_page'
+RIGHT_EDIT_PAGES = 'edit_pages'
+RIGHT_DELETE_PAGES = 'delete_pages'
+RIGHT_RENAME_PAGES = 'rename_pages'
 
 RIGHT_HIDE_REVISION = 'hide_revision'
 RIGHT_PROTECT_PAGES = 'protect_pages'
 RIGHT_RENAME_USERS = 'rename_users'
 RIGHT_EDIT_USERS_GROUPS = 'edit_user_groups'
-RIGHT_BAN_USERS = 'ban_users'
+RIGHT_BLOCK_USERS = 'block_users'
 
 PAGE_EDIT_RIGHTS = [
-    RIGHT_EDIT_PAGE,
-    RIGHT_DELETE_PAGE,
-    RIGHT_RENAME_PAGE,
+    RIGHT_EDIT_PAGES,
+    RIGHT_DELETE_PAGES,
+    RIGHT_RENAME_PAGES,
 ]
 
 OTHER_RIGHTS = [
     RIGHT_HIDE_REVISION,
     RIGHT_RENAME_USERS,
     RIGHT_EDIT_USERS_GROUPS,
-    RIGHT_BAN_USERS,
+    RIGHT_BLOCK_USERS,
     RIGHT_PROTECT_PAGES,
 ]

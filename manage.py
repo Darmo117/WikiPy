@@ -19,3 +19,8 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+    from WikiPy_app import setup, models
+
+    if sys.argv[1] == 'migrate' and models.User.objects.filter(name=setup.WIKI_USER_NAME).count() == 0:
+        setup.setup()

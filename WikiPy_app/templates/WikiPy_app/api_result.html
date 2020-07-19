@@ -1,0 +1,20 @@
+{% extends 'WikiPy_app/api.html' %}
+
+{% block page_title %}WikiPy API result{% endblock %}
+
+{% block main_title %}WikiPy API result{% endblock %}
+
+{% block content %}
+  <p>
+    Voici la représentation HTML du format JSON. HTML est bien pour le débogage, mais inapproprié pour être utilisé
+    dans une application.
+  </p>
+  <p>
+    Spécifiez le paramètre format pour modifier le format de sortie. Pour voir la représentation non HTML du format
+    JSON, mettez format=json.
+  </p>
+  <p>
+    Voir la documentation complète, ou l’aide de l’API pour plus d’information.
+  </p>
+  <pre>{{ content }}</pre>
+{% endblock %}

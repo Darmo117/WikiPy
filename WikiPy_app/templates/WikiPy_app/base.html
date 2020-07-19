@@ -2,15 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <title>{{ page_title }}</title>
+  <title>{{ full_page_title }} &mdash; {{ project_name }}</title>
 
   {% if noindex %}
     <meta name="robots" content="noindex"/>
   {% endif %}
 </head>
 <body>
-  <main>
-    {{ content }}
+  <header id="wpy-header"></header>
+  <nav id="wpy-nav-bar"></nav>
+  <main id="wpy-article">
+    <h1 id="wpy-main-title">{{ full_page_title }}</h1>
+    <hr/>
+    <article id="wpy-content">
+      {{ page_content }}
+    </article>
   </main>
+  <footer id="wpy-footer"></footer>
 </body>
 </html>

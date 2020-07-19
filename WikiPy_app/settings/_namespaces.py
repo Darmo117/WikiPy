@@ -1,11 +1,12 @@
 NAMESPACES = {  # Add local_names attribute to specify the localized names for each namespace.
+    -2: {'name': 'TestWiki'},  # Replace with project name
     -1: {'name': 'Special'},
     0: {'name': ''},
     1: {'name': 'Talk'},
     2: {'name': 'Category'},
     3: {'name': 'Category Talk'},
-    4: {'name': 'DjangoWiki'},
-    5: {'name': 'DjangoWiki Talk'},
+    4: {'name': 'WikiPy'},
+    5: {'name': 'WikiPy Talk'},
     6: {'name': 'User'},
     7: {'name': 'User Talk'},
     8: {'name': 'Template'},

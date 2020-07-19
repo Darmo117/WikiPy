@@ -15,12 +15,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic.base import RedirectView
+
+from WikiPy_app import apps
 
 urlpatterns = [
+    path('', RedirectView.as_view(url='wiki/', permanent=False)),
+    path('wiki/', include(apps.WikiPyAppConfig.name + '.urls')),
+    path('api/', include(apps.WikiPyAppConfig.name + '.urls_api')),
     path('admin/', admin.site.urls),
-    path('wiki/', include('WikiPy_app.urls')),
 ]
 
-handler403 = 'django_wiki.views.handler403'
-handler404 = 'django_wiki.views.handler404'
-handler500 = 'django_wiki.views.handler500'
+handler403 = apps.WikiPyAppConfig.name + '.views.handler403'
+handler404 = apps.WikiPyAppConfig.name + '.views.handler404'
+handler500 = apps.WikiPyAppConfig.name + '.views.handler500'
