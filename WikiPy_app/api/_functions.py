@@ -43,16 +43,13 @@ def get_full_page_title(namespace_id: int, title: str) -> str:
 def get_namespace_name(namespace_id: int, local_name=True) -> typ.Optional[str]:
     if namespace_id in settings.NAMESPACES:
         ns = settings.NAMESPACES[namespace_id]
-        if namespace_id != 0 and local_name and 'local_names' in ns:
-            return ns['local_names'][0]
-        return ns['name']
+        return ns.get_name(local_name)
     return None
 
 
 def get_namespace_id(namespace_name: str) -> typ.Optional[int]:
     for ns_id, ns in settings.NAMESPACES.items():
-        if ns['name'].lower() == namespace_name.lower() or \
-                'local_names' in ns and namespace_name.lower() in map(str.lower, ns['local_names']):
+        if ns.matches_name(namespace_name):
             return ns_id
     return None
 

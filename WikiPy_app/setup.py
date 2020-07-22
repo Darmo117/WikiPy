@@ -1,9 +1,12 @@
 from WikiPy_app import models
+import logging
 
 WIKI_USER_NAME = 'WikiPy'
 
 
 def setup():
+    logging.info('Setting up default pages…')
+
     wikiuser = models.User(name=WIKI_USER_NAME)
     wikiuser.save()
     models.UserGroupRel(user=wikiuser, group_id='administrator').save()
@@ -21,3 +24,5 @@ def setup():
                         content='The requested page title is empty or contains only the name of a namespace.\n\n'
                                 'Return to [[%(home_page)]].',
                         author=wikiuser).save()
+
+    logging.info('Default pages set up.')

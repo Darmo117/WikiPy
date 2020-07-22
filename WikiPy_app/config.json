@@ -1,0 +1,13 @@
+{
+  "project_name": "TestWiki",
+  "language": "en",
+  "main_page_namespace_id": -3,
+  "main_page_title": "Main Page",
+  "hide_title_on_main_page": true,
+  "case_sensitive_titles": true,
+  "rights": {},
+  "additional_groups": {},
+  "skins": [
+    "default"
+  ]
+}

@@ -20,7 +20,13 @@ def main():
 if __name__ == '__main__':
     main()
 
-    from WikiPy_app import setup, models
+    # Setting up default pages at first migration.
+    if sys.argv[1] == 'migrate':
+        from django.db import connection
 
-    if sys.argv[1] == 'migrate' and models.User.objects.filter(name=setup.WIKI_USER_NAME).count() == 0:
-        setup.setup()
+        if 'WikiPy_app_user' in connection.introspection.table_names():
+            import WikiPy_app.models as models
+            from WikiPy_app import setup
+
+            if models.User.objects.filter(name=setup.WIKI_USER_NAME).count() == 0:
+                setup.setup()

@@ -3,21 +3,19 @@ import importlib as _importlib
 import logging as _logging
 import typing as _typ
 
-from .. import apps
-
 
 class Skin(_abc.ABC):
     def __init__(self, name, label):
-        self._name = name
-        self._label = label
+        self.__name = name
+        self.__label = label
 
     @property
     def name(self):
-        return self._name
+        return self.__name
 
     @property
     def label(self):
-        return self._label
+        return self.__label
 
     @_abc.abstractmethod
     def render_wikicode(self, parsed_wikicode) -> str:
