@@ -57,26 +57,24 @@ class UserGroup:
     def has_right(self, right: str) -> bool:
         return right in self.__global_rights
 
-    def has_right_on_page(self, right: str, page) -> bool:
-        return self.has_right(right) and self.can_edit_page(page)
+    def has_right_on_pages_in_namespace(self, right: str, namespace_id: int) -> bool:
+        return self.has_right(right) and self.can_edit_pages_in_namespace(namespace_id)
 
-    def can_read_page(self, page):
+    def can_read_pages_in_namespace(self, namespace_id: int):
         """
-        Tells whether this group can read the given page.
-        :param page: The page to check.
-        :type page: WikiPy_app.models.Page
+        Tells whether this group can read pages in the given namespace.
+        :param namespace_id: Namespace ID to check.
         :return: True if this group read edit the page.
         """
-        return RIGHT_READ_PAGES in self.__namespace_edit_rights[page.namespace_id]
+        return RIGHT_READ_PAGES in self.__namespace_edit_rights[namespace_id]
 
-    def can_edit_page(self, page):
+    def can_edit_pages_in_namespace(self, namespace_id: int):
         """
-        Tells whether this group can edit the given page.
-        :param page: The page to check.
-        :type page: WikiPy_app.models.Page
+        Tells whether this group can edit pages in the given namespace.
+        :param namespace_id: Namespace ID to check.
         :return: True if this group can edit the page.
         """
-        return RIGHT_EDIT_PAGES in self.__namespace_edit_rights[page.namespace_id]
+        return RIGHT_EDIT_PAGES in self.__namespace_edit_rights[namespace_id]
 
     def __repr__(self):
         return f'{self.__name}[label={self.__label},hide_rc={self.__hide_rc},global_rights={self.__global_rights},' \

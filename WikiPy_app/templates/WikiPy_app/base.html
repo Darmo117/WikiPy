@@ -1,23 +1,56 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ language }}" dir="{{ writing_direction }}">
 <head>
   <meta charset="UTF-8"/>
   <title>{{ full_page_title }} &mdash; {{ project_name }}</title>
 
+  <link href="{% static 'WikiPy_app/style/common.css' %}" rel="stylesheet"/>
+  <link href="{% static 'WikiPy_app/style/skins/'|add:skin_name|add:'.css' %}" rel="stylesheet"/>
+  {% block head %}{% endblock %}
   {% if noindex %}
     <meta name="robots" content="noindex"/>
   {% endif %}
 </head>
 <body>
-  <header id="wpy-header"></header>
-  <nav id="wpy-nav-bar"></nav>
+  <header id="wpy-header">{% if namespace_id != -1 %}{% block header %}{% endblock %}{% endif %}</header>
+  <nav id="wpy-nav-bar">{% block navbar %}{% endblock %}</nav>
   <main id="wpy-article">
-    <h1 id="wpy-main-title">{{ full_page_title }}</h1>
-    <hr/>
+    {% if show_title %}
+      <h1 id="wpy-main-title">
+        {% if mode == 'read' %}
+          {{ full_page_title }}
+        {% elif mode == 'edit' %}
+          {% if page_exists %}
+            {% if user_can_edit %}
+              Editing “{{ full_page_title }}”
+            {% else %}
+              Sources of “{{ full_page_title }}”
+            {% endif %}
+          {% else %}
+            Creating “{{ full_page_title }}”
+          {% endif %}
+        {% elif mode == 'history' %}
+          Revision history of “{{ full_page_title }}”
+        {% endif %}
+      </h1>
+      <hr/>
+    {% endif %}
     <article id="wpy-content">
-      {{ page_content }}
+      {% if mode == 'read' %}
+        {{ rendered_page_content|safe }}
+      {% elif mode == 'edit' %}
+        <div id="wpy-edit-notice">
+          <div id="wpy-edit-notice-{{ namespace_id }}">
+            {{ edit_notice|safe }}
+          </div>
+        </div>
+        {% include 'WikiPy_app/editor-component.html' %}
+      {% elif mode == 'history' %}
+        {% include 'WikiPy_app/history-component.html' %}
+      {% endif %}
     </article>
   </main>
-  <footer id="wpy-footer"></footer>
+  <footer id="wpy-footer">{% block footer %}{% endblock %}</footer>
 </body>
 </html>

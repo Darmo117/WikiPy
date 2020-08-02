@@ -13,6 +13,9 @@ from .. import skins as _skins
 PROJECT_NAME = ''
 
 LANGUAGE = ''
+WRITING_DIRECTION = ''
+
+TIME_ZONE = ''
 
 MAIN_PAGE_NAMESPACE_ID = 0
 MAIN_PAGE_TITLE = ''
@@ -20,7 +23,7 @@ HIDE_TITLE_ON_MAIN_PAGE = True
 
 CASE_SENSITIVE_TITLE = True
 # noinspection PyTypeChecker
-INVALID_TITLE_REGEX: typ.Pattern[typ.AnyStr] = None
+INVALID_TITLE_REGEX: re.Pattern = None
 
 NAMESPACES: typ.Dict[int, Namespace] = {}
 
@@ -29,7 +32,7 @@ GROUPS: typ.Dict[str, UserGroup] = {}
 
 def init(base_dir: str):
     global PROJECT_NAME, LANGUAGE, MAIN_PAGE_NAMESPACE_ID, MAIN_PAGE_TITLE, HIDE_TITLE_ON_MAIN_PAGE, \
-        CASE_SENSITIVE_TITLE, NAMESPACES, INVALID_TITLE_REGEX, GROUPS
+        CASE_SENSITIVE_TITLE, NAMESPACES, INVALID_TITLE_REGEX, GROUPS, TIME_ZONE, WRITING_DIRECTION
 
     _logging.basicConfig(format='%(levelname)s:%(message)s', level=_logging.DEBUG)
 
@@ -38,6 +41,9 @@ def init(base_dir: str):
         PROJECT_NAME = str(json_config['project_name'])
 
         LANGUAGE = str(json_config['language'])
+        WRITING_DIRECTION = str(json_config['writing_direction'])
+
+        TIME_ZONE = str(json_config['time_zone'])
 
         MAIN_PAGE_NAMESPACE_ID = int(json_config['main_page_namespace_id'])
         MAIN_PAGE_TITLE = str(json_config['main_page_title'])
@@ -59,20 +65,27 @@ def init(base_dir: str):
             ns_name = ns['name']
             ns_local_name = ns.get('local_name', None)
             ns_alias = ns.get('alias', None)
+            is_talk = ns.get('talk', False)
 
-            NAMESPACES[ns_id] = Namespace(ns_id, ns_name, local_name=ns_local_name, alias=ns_alias)
+            NAMESPACES[ns_id] = Namespace(ns_id, ns_name, is_talk, local_name=ns_local_name, alias=ns_alias)
 
     INVALID_TITLE_REGEX = re.compile(
-        r'[<>_#|{}[]\x00-\x1f\x7f]|%[0-9A-Fa-f]{2}|&[A-Za-z0-9\x80-\xff]+;|&#[0-9]+;|&#x[0-9A-Fa-f]+;')
+        r'([<>_#|{}\[\]\x00-\x1f\x7f]|%[0-9A-Fa-f]{2}|&[A-Za-z0-9\x80-\xff]+;|&#[0-9]+;|&#x[0-9A-Fa-f]+;)')
 
     #################
     # Rights/Groups #
     #################
 
+    rights_all = {}
+    for ns_id in NAMESPACES:
+        ns_rights = {k: True for k in NAMESPACE_RIGHTS}
+        if ns_id in [-1, 4, 6, 16]:
+            ns_rights[RIGHT_EDIT_PAGES] = False
+        rights_all[ns_id] = ns_rights
+
     edit_rights = {
         GROUP_ALL: {
-            'namespaces': {ns_id: {k: True for k in NAMESPACE_RIGHTS}
-                           for ns_id in NAMESPACES if ns_id not in [-1, 4, 16]},
+            'namespaces': rights_all,
             'global': {
                 RIGHT_RENAME_PAGES: True,
             },
@@ -137,9 +150,9 @@ def init(base_dir: str):
         for ns_id_ in NAMESPACES:
             r[ns_id_] = []
             if ns_id_ != -1:
-                ns_rights = group_rights.get(ns_id_, {})
+                group_ns_rights = group_rights.get(ns_id_, {})
                 for right in NAMESPACE_RIGHTS:
-                    has_right = ns_rights.get(right, False)
+                    has_right = group_ns_rights.get(right, False)
                     inherits = right in inherited_rights.get(ns_id_, [])
                     if local_namespace_rights.get(str(ns_id_), {}).get(right, has_right or inherits):
                         r[ns_id_].append(right)

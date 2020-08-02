@@ -13,19 +13,19 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, re_path, include
 from django.views.generic.base import RedirectView
 
 from WikiPy_app import apps
 
 urlpatterns = [
-    path('', RedirectView.as_view(url='wiki/', permanent=False)),
+    path('', RedirectView.as_view(url='wiki/', permanent=True)),
+    path('wiki', RedirectView.as_view(url='wiki/', permanent=True)),
     path('wiki/', include(apps.WikiPyAppConfig.name + '.urls')),
+    path('api', RedirectView.as_view(url='api/', permanent=True)),
     path('api/', include(apps.WikiPyAppConfig.name + '.urls_api')),
-    path('admin/', admin.site.urls),
+    re_path(r'.*', include(apps.WikiPyAppConfig.name + '.urls_404')),
 ]
 
-handler403 = apps.WikiPyAppConfig.name + '.views.handler403'
-handler404 = apps.WikiPyAppConfig.name + '.views.handler404'
-handler500 = apps.WikiPyAppConfig.name + '.views.handler500'
+handler403 = apps.WikiPyAppConfig.name + '.views.handle403'
+handler500 = apps.WikiPyAppConfig.name + '.views.handle500'

@@ -6,7 +6,11 @@ def load_skin():
         def __init__(self):
             super().__init__('default', 'Default Skin')
 
-        def render_wikicode(self, parsed_wikicode) -> str:
+        def _format_link(self, api, url: str, text: str, page_exists: bool):
+            css_classes = 'redlink' if not page_exists else ''
+            return f'<a href="{url}" class="{css_classes}">{text}</a>'
+
+        def _render_wikicode_impl(self, api, parsed_wikicode) -> str:
             """
             Renders the given parsed wikicode.
 

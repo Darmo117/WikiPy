@@ -1,0 +1,4 @@
+ne pas restorer l’historique des pages supprimées puis recréées sauf sur action d’un admin
+minifier le CSS et le JS
+liste de suivi
+page pour définir les éléments des menus latéraux

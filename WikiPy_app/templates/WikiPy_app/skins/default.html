@@ -1,0 +1,19 @@
+{% extends 'WikiPy_app/base.html' %}
+{% load wpy_tags %}
+
+{% block header %}
+  {% wpy_internal_link page_title=full_page_title base=1 text='Read' user=wpy_user %}
+  {% wpy_internal_link page_title=full_page_title talk=1 text='Talk' user=wpy_user %}
+  {% if page_exists %}
+    {% if user_can_edit %}
+      {% wpy_internal_link page_title=full_page_title edit=1 text='Edit' user=wpy_user %}
+    {% elif user_can_read %}
+      {% wpy_internal_link page_title=full_page_title edit=1 text='View source' user=wpy_user %}
+    {% endif %}
+    {% if user_can_read %}
+      {% wpy_internal_link page_title=full_page_title history=1 text='History' user=wpy_user %}
+    {% endif %}
+  {% elif user_can_edit %}
+    {% wpy_internal_link page_title=full_page_title edit=1 text='Create' user=wpy_user %}
+  {% endif %}
+{% endblock %}

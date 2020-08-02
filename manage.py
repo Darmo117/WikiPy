@@ -24,9 +24,9 @@ if __name__ == '__main__':
     if sys.argv[1] == 'migrate':
         from django.db import connection
 
-        if 'WikiPy_app_user' in connection.introspection.table_names():
+        if 'WikiPy_app_userdata' in connection.introspection.table_names():
             import WikiPy_app.models as models
             from WikiPy_app import setup
 
-            if models.User.objects.filter(name=setup.WIKI_USER_NAME).count() == 0:
+            if models.UserData.objects.filter(user__username=setup.WIKI_USER_NAME).count() == 0:
                 setup.setup()

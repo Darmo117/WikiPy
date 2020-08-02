@@ -1,0 +1,11 @@
+{% load wpy_tags %}
+<form action="{% url 'page' raw_page_title=full_page_title|wpy_encode_url %}?action=submit" method="post">
+  {#<!--suppress HtmlFormInputWithoutLabel -->#}
+  <textarea id="wpy-edit-field" name="wpy-edit-field" rows="10"
+            {% if not user_can_edit %}disabled{% endif %}>{{ wikicode }}</textarea>
+  {% if user_can_edit %}
+    <input id="wpy-submit-btn" type="submit" value="Submit"/>
+    <input id="wpy-edit-section-id" name="wpy-edit-section-id" type="hidden" value="{{ section_id }}"/>
+    {% csrf_token %}
+  {% endif %}
+</form>

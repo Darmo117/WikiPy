@@ -10,6 +10,9 @@ _ENTRIES = {
 
     # Error pages
     'error.bad_title.title': 'Bad title',
+
+    'link.talk.label': 'talk',
+    'link.contributions.label': 'contributions',
 }
 
 

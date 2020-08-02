@@ -25,8 +25,8 @@ USER_GROUPS_IDS = [
 # Rights #
 ##########
 
-RIGHT_READ_PAGES = 'read_pages'
-RIGHT_EDIT_PAGES = 'edit_pages'
+RIGHT_READ_PAGES = 'read'
+RIGHT_EDIT_PAGES = 'edit'
 
 RIGHT_RENAME_PAGES = 'rename_pages'
 RIGHT_DELETE_PAGES = 'delete_pages'
