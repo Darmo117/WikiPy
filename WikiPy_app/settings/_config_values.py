@@ -3,13 +3,13 @@
 ##########
 
 GROUP_ALL = 'all'
-GROUP_USERS = 'user'
+GROUP_USERS = 'users'
 GROUP_EMAIL_CONFIRMED = 'email_confirmed'
 GROUP_AUTOPATROLLED = 'autopatrolled'
 GROUP_PATROLLERS = 'patrollers'
-GROUP_ADMINISTRATORS = 'administrator'
+GROUP_ADMINISTRATORS = 'administrators'
 GROUP_BOTS = 'bots'
-GROUP_BUREAUCRATS = 'bureaucrats'
+GROUP_RIGHTS_MANAGERS = 'rights_managers'
 
 USER_GROUPS_IDS = [
     GROUP_ALL,
@@ -18,7 +18,7 @@ USER_GROUPS_IDS = [
     GROUP_AUTOPATROLLED,
     GROUP_ADMINISTRATORS,
     GROUP_BOTS,
-    GROUP_BUREAUCRATS,
+    GROUP_RIGHTS_MANAGERS,
 ]
 
 ##########
@@ -37,6 +37,7 @@ RIGHT_HIDE_REVISIONS = 'hide_revisions'
 RIGHT_BLOCK_USERS = 'block_users'
 RIGHT_RENAME_USERS = 'rename_users'
 RIGHT_EDIT_USERS_GROUPS = 'edit_users_groups'
+RIGHT_EDIT_USER_PAGES = 'edit_user_pages'
 
 NAMESPACE_RIGHTS = (
     RIGHT_READ_PAGES,
@@ -53,4 +54,5 @@ GLOBAL_RIGHTS = (
     RIGHT_BLOCK_USERS,
     RIGHT_RENAME_USERS,
     RIGHT_EDIT_USERS_GROUPS,
+    RIGHT_EDIT_USER_PAGES,
 )

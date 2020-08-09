@@ -1,68 +1,104 @@
+import datetime as dt
 import logging
 import random
-import typing as typ
-import sys
 import re
+import sys
+import typing as typ
 
 import django.contrib.auth as dj_auth
 import django.contrib.auth.models as dj_models
-import django.db as dj_db
+import django.core.paginator as dj_page
 
 from . import _parser, _errors
-from .. import models, skins, settings
+from .. import models, skins, settings, special_pages
 
-REDIRECT_PATTERN = re.compile(r'@REDIRECT\[\[([^\n]+?)]]')
 
 #########
 # Users #
 #########
 
 
-INVALID_USERNAME = 'invalid username'
-DUPLICATE_USERNAME = 'duplicate username'
-
-
-def create_user(username: str, is_male: bool = None, email: str = None, password: str = None, ip: str = None) \
-        -> typ.Union[str, dj_models.User]:
+def create_user(username: str, is_male: bool = None, email: str = None, password: str = None, ip: str = None,
+                ignore_email: bool = False) -> models.User:
     anonymous = ip is not None
+
+    # TODO disable usernames that are equal without considering case
     if (not anonymous and username.startswith("Anonymous-")
             or '/' in username
             or settings.INVALID_TITLE_REGEX.search(username)):
-        return INVALID_USERNAME
-    else:
-        if anonymous:
-            email = None
-            is_male = None
-        try:
-            user = dj_models.User.objects.create_user(username, email=email, password=password)
-            user.save()
-            models.UserData(user=user, is_male=is_male, ip_address=ip if anonymous else None).save()
-            group_id = settings.GROUP_USERS if not anonymous else settings.GROUP_ALL
-            models.UserGroupRel(user=user, group_id=group_id).save()
-            logging.info(f'Created user {username}')
-            return user
-        except dj_db.IntegrityError:
-            return DUPLICATE_USERNAME
+        raise _errors.InvalidUsernameError(username)
+    if get_user_from_name(username):
+        raise _errors.DuplicateUsernameError(username)
+
+    if anonymous:
+        email = None
+        is_male = None
+    elif not ignore_email and not re.fullmatch(r'\w+([.-]\w+)*@\w+([.-]\w+)+', email):
+        raise _errors.InvalidEmailError(email)
+    elif password is None or password.strip() == '':
+        raise _errors.InvalidPasswordError(password)
+
+    if password is not None:
+        password = password.strip()
+
+    dj_user = dj_models.User.objects.create_user(username, email=email, password=password)
+    dj_user.save()
+
+    talk_text = settings.i18n.trans('link.talk')
+    user_ns = get_namespace_name(6)
+    user_talk_ns = get_namespace_name(7)
+    kwargs = {
+        'user': dj_user,
+        'is_male': is_male,
+        'ip_address': ip if anonymous else None,
+        'timezone': settings.TIME_ZONE,
+        'datetime_format': settings.DATETIME_FORMATS[0],
+        'signature': f'[[{user_ns}:{username}|{username}]] ([[{user_talk_ns}:{username}|{talk_text}]])',
+    }
+    data = models.UserData(**kwargs)
+    data.save()
+    group_id = settings.GROUP_USERS if not anonymous else settings.GROUP_ALL
+    models.UserGroupRel(user=dj_user, group_id=group_id).save()
+    logging.info(f'Created user {username}')
+
+    return models.User(dj_user, data)
 
 
 def log_in(request, username: str, password: str) -> bool:
-    return dj_auth.authenticate(request, username=username, password=password) is not None
+    user = dj_auth.authenticate(request, username=username, password=password)
+    if user is not None:
+        dj_auth.login(request, user)
+        return True
+    return False
 
 
-def get_user(request) -> models.User:
+def log_out(request):
+    dj_auth.logout(request)
+
+
+def get_user_from_request(request) -> models.User:
     dj_user = dj_auth.get_user(request)
 
     if dj_user.is_anonymous:
         ip = request.META['REMOTE_ADDR']
         # Create user if IP and not already created
         if not ip_exists(ip):
-            username = f'Anonymous-{random.randint(1, 1000)}'  # TODO revoir l’index
-            dj_user = create_user(username, ip=ip)
+            username = f'Anonymous-{random.randint(1, 1000)}'  # TODO revoir l’index (utiliser un compteur)
+            return create_user(username, ip=ip)
         else:
             dj_user = dj_models.User.objects.get(userdata__ip_address=ip)
 
     user_data = models.UserData.objects.get(user=dj_user)
     return models.User(dj_user, user_data)
+
+
+def get_user_from_name(username: str) -> typ.Optional[models.User]:
+    try:
+        dj_user = dj_models.User.objects.get(username__iexact=username)
+        user_data = models.UserData.objects.get(user=dj_user)
+        return models.User(dj_user, user_data)
+    except dj_models.User.DoesNotExist:
+        return None
 
 
 def user_exists(username: str) -> bool:
@@ -87,6 +123,33 @@ def can_read_page(user: models.User, namespace_id: int, title: str) -> bool:
 
 def can_edit_page(user: models.User, namespace_id: int, title: str) -> bool:
     return user.can_edit_page(namespace_id, title)
+
+
+def get_user_contributions(username: str) -> typ.Iterable[models.PageRevision]:
+    if user_exists(username):
+        return models.PageRevision.objects.filter(author__username=username).order_by('-date')
+    return []
+
+
+def add_user_to_group(user: models.User, group_id: str, performer: models.User = None, setup: bool = False) \
+        -> bool:
+    if group_exists(group_id) and ((performer and performer.has_right(settings.RIGHT_EDIT_USERS_GROUPS)) or setup):
+        models.UserGroupRel(user=user.django_user, group_id=group_id).save()
+        return True
+
+    return False
+
+
+def group_exists(group_id: str) -> bool:
+    return group_id in settings.GROUPS
+
+
+def get_param(query_dict, param_name: str, expected_type: typ.Type[typ.Any] = str, default=None):
+    try:
+        value = query_dict.get(param_name, default)
+        return expected_type(value) if value is not None else None
+    except ValueError:
+        return default
 
 
 ##########
@@ -178,6 +241,25 @@ def title_from_url(url_title: str) -> str:
 #########
 
 
+def paginate(values: typ.Iterable[typ.Any], url_params: typ.Dict[str, str]) -> typ.Tuple[dj_page.Paginator, int]:
+    try:
+        page = int(url_params.get('page', 1))
+        if page < 1:
+            page = 1
+    except ValueError:
+        page = 1
+    try:
+        number_per_page = int(url_params.get('limit', 50))
+        if number_per_page < 1:
+            number_per_page = 1
+        elif number_per_page > 500:
+            number_per_page = 500
+    except ValueError:
+        number_per_page = 50
+
+    return dj_page.Paginator(values, number_per_page), page
+
+
 def get_base_page_namespace(namespace_id: int) -> typ.Optional[int]:
     if namespace_id == -1:
         return None
@@ -193,7 +275,19 @@ def get_talk_page_namespace(namespace_id: int) -> typ.Optional[int]:
 
 
 def page_exists(namespace_id: int, title: str) -> bool:
-    return models.Page.objects.filter(namespace_id=namespace_id, title=title).count() != 0
+    if namespace_id != -1:
+        return models.Page.objects.filter(namespace_id=namespace_id, title=title).count() != 0
+    else:
+        return special_pages.get_special_page(get_special_page_title(title)) is not None
+
+
+def get_special_page_title(title: str) -> str:
+    return title.split('/', 1)[0]
+
+
+def get_special_page_sub_title(title: str) -> str:
+    s = title.split('/', 1)
+    return s[1] if len(s) > 1 else ''
 
 
 def get_page_content(namespace_id: int, title: str, default='') -> str:
@@ -213,27 +307,22 @@ def get_page_revisions(namespace_id: int, title: str) -> typ.List[models.PageRev
 
 
 def get_redirect(wikicode: str) -> typ.Optional[str]:
-    if m := REDIRECT_PATTERN.fullmatch(wikicode.strip()):
-        title = m.group(1)
-        try:
-            check_title(title)
-        except (_errors.BadTitleException, _errors.EmptyPageTitleException):
-            pass
-        else:
-            return title
-    return None
+    return _PARSER.get_redirect(wikicode)
+
+
+def format_datetime(datetime: dt.datetime, user: models.User):
+    return datetime.strftime(user.data.datetime_format)
 
 
 def render_wikicode(wikicode: str, skin_id: str) -> str:
     skin = skins.get_skin(skin_id)
-    parser = _parser.WikicodeParser()
-    parsed_wikicode = parser.parse_wikicode(wikicode)
-    return skin.render_wikicode(sys.modules[__name__], parsed_wikicode)
+    parsed_wikicode = _PARSER.parse_wikicode(wikicode)
+    return skin.render_wikicode(_get_self(), parsed_wikicode)
 
 
 # TODO gérer les conflits
-def submit_page_content(namespace_id: int, title: str, user: models.User, wikicode: str, revision_id: int = None,
-                        section_id: int = None):
+def submit_page_content(namespace_id: int, title: str, user: models.User, wikicode: str, comment: typ.Optional[str],
+                        minor: bool, section_id: int = None):
     exists = page_exists(namespace_id, title)
     if exists:
         page = _get_page(namespace_id, title)
@@ -246,13 +335,28 @@ def submit_page_content(namespace_id: int, title: str, user: models.User, wikico
     if not exists:
         page.save()
 
+    def _edit_size(old_text: str, new_text: str) -> int:
+        return len(new_text.encode('UTF-8')) - len(old_text.encode('UTF-8'))
+
+    latest_revision = page.get_latest_revision()
+    prev_content = latest_revision.content if latest_revision else ''
+
     if section_id is not None:
-        latest_revision = page.get_latest_revision()
-        header, sections = _parser.WikicodeParser.split_sections(latest_revision.content)
+        header, sections = _parser.WikicodeParser.split_sections(prev_content)
         sections[section_id] = wikicode
         new_content = _parser.WikicodeParser.paste_sections(header, sections)
-        revision = models.PageRevision(page=page, author=user.django_user, content=new_content)
+        size = _edit_size(prev_content, new_content)
+        revision = models.PageRevision(page=page, author=user.django_user, content=new_content, minor=minor, size=size)
         revision.save()
     else:
-        revision = models.PageRevision(page=page, author=user.django_user, content=wikicode)
+        size = _edit_size(prev_content, wikicode)
+        revision = models.PageRevision(page=page, author=user.django_user, content=wikicode, comment=comment,
+                                       minor=minor, diff_size=size)
         revision.save()
+
+
+def _get_self():
+    return sys.modules[__name__]
+
+
+_PARSER = _parser.WikicodeParser(_get_self())

@@ -1,14 +1,2 @@
 {% load wpy_tags %}
-<ul>
-  {% for revision in revisions %}
-    <li>
-      {% if revision.hidden %}
-        <s>{{ revision.date }}</s>
-      {% else %}
-        <a href="{% url 'page' raw_page_title=full_page_title|wpy_encode_url %}?revision_id={{ revision.id }}">{{ revision.date }}</a>
-      {% endif %}
-      &ndash;
-      {% wpy_user_link user=wpy_user username=revision.author.username %}
-    </li>
-  {% endfor %}
-</ul>
+{% wpy_contributions_list mode='history' %}

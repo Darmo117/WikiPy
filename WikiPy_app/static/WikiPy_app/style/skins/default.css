@@ -1,0 +1,23 @@
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:active {
+  color: goldenrod;
+}
+
+a:visited {
+  color: #51a9ff;
+}
+
+a.wpy-redlink {
+  color: red;
+}
+
+#wpy-header {
+  border-bottom: 1px solid gray;
+}

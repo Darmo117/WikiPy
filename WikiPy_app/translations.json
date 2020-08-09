@@ -1,0 +1,195 @@
+{
+  "namespace": {
+    "-3": "TestWiki",
+    "-2": "TestWiki Talk"
+  },
+  "group": {
+    "all": "All",
+    "users": "Users",
+    "email_confirmed": "Email Confirmed",
+    "autoconfirmed": "Autoconfirmed users",
+    "patrollers": "Patrollers",
+    "administrators": "Administrators",
+    "rights_managers": "Rights managers"
+  },
+  "title": {
+    "edit": "Editing “%(page_title)s”",
+    "create": "Creating “%(page_title)s”",
+    "source": "Sources of “%(page_title)s”",
+    "history": "Revision history of “%(page_title)s”"
+  },
+  "tag": {
+    "page_size": {
+      "label": "%(content_size)s B"
+    },
+    "diff_size": {
+      "tooltip": "%(content_size)s B after edit"
+    },
+    "minor_edit": {
+      "label": "m",
+      "tooltip": "This is a minor edit."
+    },
+    "page_creation": {
+      "label": "N",
+      "tooltip": "This edit created a new page."
+    },
+    "bot_edit": {
+      "label": "b",
+      "tooltip": "This edit was made by a bot."
+    }
+  },
+  "link": {
+    "talk": "talk",
+    "contributions": "contributions",
+    "uploads": "uploads",
+    "blocks": "blocks",
+    "journals": "journals",
+    "block": "blocks",
+    "deleted_contributions": "deleted contributions",
+    "permissions": "permissions",
+    "mass_deletion": "mass deletion",
+    "difference": "diff",
+    "current": "curr",
+    "history": "hist",
+    "show_hide": "show/hide",
+    "redlink": {
+      "tooltip": "page does not exist"
+    },
+    "header": {
+      "read": {
+        "label": "Read",
+        "tooltip": "See the content of this page"
+      },
+      "talk": {
+        "label": "Talk",
+        "tooltip": "Talk about the content of this page"
+      },
+      "edit": {
+        "label": "Edit",
+        "tooltip": "Edit the wikicode of this page"
+      },
+      "create": {
+        "label": "Create",
+        "tooltip": "Create this page"
+      },
+      "source": {
+        "label": "View source",
+        "tooltip": "See the wikicode of this page"
+      },
+      "history": {
+        "label": "History",
+        "tooltip": "See the revision history of this page"
+      }
+    },
+    "pagination": {
+      "next": "Next %(nb_per_page)s",
+      "previous": "Previous %(nb_per_page)s"
+    }
+  },
+  "revision": {
+    "hidden_revision": {
+      "tooltip": "This revision is hidden"
+    },
+    "hidden_username": {
+      "label": "Hidden username",
+      "tooltip": "This username is hidden"
+    },
+    "hidden_comment": {
+      "tooltip": "This revision comment is hidden"
+    },
+    "tag_box": {
+      "title": "Tags legend:",
+      "diff_size_tag": "Indicates the number of bytes the edit added/removed."
+    }
+  },
+  "form": {
+    "edit": {
+      "revision_comment": {
+        "label": "Comment",
+        "tooltip": "Enter a short summary"
+      },
+      "minor_chk": {
+        "label": "Minor edit",
+        "tooltip": "Mark as a minor edit"
+      },
+      "submit": {
+        "label": "Submit changes",
+        "tooltip": "Submit your changes"
+      },
+      "preview": {
+        "label": "Preview",
+        "tooltip": "Please preview your changes before submitting"
+      },
+      "cancel": {
+        "label": "Cancel",
+        "tooltip": "Discard all changes"
+      }
+    }
+  },
+  "error": {
+    "bad_title": "Bad title",
+    "no_results": "There are no results for the given criteria.",
+    "no_history": "There is no revision history for this page."
+  },
+  "special": {
+    "contributions": {
+      "title_user": "Contributions of user “%(username)s”",
+      "user_link": "User page",
+      "unknown_user": "No account “%(account_name)s” registered."
+    },
+    "create_account": {
+      "display_title": "Create an account",
+      "form": {
+        "username": {
+          "label": "Username",
+          "placeholder": "Enter the username",
+          "error": {
+            "invalid": "The provided username is invalid.",
+            "duplicate": "The provided username already exists or is too similar to an existing one."
+          }
+        },
+        "password": {
+          "label": "Password",
+          "placeholder": "Enter a password",
+          "error": "Invalid password."
+        },
+        "password_confirm": {
+          "label": "Confirm password",
+          "placeholder": "Confirm the password",
+          "error": "Passwords do not match."
+        },
+        "email": {
+          "label": "Email address",
+          "placeholder": "Enter an email",
+          "error": "Invalid email address."
+        },
+        "submit": {
+          "label": "Create account"
+        }
+      }
+    },
+    "login": {
+      "display_title": "Log in",
+      "form": {
+        "error": "Invalid credentials.",
+        "username": {
+          "label": "Username"
+        },
+        "password": {
+          "label": "Password"
+        },
+        "submit": {
+          "label": "Log in"
+        }
+      }
+    },
+    "logout": {
+      "display_title": "Log out",
+      "form": {
+        "submit": {
+          "label": "Log out"
+        }
+      }
+    }
+  }
+}

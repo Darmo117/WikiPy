@@ -1,3 +1,85 @@
-a.redlink {
+/*********
+ * Links *
+ *********/
+
+a {
+  color: #3268ff;
+}
+
+a.wpy-redlink {
   color: red;
+}
+
+.wpy-error {
+  color: indianred;
+}
+
+.wpy-self-link {
+  font-weight: bold;
+}
+
+/******************
+ * Revisions list *
+ ******************/
+
+.wpy-hidden-revision-link {
+  text-decoration: line-through;
+  color: gray;
+}
+
+.wpy-page-size-tag::before {
+  content: "(";
+}
+
+.wpy-page-size-tag::after {
+  content: ")";
+}
+
+.wpy-diff-size-tag::before {
+  content: "(";
+}
+
+.wpy-diff-size-tag::after {
+  content: ")";
+}
+
+.wpy-diff-size-tag-important {
+  font-weight: bold;
+}
+
+.wpy-diff-size-tag-negative {
+  color: red;
+}
+
+.wpy-diff-size-tag-zero {
+  color: gray;
+}
+
+.wpy-tag {
+  border-bottom: 1px dotted black;
+  cursor: help;
+  font-weight: bold;
+}
+
+.wpy-revision-comment::before {
+  content: "“";
+}
+
+.wpy-revision-comment::after {
+  content: "”";
+}
+
+/*********
+ * Boxes *
+ *********/
+
+.wpy-warning-box {
+  display: block;
+  border: 1px solid #ffe141;
+  background-color: #ffeb81;
+  padding: 5px;
+}
+
+.wpy-revision-tags-legend-box {
+  float: right;
 }

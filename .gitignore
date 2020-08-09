@@ -1,4 +1,6 @@
 # Project exclude paths
 /venv/
 /WikiPy_app/migrations/
+/WikiPy_app/additional_namespaces.json
+/WikiPy_app/SETUP_SECRET_KEY
 db.sqlite3

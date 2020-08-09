@@ -1,0 +1,9 @@
+{
+  "100": {
+    "name": "TestNamespace"
+  },
+  "101": {
+    "name": "TestNamespace Talk",
+    "talk": true
+  }
+}

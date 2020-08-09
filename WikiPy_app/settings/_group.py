@@ -7,12 +7,13 @@ from ._config_values import *
 
 class UserGroup:
     def __init__(self, name: str, label: str, hide_rc: bool, needs_validation: bool, global_rights: typ.Iterable[str],
-                 namespace_edit_rights: typ.Dict[int, typ.Iterable[str]]):
+                 namespace_edit_rights: typ.Dict[int, typ.Iterable[str]], editable: bool):
         self.__name = name
         self.__label = label
         self.__hide_rc = hide_rc
         self.__needs_validation = needs_validation
         self.__namespace_edit_rights = {}
+        self.__editable = editable
 
         _global_rights = []
         for right in global_rights:
@@ -37,6 +38,10 @@ class UserGroup:
     @property
     def label(self):
         return self.__label
+
+    @property
+    def editable(self):
+        return self.__editable
 
     @property
     def hide_from_recent_changes(self) -> bool:

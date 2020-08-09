@@ -1,0 +1,20 @@
+{% load wpy_tags %}
+{% if target_user_name %}
+  {% wpy_translate 'special.contributions.user_link' username=target_user_link as text %}
+  {% wpy_inner_link 6 target_user_name text %}
+{% endif %}
+{# TODO create form #}
+<form>
+  Form
+</form>
+{% if target_user_name %}
+  {% if revisions %}
+    {% wpy_contributions_list mode='contributions' %}
+  {% elif unknown_user %}
+    <span class="wpy-contributions-userdoesnotexist wpy-error">
+      {% wpy_translate 'special.contributions.unknown_user' account_name=target_user_name %}
+    </span>
+  {% else %}
+    {% wpy_translate 'special.contributions.no_results' %}
+  {% endif %}
+{% endif %}

@@ -1,5 +1,6 @@
-rm db.sqlite3
-rm -rf WikiPy_app/migrations/[0-9]*.py
+@echo off
+del db.sqlite3
+del /S /Q WikiPy_app\migrations\0*.py
 
 python manage.py migrate
 python manage.py makemigrations

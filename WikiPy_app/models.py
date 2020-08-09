@@ -3,9 +3,9 @@ from __future__ import annotations
 import re
 import typing as typ
 
+import django.contrib.auth.models as dj_auth_models
 import django.core.exceptions as dj_exc
 import django.db.models as dj_models
-import django.contrib.auth.models as dj_auth_models
 
 from . import settings
 
@@ -34,11 +34,50 @@ class Page(dj_models.Model):
     deleted = dj_models.BooleanField(default=False)
     protection_level = dj_models.CharField(max_length=100, validators=[_group_id_validator])
 
-    def get_latest_revision(self) -> PageRevision:
-        return PageRevision.objects.filter(page__namespace_id=self.namespace_id, page__title=self.title).latest('date')
+    def get_latest_revision(self) -> typ.Optional[PageRevision]:
+        try:
+            return PageRevision.objects.filter(page__namespace_id=self.namespace_id, page__title=self.title) \
+                .latest('date')
+        except PageRevision.DoesNotExist:
+            return None
 
     class Meta:
         unique_together = ('namespace_id', 'title')
+
+
+class PageRevision(dj_models.Model):
+    page = dj_models.ForeignKey(Page, dj_models.CASCADE)
+    author = dj_models.ForeignKey(dj_auth_models.User, dj_models.SET_NULL, null=True)
+    date = dj_models.DateTimeField(auto_now_add=True)
+    text_hidden = dj_models.BooleanField(default=False)
+    author_hidden = dj_models.BooleanField(default=False)
+    comment_hidden = dj_models.BooleanField(default=False)
+    content = dj_models.TextField()
+    comment = dj_models.CharField(max_length=200, null=True, default=None)
+    minor = dj_models.BooleanField(default=False)
+    diff_size = dj_models.IntegerField()
+    reverted_to = dj_models.IntegerField(null=True, default=None)
+
+    def get_previous(self) -> typ.Optional[PageRevision]:
+        try:
+            return PageRevision.objects.filter(page_id=self.page.id, date__lt=self.date).latest('date')
+        except PageRevision.DoesNotExist:
+            return None
+
+    def get_reverted_revision(self) -> typ.Optional[PageRevision]:
+        return PageRevision.objects.get(id=self.reverted_to) if self.reverted_to else None
+
+    @property
+    def size(self) -> int:
+        return len(self.content.encode('utf-8'))
+
+    @property
+    def has_created_page(self) -> bool:
+        return self.get_previous() is None
+
+    @property
+    def is_bot_edit(self) -> bool:
+        return UserData.objects.get(user=self.author)
 
 
 class UserData(dj_models.Model):
@@ -46,10 +85,17 @@ class UserData(dj_models.Model):
     ip_address = dj_models.CharField(max_length=50, null=True, default=None)
     is_male = dj_models.BooleanField(null=True, default=None)
     skin = dj_models.CharField(max_length=50, default='default')
+    timezone = dj_models.CharField(max_length=50)
+    datetime_format = dj_models.CharField(max_length=50)
+    signature = dj_models.CharField(max_length=100)
 
     @property
     def groups(self):
         return [settings.GROUPS[rel.group_id] for rel in self.user.usergrouprel_set.filter(user=self.user)]
+
+    def is_in_group(self, group_id: str) -> bool:
+        group = settings.GROUPS.get(group_id)
+        return group is not None and group in self.groups
 
     def __str__(self):
         return repr(self)
@@ -67,20 +113,19 @@ class UserGroupRel(dj_models.Model):
 
 
 class UserBlock(dj_models.Model):
-    user = dj_models.ForeignKey(dj_auth_models.User, dj_models.CASCADE)
-    page_or_namespace = dj_models.TextField()
+    user = dj_models.OneToOneField(dj_auth_models.User, dj_models.CASCADE)
+    on_whole_site = dj_models.BooleanField()
+    pages = dj_models.TextField()
+    namespaces = dj_models.TextField()
+    on_own_talk_page = dj_models.BooleanField()
     duration = dj_models.IntegerField()
     reason = dj_models.TextField(null=True, default=None)
 
-    def get_page_title(self) -> typ.Optional[str]:
-        if m := re.fullmatch('page:(.+)', self.page_or_namespace):
-            return m.group(1)
-        return None
+    def get_page_titles(self) -> typ.Iterable[str]:
+        return self.pages.split(',')
 
-    def get_namespace_id(self) -> typ.Optional[int]:
-        if m := re.fullmatch(r'namespace:(\d+)', self.page_or_namespace):
-            return int(m.group(1))
-        return None
+    def get_namespace_ids(self) -> typ.Iterable[int]:
+        return map(int, self.namespaces.split(','))
 
 
 class User:
@@ -107,8 +152,19 @@ class User:
         return self.__data.groups
 
     @property
+    def is_bot(self):
+        return self.is_in_group(settings.GROUP_BOTS)
+
+    @property
     def is_anonymous(self) -> bool:
         return self.__data.ip_address is not None
+
+    @property
+    def is_logged_in(self) -> bool:
+        return self.__django_user.is_authenticated and not self.is_anonymous
+
+    def is_in_group(self, group_id: str) -> bool:
+        return self.__data.is_in_group(group_id)
 
     def has_right(self, right: str) -> bool:
         return any(map(lambda g: g.has_right(right), self.__data.groups))
@@ -116,29 +172,15 @@ class User:
     def has_right_on_page(self, right: str, namespace_id: int, title: str) -> bool:
         return any(map(lambda g: g.has_right_on_pages_in_namespace(right, namespace_id, title), self.__data.groups))
 
-    def can_read_page(self, namespace_id: int, title: str):  # TODO prendre en compte les blocages
-        return namespace_id in [6, 7] and re.fullmatch(fr'{self.username}(/.*)?', title) or \
-               any(map(lambda g: g.can_read_pages_in_namespace(namespace_id), self.__data.groups))
+    def can_read_page(self, namespace_id: int, title: str) -> bool:  # TODO prendre en compte les blocages
+        return (namespace_id in [6, 7] and re.fullmatch(fr'{self.username}(/.*)?', title) or
+                self.has_right(settings.RIGHT_EDIT_USER_PAGES) or
+                any(map(lambda g: g.can_read_pages_in_namespace(namespace_id), self.__data.groups)))
 
-    def can_edit_page(self, namespace_id: int, title: str):  # TODO prendre en compte les blocages
-        return namespace_id in [6, 7] and re.fullmatch(fr'{self.username}(/.*)?', title) or \
-               any(map(lambda g: g.can_edit_pages_in_namespace(namespace_id), self.__data.groups))
+    def can_edit_page(self, namespace_id: int, title: str) -> bool:  # TODO prendre en compte les blocages
+        return (namespace_id in [6, 7] and re.fullmatch(fr'{self.username}(/.*)?', title) or
+                self.has_right(settings.RIGHT_EDIT_USER_PAGES) or
+                any(map(lambda g: g.can_edit_pages_in_namespace(namespace_id), self.__data.groups)))
 
     def __repr__(self):
         return f'User[django_user={self.__django_user.username},data={self.__data}]'
-
-
-class PageRevision(dj_models.Model):
-    page = dj_models.ForeignKey(Page, dj_models.CASCADE)
-    author = dj_models.ForeignKey(dj_auth_models.User, dj_models.SET_NULL, null=True)
-    date = dj_models.DateTimeField(auto_now_add=True)
-    hidden = dj_models.BooleanField(default=False)
-    content = dj_models.TextField()
-    # minor = dj_models.BooleanField(default=False)  # TODO activer
-    reverted_to = dj_models.IntegerField(null=True, default=None)
-
-    def get_previous(self) -> typ.Optional[PageRevision]:
-        return self.objects.filter(date__lt=self.date).latest('date')
-
-    def get_reverted_revision(self) -> typ.Optional[PageRevision]:
-        return self.objects.get(id=self.reverted_to) if self.reverted_to else None

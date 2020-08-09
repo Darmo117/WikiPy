@@ -1,19 +1,37 @@
 from __future__ import annotations
-import typing as typ
+
 import re
+import typing as typ
+
+from . import _errors
 
 
 class WikicodeParser:
-    # TODO
+    REDIRECT_PATTERN = re.compile(r'@REDIRECT\[\[([^\n]+?)]]')
 
+    def __init__(self, api):
+        self.__api = api
+
+    # TODO
     def parse_wikicode(self, wikicode: str) -> ParsedWikicode:
-        # TODO
+        # TODO escape unauthorized HTML
         return wikicode  # TEMP
+
+    def get_redirect(self, wikicode: str) -> typ.Optional[str]:
+        if m := self.REDIRECT_PATTERN.fullmatch(wikicode.strip()):
+            title = m.group(1)
+            try:
+                self.__api.check_title(title)
+                return title
+            except (_errors.BadTitleException, _errors.EmptyPageTitleException):
+                pass
+        return None
 
     @staticmethod
     def paste_sections(header: str, sections: typ.Dict[int, str]):
         return header + '\n' + '\n'.join(sections.values())
 
+    # TODO
     @staticmethod
     def split_sections(wikicode: str, level: int = 1) -> typ.Tuple[str, typ.Dict[int, str]]:
         header = ''

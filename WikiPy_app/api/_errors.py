@@ -36,3 +36,19 @@ class PageEditConflit(PageException):
     @property
     def wikicode(self):
         return self.__wikicode
+
+
+class InvalidUsernameError(ValueError):
+    pass
+
+
+class DuplicateUsernameError(ValueError):
+    pass
+
+
+class InvalidPasswordError(ValueError):
+    pass
+
+
+class InvalidEmailError(ValueError):
+    pass

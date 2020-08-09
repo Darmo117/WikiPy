@@ -4,7 +4,18 @@
   <textarea id="wpy-edit-field" name="wpy-edit-field" rows="10"
             {% if not user_can_edit %}disabled{% endif %}>{{ wikicode }}</textarea>
   {% if user_can_edit %}
-    <input id="wpy-submit-btn" type="submit" value="Submit"/>
+    <label for="wpy-edit-revision-comment">{% wpy_translate 'form.edit.revision_comment.label' %}</label>
+    <input id="wpy-edit-revision-comment" name="wpy-edit-revision-comment" type="text" title="{% wpy_translate 'form.edit.revision_comment.tooltip' %}"/>
+
+    <input id="wpy-edit-minor" name="wpy-edit-minor" type="checkbox"/>
+    <label for="wpy-edit-minor" title="{% wpy_translate 'form.edit.minor_chk.tooltip' %}">
+      {% wpy_translate 'form.edit.minor_chk.label' %}
+    </label>
+
+    <input id="wpy-submit-btn" type="submit" value="{% wpy_translate 'form.edit.submit.label' %}" title="{% wpy_translate 'form.edit.submit.tooltip' %}"/>
+    <input id="wpy-preview-btn" type="button" value="{% wpy_translate 'form.edit.preview.label' %}" title="{% wpy_translate 'form.edit.preview.tooltip' %}"/>
+    <input id="wpy-cancel-btn" type="button" value="{% wpy_translate 'form.edit.cancel.label' %}" title="{% wpy_translate 'form.edit.cancel.tooltip' %}"/>
+
     <input id="wpy-edit-section-id" name="wpy-edit-section-id" type="hidden" value="{{ section_id }}"/>
     {% csrf_token %}
   {% endif %}

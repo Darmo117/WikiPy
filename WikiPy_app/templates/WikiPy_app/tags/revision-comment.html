@@ -1,0 +1,16 @@
+{% load wpy_tags %}
+{% if revision.comment %}
+  <span class="wpy-revision-comment"><!--
+    {% if revision.comment_hidden %}
+      --><span class="wpy-hidden-revision-link" title="{% wpy_translate 'revision.hidden_comment.tooltip' %}"><!--
+        {% if user_can_hide %}
+           -->{% wpy_render revision.comment %}<!--
+        {% else %}
+           -->{% wpy_translate 'revision.hidden_comment.label' %}<!--
+        {% endif %}
+       --></span><!--
+    {% else %}
+      -->{{ revision.comment|safe }}<!--
+    {% endif %}
+  --></span>
+{% endif %}

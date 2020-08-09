@@ -1,8 +1,23 @@
 {
+  "hosts": [
+    "127.0.0.1",
+    "::1",
+    "localhost"
+  ],
   "project_name": "TestWiki",
   "language": "en",
   "writing_direction": "ltr",
   "time_zone": "UTC",
+  "datetime_formats": [
+    "%B %d, %Y at %H:%M",
+    "%d %B, %Y at %H:%M",
+    "%Y %B %d at %H:%M",
+    "%Y-%m-%dT%H:%M:%S",
+    "%B %d, %Y at %I:%M %p",
+    "%d %B, %Y at %I:%M %p",
+    "%Y %B %d at %I:%M %p",
+    "%Y-%m-%dT%H:%I:%S %p"
+  ],
   "main_page_namespace_id": -3,
   "main_page_title": "Main Page",
   "hide_title_on_main_page": true,

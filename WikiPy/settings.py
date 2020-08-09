@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+
 import WikiPy_app.settings as wpy_settings
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -24,8 +25,6 @@ SECRET_KEY = '!zy_6he!@*(3!ibvnu9&tfnupeu0#i64k*nd0z5&#pmrxag#sb'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -53,7 +52,6 @@ ROOT_URLCONF = 'WikiPy.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -111,7 +109,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'WikiPy_app/static'),
 ]
 STATIC_URL = '/static/'
 
@@ -120,3 +118,4 @@ wpy_settings.init(BASE_DIR)
 
 LANGUAGE_CODE = wpy_settings.LANGUAGE
 TIME_ZONE = wpy_settings.TIME_ZONE
+ALLOWED_HOSTS = wpy_settings.HOSTS

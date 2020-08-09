@@ -1,48 +1,73 @@
 {% load static %}
+{% load wpy_tags %}
 <!DOCTYPE html>
 <html lang="{{ language }}" dir="{{ writing_direction }}">
 <head>
   <meta charset="UTF-8"/>
-  <title>{{ full_page_title }} &mdash; {{ project_name }}</title>
+  <title>{{ display_title|default:full_page_title }} &mdash; {{ project_name }}</title>
 
   <link href="{% static 'WikiPy_app/style/common.css' %}" rel="stylesheet"/>
   <link href="{% static 'WikiPy_app/style/skins/'|add:skin_name|add:'.css' %}" rel="stylesheet"/>
+  {% if mode != 'setup' %}
+    {# TODO not load if page doesn’t exist #}
+    <link href="{% wpy_static 4 'Common.css' %}" rel="stylesheet"/>
+    {% if not wpy_user.is_anonymous %}
+      <link href="{% wpy_static 6 wpy_user.username|add:'/Common.css' %}" rel="stylesheet"/>
+    {% endif %}
+  {% endif %}
   {% block head %}{% endblock %}
   {% if noindex %}
     <meta name="robots" content="noindex"/>
   {% endif %}
 </head>
 <body>
-  <header id="wpy-header">{% if namespace_id != -1 %}{% block header %}{% endblock %}{% endif %}</header>
+  <header id="wpy-header">
+    {# TODO use settings #}
+    {% wpy_inner_link -3 'Main Page' %}
+    {% block header %}{% endblock %}
+  </header>
   <nav id="wpy-nav-bar">{% block navbar %}{% endblock %}</nav>
   <main id="wpy-article">
+    {% if namespace_id != -1 and mode != 'setup' %}
+      <nav id="wpy-article-nav-bar">{% block article_navbar %}{% endblock %}</nav>
+    {% endif %}
     {% if show_title %}
-      <h1 id="wpy-main-title">
-        {% if mode == 'read' %}
-          {{ full_page_title }}
+      <h1 id="wpy-main-title"><!--
+        {% if mode == 'setup' %}
+          -->Wiki setup<!--
+        {% elif mode == 'read' %}
+          -->{{ display_title|default:full_page_title }}<!--
         {% elif mode == 'edit' %}
           {% if page_exists %}
             {% if user_can_edit %}
-              Editing “{{ full_page_title }}”
+              -->{% wpy_translate 'title.edit' page_title=full_page_title %}<!--
             {% else %}
-              Sources of “{{ full_page_title }}”
+              -->{% wpy_translate 'title.source' page_title=full_page_title %}<!--
             {% endif %}
           {% else %}
-            Creating “{{ full_page_title }}”
+            -->{% wpy_translate 'title.create' page_title=full_page_title %}<!--
           {% endif %}
         {% elif mode == 'history' %}
-          Revision history of “{{ full_page_title }}”
+          -->{% wpy_translate 'title.history' page_title=full_page_title %}<!--
         {% endif %}
-      </h1>
-      <hr/>
+      --></h1>
+      <hr class="wpy-title-separator"/>
     {% endif %}
     <article id="wpy-content">
-      {% if mode == 'read' %}
-        {{ rendered_page_content|safe }}
+      {% if mode == 'setup' %}
+        {% include 'WikiPy_app/wiki-setup.html' %}
+      {% elif mode == 'read' %}
+        {% if special_page %}
+          {% with path='WikiPy_app/special_pages/'|add:special_page_name|add:'.html' %}
+            {% include path %}
+          {% endwith %}
+        {% else %}
+          {{ rendered_page_content }}
+        {% endif %}
       {% elif mode == 'edit' %}
         <div id="wpy-edit-notice">
           <div id="wpy-edit-notice-{{ namespace_id }}">
-            {{ edit_notice|safe }}
+            {{ edit_notice }}
           </div>
         </div>
         {% include 'WikiPy_app/editor-component.html' %}

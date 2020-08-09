@@ -1,9 +1,9 @@
 {
   "-3": {
-    "name": "TestWiki"
+    "name": "WikiNamespace"
   },
   "-2": {
-    "name": "TestWiki Talk",
+    "name": "WikiNamespace Talk",
     "talk": true
   },
   "-1": {

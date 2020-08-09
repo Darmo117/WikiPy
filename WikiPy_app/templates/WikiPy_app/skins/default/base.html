@@ -1,0 +1,28 @@
+{% extends 'WikiPy_app/base.html' %}
+{% load wpy_tags %}
+
+{% block header %}
+  {% if wpy_user.is_logged_in %}
+    {% wpy_user_link '' wpy_user.username only_username=True %}
+    {% wpy_header_link link_type='special' special_page_id='logout' add_return_to=True %}
+  {% else %}
+    {% wpy_header_link link_type='special' special_page_id='login' add_return_to=True %}
+  {% endif %}
+{% endblock %}
+
+{% block article_navbar %}
+  {% wpy_header_link link_type='read' %}
+  {% wpy_header_link link_type='talk' %}
+  {% if page_exists %}
+    {% if user_can_edit %}
+      {% wpy_header_link link_type='edit' %}
+    {% elif user_can_read %}
+      {% wpy_header_link link_type='source' %}
+    {% endif %}
+    {% if user_can_read %}
+      {% wpy_header_link link_type='history' %}
+    {% endif %}
+  {% elif user_can_edit %}
+    {% wpy_header_link link_type='create' %}
+  {% endif %}
+{% endblock %}
