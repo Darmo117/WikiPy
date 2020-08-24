@@ -1,23 +1,50 @@
 {% load wpy_tags %}
-{{ rendered_page_content }}
-{% if not wpy_user.is_logged_in %}
-  <form action="{% url 'page' full_page_title_url %}?action=login" method="post">
-    {% if login_error %}
-      <p class="wpy-error">{% wpy_translate 'special.login.form.error' %}</p>
-    {% endif %}
-    <label for="wpy-login-username">{% wpy_translate 'special.login.form.username.label' %}</label>
-    <input type="text" name="wpy-login-username" id="wpy-login-username" required
-           value="{{ wpy_setup_username|default_if_none:'' }}"/>
-    <label for="wpy-login-password">{% wpy_translate 'special.login.form.password.label' %}</label>
-    <input type="password" name="wpy-login-password" id="wpy-login-password" required/>
 
-    <input type="submit" value="{% wpy_translate 'special.login.form.submit.label' %}">
-    <input type="hidden" name="wpy-login-returnto" value="{{ return_to }}"/>
-    {% csrf_token %}
-  </form>
+{% if wpy_context.login_notice %}
+  <div class="alert alert-info" role="alert">
+    {{ wpy_context.login_notice }}
+  </div>
+{% endif %}
+{% if wpy_context.login_warning %}
+  <div class="alert alert-warning" role="alert">
+    {{ wpy_context.login_warning }}
+  </div>
 {% endif %}
 
-<div class="wpy-login-other-links">
-  {#{% wpy_header_link link_type='special' special_page_id='password_reset'  %}#}
-  {% wpy_header_link link_type='special' special_page_id='create_account' %}
+<div class="row">
+  {% if not wpy_context.user.is_logged_in %}
+    <div class="col">
+      <form id="wpy-login-form" method="post" action="{% url 'page' wpy_context.full_page_title_url %}?action=login">
+        {% if wpy_context.login_error %}
+          <div class="wpy-error alert alert-danger" role="alert">
+            {% wpy_translate 'special.login.form.error' %}
+          </div>
+        {% endif %}
+
+        <div class="form-group">
+          <label for="wpy-login-username">{% wpy_translate 'special.login.form.username.label' %}</label>
+          <input type="text" name="wpy-login-username" id="wpy-login-username" class="form-control" required
+                 placeholder="{% wpy_translate 'special.login.form.username.placeholder' %}"
+                 value="{{ wpy_context.login_username|default_if_none:'' }}"/>
+        </div>
+
+        <div class="form-group">
+          <label for="wpy-login-password">{% wpy_translate 'special.login.form.password.label' %}</label>
+          <input type="password" name="wpy-login-password" id="wpy-login-password" class="form-control" required
+                 placeholder="{% wpy_translate 'special.login.form.password.placeholder' %}"/>
+        </div>
+
+        <input type="submit" class="btn btn-primary btn-block"
+               value="{% wpy_translate 'special.login.form.submit.label' %}">
+
+        <input type="hidden" name="wpy-login-returnto" value="{{ wpy_context.return_to|default_if_none:'' }}"/>
+        {% csrf_token %}
+      </form>
+    </div>
+  {% endif %}
+
+  <div id="wpy-login-other-links" class="col text-center">
+    {#{% wpy_inner_link -1 'password_reset'  %}#}
+    {% wpy_inner_link -1 'create_account' %}
+  </div>
 </div>

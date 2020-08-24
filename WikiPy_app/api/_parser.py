@@ -15,7 +15,10 @@ class WikicodeParser:
     # TODO
     def parse_wikicode(self, wikicode: str) -> ParsedWikicode:
         # TODO escape unauthorized HTML
-        return wikicode  # TEMP
+        wikicode = wikicode.strip()
+        if wikicode:
+            wikicode = re.sub(r'\n{2,}', '</p><p>', f'<p>{wikicode}</p>')  # TEMP
+        return wikicode
 
     def get_redirect(self, wikicode: str) -> typ.Optional[str]:
         if m := self.REDIRECT_PATTERN.fullmatch(wikicode.strip()):

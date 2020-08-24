@@ -1,8 +1,12 @@
 import logging
+import os
+import secrets
+import string
 
 import django.contrib.auth.models as dj_models
 
-from . import api, settings
+from WikiPy import settings as wpy_settings
+from . import api, settings, apps
 
 WIKI_USER_NAME = 'WikiPy'
 _COMMENT = 'Wiki setup.'
@@ -16,6 +20,18 @@ SUCCESS = 'ok'
 
 def are_pages_setup():
     return dj_models.User.objects.filter(username=WIKI_USER_NAME).count()
+
+
+def generate_secret_key_file() -> bool:
+    path = os.path.join(wpy_settings.BASE_DIR, apps.WikiPyAppConfig.name, 'SETUP_SECRET_KEY')
+    if not os.path.exists(path):
+        chars = string.ascii_letters + string.digits
+        secret_key = ''.join(secrets.choice(chars) for _ in range(20))
+        with open(path, mode='w', encoding='UTF-8') as f:
+            f.write(secret_key)
+            f.flush()
+        return True
+    return False
 
 
 def setup(username: str, password: str, email: str, secret_key: str) -> str:
@@ -41,10 +57,10 @@ def setup(username: str, password: str, email: str, secret_key: str) -> str:
     except api.InvalidEmailError:
         return INVALID_EMAIL
 
-    api.add_user_to_group(admin, settings.GROUP_AUTOPATROLLED, setup=True)
-    api.add_user_to_group(admin, settings.GROUP_PATROLLERS, setup=True)
-    api.add_user_to_group(admin, settings.GROUP_ADMINISTRATORS, setup=True)
-    api.add_user_to_group(admin, settings.GROUP_RIGHTS_MANAGERS, setup=True)
+    api.add_user_to_group(admin, settings.GROUP_AUTOPATROLLED, auto=True)
+    api.add_user_to_group(admin, settings.GROUP_PATROLLERS, auto=True)
+    api.add_user_to_group(admin, settings.GROUP_ADMINISTRATORS, auto=True)
+    api.add_user_to_group(admin, settings.GROUP_RIGHTS_MANAGERS, auto=True)
 
     logging.info('Done.')
 
@@ -52,10 +68,11 @@ def setup(username: str, password: str, email: str, secret_key: str) -> str:
 
     password = dj_models.User.objects.make_random_password(length=100)
     wikiuser = api.create_user(WIKI_USER_NAME, password=password, ignore_email=True)
-    api.add_user_to_group(wikiuser, settings.GROUP_ADMINISTRATORS, setup=True)
+    api.add_user_to_group(wikiuser, settings.GROUP_ADMINISTRATORS, auto=True)
+    api.add_user_to_group(wikiuser, settings.GROUP_BOTS, auto=True)
 
     api.submit_page_content(4, 'Message-BadTitle', wikiuser,
-                            'The requested page title contains invalid characters: “%(invalid_char)”.\n\n'
+                            'The requested page title contains invalid characters: “$invalid_char”.\n\n'
                             f'Return to [[{main_page}]].', _COMMENT, False)
 
     api.submit_page_content(4, 'Message-EmptyTitle', wikiuser,
@@ -103,11 +120,22 @@ def setup(username: str, password: str, email: str, secret_key: str) -> str:
                             _COMMENT, False)
 
     api.submit_page_content(4, 'Message-EditNotice-4', wikiuser,
-                            'Be carefull as changes made to this page will impact all users.',
+                            '<div class="alert alert-warning text-center" role="alert">'
+                            'Be carefull as changes made to this page will impact all users.'
+                            '</div>',
                             _COMMENT, False)
 
     api.submit_page_content(4, 'Message-EditNotice-16', wikiuser,
-                            'Be carefull as changes made to this page will impact all users.',
+                            '<div class="alert alert-warning text-center" role="alert">'
+                            'Be carefull as changes made to this page will impact all users.'
+                            '</div>',
+                            _COMMENT, False)
+
+    api.submit_page_content(4, 'Message-InvalidRevisionID', wikiuser,
+                            'Revision #$revision_id of page “{{PAGE_TITLE}}” does not exist.\n\n'
+                            'This usually happens when following a link to a deleted revision. '
+                            'You can find more information in the '
+                            '[[Special:Journal/deleted revisions|deletion journal]].',
                             _COMMENT, False)
 
     api.submit_page_content(4, 'Message-LoginDisclaimer', wikiuser,
@@ -126,6 +154,10 @@ def setup(username: str, password: str, email: str, secret_key: str) -> str:
                             'until you clear your browser cache.\n\n'
                             f'Return to [[{main_page}]].',
                             _COMMENT, False)
+
+    api.submit_page_content(4, 'Common.css', wikiuser, '/* Put custom CSS in here. */', _COMMENT, False)
+
+    api.submit_page_content(4, 'Common.js', wikiuser, '/* Put custom JavaScript in here. */', _COMMENT, False)
 
     api.submit_page_content(settings.MAIN_PAGE_NAMESPACE_ID, settings.MAIN_PAGE_TITLE, wikiuser,
                             'This is the main page of TestWiki.', _COMMENT, False)

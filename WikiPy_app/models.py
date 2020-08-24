@@ -36,8 +36,13 @@ class Page(dj_models.Model):
 
     def get_latest_revision(self) -> typ.Optional[PageRevision]:
         try:
-            return PageRevision.objects.filter(page__namespace_id=self.namespace_id, page__title=self.title) \
-                .latest('date')
+            return PageRevision.objects.filter(page=self).latest('date')
+        except PageRevision.DoesNotExist:
+            return None
+
+    def get_revision(self, revision_id: int) -> typ.Optional[PageRevision]:
+        try:
+            return PageRevision.objects.filter(page=self).get(id=revision_id)
         except PageRevision.DoesNotExist:
             return None
 
@@ -58,9 +63,27 @@ class PageRevision(dj_models.Model):
     diff_size = dj_models.IntegerField()
     reverted_to = dj_models.IntegerField(null=True, default=None)
 
-    def get_previous(self) -> typ.Optional[PageRevision]:
+    def get_previous(self, ignore_hidden: bool = True) -> typ.Optional[PageRevision]:
         try:
-            return PageRevision.objects.filter(page_id=self.page.id, date__lt=self.date).latest('date')
+            params = {
+                'page': self.page,
+                'date__lt': self.date,
+            }
+            if ignore_hidden:
+                params['text_hidden'] = False
+            return PageRevision.objects.filter(**params).latest('date')
+        except PageRevision.DoesNotExist:
+            return None
+
+    def get_next(self, ignore_hidden: bool = True) -> typ.Optional[PageRevision]:
+        try:
+            params = {
+                'page': self.page,
+                'date__gt': self.date,
+            }
+            if ignore_hidden:
+                params['text_hidden'] = False
+            return PageRevision.objects.filter(**params).earliest('date')
         except PageRevision.DoesNotExist:
             return None
 
@@ -73,11 +96,11 @@ class PageRevision(dj_models.Model):
 
     @property
     def has_created_page(self) -> bool:
-        return self.get_previous() is None
+        return self.get_previous(ignore_hidden=False) is None
 
     @property
     def is_bot_edit(self) -> bool:
-        return UserData.objects.get(user=self.author)
+        return UserData.objects.get(user=self.author).is_in_group(settings.GROUP_BOTS)
 
 
 class UserData(dj_models.Model):
@@ -92,6 +115,10 @@ class UserData(dj_models.Model):
     @property
     def groups(self):
         return [settings.GROUPS[rel.group_id] for rel in self.user.usergrouprel_set.filter(user=self.user)]
+
+    @property
+    def group_ids(self):
+        return [rel.group_id for rel in self.user.usergrouprel_set.filter(user=self.user)]
 
     def is_in_group(self, group_id: str) -> bool:
         group = settings.GROUPS.get(group_id)
@@ -148,11 +175,15 @@ class User:
         return self.__django_user.username
 
     @property
-    def groups(self):
+    def groups(self) -> typ.List[settings.UserGroup]:
         return self.__data.groups
 
     @property
-    def is_bot(self):
+    def group_ids(self) -> typ.List[str]:
+        return self.__data.group_ids
+
+    @property
+    def is_bot(self) -> bool:
         return self.is_in_group(settings.GROUP_BOTS)
 
     @property

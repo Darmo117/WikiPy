@@ -1,6 +1,7 @@
 @echo off
 del db.sqlite3
-del /S /Q WikiPy_app\migrations\0*.py
+del WikiPy_app\SETUP_SECRET_KEY
+del /S WikiPy_app\migrations\0*.py
 
 python manage.py migrate
 python manage.py makemigrations

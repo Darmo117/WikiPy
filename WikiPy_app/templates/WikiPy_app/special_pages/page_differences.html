@@ -1,0 +1,84 @@
+{% load wpy_tags %}
+{% load diff_tags %}
+
+{% if wpy_context.page_diff_error %}
+  <div class="alert alert-danger" role="alert">
+    {{ wpy_context.page_diff_error }}
+  </div>
+{% elif not wpy_context.page_diff_diff %}
+  <form id="wpy-diff-form" class="form-inline">
+    <div class="form-group">
+      <label for="wpy-diff-form-revisionid1">
+        {% wpy_translate 'special.page_differences.form.revision_id1.label' %}
+      </label>
+      <input type="number" id="wpy-diff-form-revisionid1" name="wpy-diff-form-revisionid1" class="form-control mx-sm-3"
+             required/>
+    </div>
+
+    <div class="form-group">
+      <label for="wpy-diff-form-revisionid2">
+        {% wpy_translate 'special.page_differences.form.revision_id2.label' %}
+      </label>
+      <input type="number" id="wpy-diff-form-revisionid2" name="wpy-diff-form-revisionid2" class="form-control mx-sm-3"
+             required/>
+    </div>
+
+    <input type="submit" id="wpy-diff-form-submit" class="btn btn-primary"
+           value="{% wpy_translate 'special.page_differences.form.submit.label' %}"/>
+  </form>
+{% else %}
+  <table id="wpy-diff-table">
+    <colgroup>
+      <col class="wpy-diff-table-marker">
+      <col class="wpy-diff-table-text">
+      <col class="wpy-diff-table-marker">
+      <col class="wpy-diff-table-text">
+    </colgroup>
+    <tbody>
+      <tr id="wpy-diff-table-header">
+        <td colspan="2">
+          {% diff_header wpy_context.page_diff_revision1 previous=True show_nav_link=wpy_context.page_diff_same_page %}
+        </td>
+        <td colspan="2">
+          {% diff_header wpy_context.page_diff_revision2 previous=False show_nav_link=wpy_context.page_diff_same_page %}
+        </td>
+      </tr>
+      {% if wpy_context.page_diff_nb_not_shown and wpy_context.page_diff_same_page %}
+        <tr id="wpy-diff-table-subtitle">
+          <td colspan="4">
+            <span>
+              {% wpy_translate 'special.page_differences.nb_not_shown' nb=wpy_context.page_diff_nb_not_shown %}
+            </span>
+          </td>
+        </tr>
+      {% endif %}
+      {% for d in wpy_context.page_diff_diff %}
+        {% if d|length_is:2 %}
+          <tr class="wpy-diff-table-line">
+            <td colspan="2" class="wpy-diff-table-line-number">
+              {% wpy_translate 'special.page_differences.line_number' line_nb=d.0 %}
+            </td>
+            <td colspan="2" class="wpy-diff-table-line-number">
+              {% wpy_translate 'special.page_differences.line_number' line_nb=d.1 %}
+            </td>
+          </tr>
+        {% else %}
+          <tr class="wpy-diff-table-line">
+            <td class="wpy-diff-table-marker">
+              {% if d.0 != d.1 and d.0 != None %}−{% else %}&nbsp;{% endif %}
+            </td>
+            <td class="{% if d.0 != None %}wpy-diff-table-text{% endif %} {% if d.0 != d.1 and d.0 != None %}wpy-diff-table-deletion{% endif %}">
+              <pre>{% if d.0 %}{% diff_format d.0 d.2 inserted=False %}{% endif %}</pre>
+            </td>
+            <td class="wpy-diff-table-marker">
+              {% if d.0 != d.1 and d.1 != None %}+{% else %}&nbsp;{% endif %}
+            </td>
+            <td class="{% if d.1 != None %}wpy-diff-table-text{% endif %} {% if d.0 != d.1 and d.1 != None %}wpy-diff-table-insertion{% endif %}">
+              <pre>{% if d.1 %}{% diff_format d.1 d.3 inserted=True %}{% endif %}</pre>
+            </td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+{% endif %}

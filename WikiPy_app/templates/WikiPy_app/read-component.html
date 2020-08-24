@@ -1,0 +1,21 @@
+{% load wpy_tags %}
+
+{% if wpy_context.archived %}
+  <div id="wpy-revision-navbox" class="alert alert-info text-center" role="alert">
+    <div class="wpy-revision-navbox-message">
+      {% wpy_user_link wpy_context.revision.author.username hidden=wpy_context.revision.author_hidden as user_link %}
+      {% wpy_format_date wpy_context.revision.date as revision_date %}
+      {% wpy_translate 'revision.nav_box.label' user_link=user_link date=revision_date %}
+    </div>
+    <div class="wpy-revision-navbox-diffnav">
+      {% wpy_diff_link wpy_context.revision against='previous' show_nav_link=True %}
+      | {% wpy_diff_link wpy_context.revision against='current' show_nav_link=True %}
+      | {% wpy_diff_link wpy_context.revision against='next' show_nav_link=True %}
+    </div>
+    {% if wpy_context.revision.comment %}
+      {% wpy_revision_comment wpy_context.revision.comment hidden=wpy_context.revision.comment_hidden %}
+    {% endif %}
+  </div>
+{% endif %}
+
+{{ wpy_context.rendered_page_content }}

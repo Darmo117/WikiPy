@@ -8,8 +8,9 @@ import typing as typ
 import django.contrib.auth as dj_auth
 import django.contrib.auth.models as dj_models
 import django.core.paginator as dj_page
+import django.db.models as dj_db
 
-from . import _parser, _errors
+from . import _parser, _errors, _diff
 from .. import models, skins, settings, special_pages
 
 
@@ -57,11 +58,13 @@ def create_user(username: str, is_male: bool = None, email: str = None, password
     }
     data = models.UserData(**kwargs)
     data.save()
-    group_id = settings.GROUP_USERS if not anonymous else settings.GROUP_ALL
-    models.UserGroupRel(user=dj_user, group_id=group_id).save()
+    user = models.User(dj_user, data)
+    add_user_to_group(user, settings.GROUP_ALL, auto=True)
+    if not anonymous:
+        add_user_to_group(user, settings.GROUP_USERS, auto=True)
     logging.info(f'Created user {username}')
 
-    return models.User(dj_user, data)
+    return user
 
 
 def log_in(request, username: str, password: str) -> bool:
@@ -117,23 +120,50 @@ def block_user(user: models.User, duration: int, reason: str, *, pages: typ.Iter
         models.UserBlock(user=user.data, duration=duration, reason=reason, pages=f'namespace:{ns_id}').save()
 
 
-def can_read_page(user: models.User, namespace_id: int, title: str) -> bool:
-    return user.can_read_page(namespace_id, title)
+def can_read_page(current_user: models.User, namespace_id: int, title: str) -> bool:
+    return current_user.can_read_page(namespace_id, title)
 
 
-def can_edit_page(user: models.User, namespace_id: int, title: str) -> bool:
-    return user.can_edit_page(namespace_id, title)
+def can_edit_page(current_user: models.User, namespace_id: int, title: str) -> bool:
+    return current_user.can_edit_page(namespace_id, title)
 
 
-def get_user_contributions(username: str) -> typ.Iterable[models.PageRevision]:
+def get_user_contributions(current_user: models.User, username: str, namespace: int = None,
+                           only_hidden_revisions: bool = False, only_last_edits: bool = False,
+                           only_page_creations: bool = False, hide_minor: bool = False, from_date: dt.date = None,
+                           to_date: dt.date = None) \
+        -> typ.Iterable[models.PageRevision]:
     if user_exists(username):
-        return models.PageRevision.objects.filter(author__username=username).order_by('-date')
+        kwargs = {
+            'author__username': username,
+        }
+        if namespace is not None:
+            kwargs['page__namespace_id'] = namespace
+        if hide_minor:
+            kwargs['minor'] = False
+        if from_date:
+            kwargs['date__gt'] = from_date
+        if to_date:
+            kwargs['date__lt'] = to_date
+        query = dj_db.Q(**kwargs)
+        if only_hidden_revisions:
+            query = query & (dj_db.Q(text_hidden=True) | dj_db.Q(author_hidden=True) | dj_db.Q(comment_hidden=True))
+
+        query_set = models.PageRevision.objects.filter(query).order_by('-date')
+        result = []
+        for res in query_set:
+            if not (not current_user.can_read_page(res.page.namespace_id, res.page.title) or
+                    only_last_edits and res.get_next(
+                        ignore_hidden=not current_user.has_right(settings.RIGHT_HIDE_REVISIONS)) or
+                    only_page_creations and not res.has_created_page):
+                result.append(res)
+        return result
     return []
 
 
-def add_user_to_group(user: models.User, group_id: str, performer: models.User = None, setup: bool = False) \
+def add_user_to_group(user: models.User, group_id: str, performer: models.User = None, auto: bool = False) \
         -> bool:
-    if group_exists(group_id) and ((performer and performer.has_right(settings.RIGHT_EDIT_USERS_GROUPS)) or setup):
+    if group_exists(group_id) and ((performer and performer.has_right(settings.RIGHT_EDIT_USERS_GROUPS)) or auto):
         models.UserGroupRel(user=user.django_user, group_id=group_id).save()
         return True
 
@@ -144,9 +174,11 @@ def group_exists(group_id: str) -> bool:
     return group_id in settings.GROUPS
 
 
-def get_param(query_dict, param_name: str, expected_type: typ.Type[typ.Any] = str, default=None):
+def get_param(query_dict, param_name: str, *, expected_type: typ.Type[typ.Any] = str, default=None):
     try:
         value = query_dict.get(param_name, default)
+        if value == '':
+            raise ValueError('')
         return expected_type(value) if value is not None else None
     except ValueError:
         return default
@@ -176,17 +208,17 @@ def extract_namespace_and_title(full_title: str, ns_as_id=False, local_name=True
     split = full_title.split(':', maxsplit=1)
 
     if len(split) == 1:
-        ns = main_ns
+        ns_id = main_ns
         title = split[0]
     else:
-        ns = get_namespace_id(split[0])
+        ns_id = get_namespace_id(split[0])
         title = split[1]
 
-        if ns is None:
-            ns = main_ns
+        if ns_id is None:
+            ns_id = main_ns
             title = split[0] + ':' + title
 
-    return (get_namespace_name(ns, local_name=local_name), title) if not ns_as_id else (ns, title)
+    return (get_namespace_name(ns_id, local_name=local_name), title) if not ns_as_id else (ns_id, title)
 
 
 def get_full_page_title(namespace_id: int, title: str, local_name: bool = True) -> str:
@@ -214,11 +246,47 @@ def get_actual_page_title(raw_title: str) -> str:
     namespace_id, title = extract_namespace_and_title(raw_title, ns_as_id=True)
     check_title(title)
 
+    if namespace_id == -1:
+        base_title = get_special_page_title(title)
+        sub_title = get_special_page_sub_title(title)
+        if sp := special_pages.get_special_page(base_title):
+            title = sp.get_title()
+            if sub_title:
+                title += '/' + sub_title
     # Convert first letter to caps if case sensitivity is disabled
-    if not settings.CASE_SENSITIVE_TITLE:
+    elif not settings.CASE_SENSITIVE_TITLE:
         title = title[0].upper() + title[1:]
 
     return get_full_page_title(namespace_id, title)
+
+
+def get_special_page_title(title: str) -> str:
+    return title.split('/', 1)[0]
+
+
+def get_special_page_sub_title(title: str) -> str:
+    s = title.split('/', 1)
+    return s[1] if len(s) > 1 else ''
+
+
+def get_page_content_model(namespace_id: int, title: str) -> str:
+    if namespace_id == -1:
+        return 'special'
+    if namespace_id == 10:
+        return 'module'
+    if title.endswith('.css'):
+        return 'css'
+    if title.endswith('.js'):
+        return 'javascript'
+    return 'wikicode'
+
+
+def get_page_content_type(title: str) -> str:
+    if title.endswith('.css'):
+        return 'text/css'
+    if title.endswith('.js'):
+        return 'text/javascript'
+    return 'text/plain'
 
 
 def check_title(page_title: str):
@@ -239,6 +307,35 @@ def title_from_url(url_title: str) -> str:
 #########
 # Pages #
 #########
+
+
+# TODO check user hide right
+def get_diff(revision_id1: int, revision_id2: int, current_user: models.User, escape_html: bool, keep_lines: int):
+    try:
+        revision1 = models.PageRevision.objects.get(id=revision_id1)
+    except models.PageRevision.DoesNotExist:
+        raise _errors.RevisionDoesNotExist(revision_id1)
+    try:
+        revision2 = models.PageRevision.objects.get(id=revision_id2)
+    except models.PageRevision.DoesNotExist:
+        raise _errors.RevisionDoesNotExist(revision_id2)
+
+    page1 = revision1.page
+    page2 = revision2.page
+
+    if not current_user.can_read_page(page1.namespace_id, page1.title):
+        raise _errors.PageReadForbidden(page1)
+    if not current_user.can_read_page(page2.namespace_id, page2.title):
+        raise _errors.PageReadForbidden(page2)
+
+    if revision1.page.id == revision2.page.id:
+        nb_not_shown = models.PageRevision.objects.filter(page=page1, date__gt=revision1.date,
+                                                          date__lt=revision2.date).count()
+    else:
+        nb_not_shown = 0
+    diff = _diff.Diff(revision1, revision2).get(escape_html, keep_lines)
+
+    return diff, revision1, revision2, nb_not_shown
 
 
 def paginate(values: typ.Iterable[typ.Any], url_params: typ.Dict[str, str]) -> typ.Tuple[dj_page.Paginator, int]:
@@ -281,55 +378,53 @@ def page_exists(namespace_id: int, title: str) -> bool:
         return special_pages.get_special_page(get_special_page_title(title)) is not None
 
 
-def get_special_page_title(title: str) -> str:
-    return title.split('/', 1)[0]
-
-
-def get_special_page_sub_title(title: str) -> str:
-    s = title.split('/', 1)
-    return s[1] if len(s) > 1 else ''
-
-
-def get_page_content(namespace_id: int, title: str, default='') -> str:
+def get_page_content(namespace_id: int, title: str, *, revision_id: int = None, default: str = '') \
+        -> typ.Tuple[str, typ.Optional[models.PageRevision]]:
     if page_exists(namespace_id, title):
         page = models.Page.objects.get(namespace_id=namespace_id, title=title)
-        return page.get_latest_revision().content
+        if revision_id is not None:
+            revision = page.get_revision(revision_id)
+        else:
+            revision = page.get_latest_revision()
+
+        if not revision:
+            raise _errors.RevisionDoesNotExist(revision_id)
+
+        return revision.content, revision
     else:
-        return default
+        return default, None
 
 
-def _get_page(namespace_id: int, title: str) -> models.Page:
-    return models.Page.objects.get(namespace_id=namespace_id, title=title)
-
-
-def get_page_revisions(namespace_id: int, title: str) -> typ.List[models.PageRevision]:
-    return list(models.PageRevision.objects.filter(page=_get_page(namespace_id, title)).order_by('-date'))
+def get_page_revisions(namespace_id: int, title: str, current_user: models.User) -> typ.List[models.PageRevision]:
+    if page_exists(namespace_id, title) and current_user.can_read_page(namespace_id, title):
+        return list(models.PageRevision.objects.filter(page=_get_page(namespace_id, title)).order_by('-date'))
+    return []
 
 
 def get_redirect(wikicode: str) -> typ.Optional[str]:
     return _PARSER.get_redirect(wikicode)
 
 
-def format_datetime(datetime: dt.datetime, user: models.User):
-    return datetime.strftime(user.data.datetime_format)
+def format_datetime(datetime: dt.datetime, current_user: models.User):
+    return datetime.strftime(current_user.data.datetime_format)
 
 
-def render_wikicode(wikicode: str, skin_id: str) -> str:
+def render_wikicode(wikicode: str, skin_id: str, disable_comment: bool = False) -> str:
     skin = skins.get_skin(skin_id)
     parsed_wikicode = _PARSER.parse_wikicode(wikicode)
-    return skin.render_wikicode(_get_self(), parsed_wikicode)
+    return skin.render_wikicode(_get_self(), parsed_wikicode, disable_comment=disable_comment)
 
 
 # TODO gérer les conflits
-def submit_page_content(namespace_id: int, title: str, user: models.User, wikicode: str, comment: typ.Optional[str],
-                        minor: bool, section_id: int = None):
+def submit_page_content(namespace_id: int, title: str, current_user: models.User, wikicode: str,
+                        comment: typ.Optional[str], minor: bool, section_id: int = None):
     exists = page_exists(namespace_id, title)
     if exists:
         page = _get_page(namespace_id, title)
     else:
         page = models.Page(namespace_id=namespace_id, title=title)
 
-    if not can_edit_page(user, namespace_id, title):
+    if not can_edit_page(current_user, namespace_id, title):
         raise _errors.PageEditForbidden(page)
 
     if not exists:
@@ -341,18 +436,24 @@ def submit_page_content(namespace_id: int, title: str, user: models.User, wikico
     latest_revision = page.get_latest_revision()
     prev_content = latest_revision.content if latest_revision else ''
 
+    wikicode = wikicode.replace('\r\n', '\n')
     if section_id is not None:
         header, sections = _parser.WikicodeParser.split_sections(prev_content)
         sections[section_id] = wikicode
         new_content = _parser.WikicodeParser.paste_sections(header, sections)
         size = _edit_size(prev_content, new_content)
-        revision = models.PageRevision(page=page, author=user.django_user, content=new_content, minor=minor, size=size)
+        revision = models.PageRevision(page=page, author=current_user.django_user, content=new_content, minor=minor,
+                                       size=size)
         revision.save()
     else:
         size = _edit_size(prev_content, wikicode)
-        revision = models.PageRevision(page=page, author=user.django_user, content=wikicode, comment=comment,
+        revision = models.PageRevision(page=page, author=current_user.django_user, content=wikicode, comment=comment,
                                        minor=minor, diff_size=size)
         revision.save()
+
+
+def _get_page(namespace_id: int, title: str) -> models.Page:
+    return models.Page.objects.get(namespace_id=namespace_id, title=title)
 
 
 def _get_self():

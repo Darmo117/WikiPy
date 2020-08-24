@@ -18,6 +18,7 @@
     "%Y %B %d at %I:%M %p",
     "%Y-%m-%dT%H:%I:%S %p"
   ],
+  "main_namespace_name": "Main",
   "main_page_namespace_id": -3,
   "main_page_title": "Main Page",
   "hide_title_on_main_page": true,

@@ -14,11 +14,11 @@ from .. import skins as _skins, special_pages as _sp, apps as _apps
 
 VERSION = '0.1'
 
-HOSTS = ''
+ALLOWED_HOSTS = []
 
 PROJECT_NAME = ''
 
-LANGUAGE = ''
+LANGUAGE_CODE = ''
 WRITING_DIRECTION = ''
 
 TIME_ZONE = ''
@@ -32,6 +32,7 @@ CASE_SENSITIVE_TITLE = True
 # noinspection PyTypeChecker
 INVALID_TITLE_REGEX: _typ.Pattern = None
 
+MAIN_NAMESPACE_NAME: str = ''
 NAMESPACES: _typ.Dict[int, Namespace] = {}
 
 GROUPS: _typ.Dict[str, UserGroup] = {}
@@ -40,8 +41,9 @@ DIFF_SIZE_TAG_IMPORTANT = 500
 
 
 def init(base_dir: str):
-    global HOSTS, PROJECT_NAME, LANGUAGE, MAIN_PAGE_NAMESPACE_ID, MAIN_PAGE_TITLE, HIDE_TITLE_ON_MAIN_PAGE, \
-        CASE_SENSITIVE_TITLE, INVALID_TITLE_REGEX, TIME_ZONE, WRITING_DIRECTION, NAMESPACES, GROUPS, DATETIME_FORMATS
+    global ALLOWED_HOSTS, PROJECT_NAME, LANGUAGE_CODE, MAIN_PAGE_NAMESPACE_ID, MAIN_PAGE_TITLE, \
+        HIDE_TITLE_ON_MAIN_PAGE, CASE_SENSITIVE_TITLE, INVALID_TITLE_REGEX, TIME_ZONE, WRITING_DIRECTION, NAMESPACES, \
+        GROUPS, DATETIME_FORMATS, MAIN_NAMESPACE_NAME
 
     _logging.basicConfig(format='%(levelname)s:%(message)s', level=_logging.DEBUG)
 
@@ -49,11 +51,11 @@ def init(base_dir: str):
     with open(config_path, mode='r', encoding='UTF-8') as _config_file:
         json_config = _json.load(_config_file)
 
-        HOSTS = list(map(str, json_config['hosts']))
+        ALLOWED_HOSTS = list(map(str, json_config['hosts']))
 
         PROJECT_NAME = str(json_config['project_name'])
 
-        LANGUAGE = str(json_config['language'])
+        LANGUAGE_CODE = str(json_config['language'])
         WRITING_DIRECTION = str(json_config['writing_direction'])
 
         TIME_ZONE = str(json_config['time_zone'])
@@ -64,6 +66,8 @@ def init(base_dir: str):
         HIDE_TITLE_ON_MAIN_PAGE = bool(json_config['hide_title_on_main_page'])
 
         CASE_SENSITIVE_TITLE = bool(json_config['case_sensitive_titles'])
+
+        MAIN_NAMESPACE_NAME = str(json_config['main_namespace_name'])
 
         local_rights = dict(json_config['rights'])
         # TODO handle custom groups definition
@@ -84,16 +88,21 @@ def init(base_dir: str):
     if len(DATETIME_FORMATS) == 0:
         raise ValueError(f'no datetime formats defined')
 
-    def load_ns_file(filename: str):
+    def load_ns_file(filename: str, ignore_translation: bool):
         ns_config_path = _os.path.join(base_dir, _apps.WikiPyAppConfig.name, filename + '.json')
         with open(ns_config_path, mode='r', encoding='UTF-8') as _namespaces_file:
-            json_obj = _json.load(_namespaces_file)
+            json_obj: _typ.Mapping[str, _typ.Mapping] = _json.load(_namespaces_file)
 
             for _ns_id, ns_json in json_obj.items():
                 _ns_id = int(_ns_id)
                 ns_name = str(ns_json['name'])
-                ns_local_name = i18n.trans(f'namespace.{_ns_id}', none_if_undefined=True)
-                ns_alias = str(ns_json.get('alias', None))
+                if not ignore_translation:
+                    ns_local_name = i18n.trans(f'namespace.{_ns_id}', none_if_undefined=True)
+                else:
+                    ns_local_name = None
+                ns_alias = ns_json.get('alias')
+                if ns_alias is not None:
+                    ns_alias = str(ns_alias)
                 is_talk = bool(ns_json.get('talk', False))
 
                 # Check name and ID duplicates
@@ -106,8 +115,8 @@ def init(base_dir: str):
                 NAMESPACES[_ns_id] = Namespace(_ns_id, ns_name, is_talk, local_name=ns_local_name, alias=ns_alias)
 
     NAMESPACES = {}
-    load_ns_file('settings/_default_namespaces')
-    load_ns_file('additional_namespaces')
+    load_ns_file('settings/_default_namespaces', ignore_translation=False)
+    load_ns_file('additional_namespaces', ignore_translation=True)
 
     INVALID_TITLE_REGEX = _re.compile(
         r'([<>_#|{}\[\]\x00-\x1f\x7f]|%[0-9A-Fa-f]{2}|&[A-Za-z0-9\x80-\xff]+;|&#[0-9]+;|&#x[0-9A-Fa-f]+;)')

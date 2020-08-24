@@ -73,7 +73,15 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    },  # TODO enable other DB managers
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #     'NAME': 'myproject',
+    #     'USER': 'myprojectuser',
+    #     'PASSWORD': 'password',
+    #     'HOST': 'localhost',
+    #     'PORT': '',
+    # }
 }
 
 # Password validation
@@ -105,6 +113,13 @@ USE_THOUSAND_SEPARATOR = True
 
 USE_TZ = True
 
+# WikiPy settings intialization.
+wpy_settings.init(BASE_DIR)
+
+LANGUAGE_CODE = wpy_settings.LANGUAGE_CODE
+TIME_ZONE = wpy_settings.TIME_ZONE
+ALLOWED_HOSTS = wpy_settings.ALLOWED_HOSTS
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
@@ -112,10 +127,3 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'WikiPy_app/static'),
 ]
 STATIC_URL = '/static/'
-
-# WikiPy settings intialization.
-wpy_settings.init(BASE_DIR)
-
-LANGUAGE_CODE = wpy_settings.LANGUAGE
-TIME_ZONE = wpy_settings.TIME_ZONE
-ALLOWED_HOSTS = wpy_settings.HOSTS

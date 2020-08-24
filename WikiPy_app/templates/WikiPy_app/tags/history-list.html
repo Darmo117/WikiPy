@@ -1,0 +1,39 @@
+{% extends 'WikiPy_app/tags/revisions-list.html' %}
+{% load wpy_tags %}
+
+{% block table_header %}
+  <td>{% wpy_translate 'revisions_table.header.revision' %}</td>
+  <td>{% wpy_translate 'revisions_table.header.size' %}</td>
+  <td>{% wpy_translate 'revisions_table.header.size_diff' %}</td>
+  <td>{% wpy_translate 'revisions_table.header.author' %}</td>
+  <td>{% wpy_translate 'revisions_table.header.tags' %}</td>
+  <td>{% wpy_translate 'revisions_table.header.comment' %}</td>
+{% endblock %}
+
+{% block revision_actions %}
+  {% wpy_diff_link revision against='current' %}
+  {% wpy_diff_link revision against='previous' %}
+{% endblock %}
+
+{% block table_item %}
+  <td>
+    {% include 'WikiPy_app/tags/revision-link.html' %}
+  </td>
+  <td>
+    {% wpy_page_size_tag revision.size %}
+  </td>
+  <td>
+    {% wpy_diff_size_tag revision.diff_size revision.size %}
+  </td>
+  <td>
+    <span class="wpy-history-user">{% wpy_user_link revision.author.username hidden=revision.author_hidden %}</span>
+  </td>
+  <td>
+    {% wpy_revision_tags revision %}
+  </td>
+  <td>
+    {% if revision.comment %}
+      {% wpy_revision_comment revision.comment hidden=revision.comment_hidden %}
+    {% endif %}
+  </td>
+{% endblock %}

@@ -1,22 +1,64 @@
 {% load wpy_tags %}
-<form action="{% url 'page' raw_page_title=full_page_title|wpy_encode_url %}?action=submit" method="post">
-  {#<!--suppress HtmlFormInputWithoutLabel -->#}
-  <textarea id="wpy-edit-field" name="wpy-edit-field" rows="10"
-            {% if not user_can_edit %}disabled{% endif %}>{{ wikicode }}</textarea>
-  {% if user_can_edit %}
-    <label for="wpy-edit-revision-comment">{% wpy_translate 'form.edit.revision_comment.label' %}</label>
-    <input id="wpy-edit-revision-comment" name="wpy-edit-revision-comment" type="text" title="{% wpy_translate 'form.edit.revision_comment.tooltip' %}"/>
+<div id="wpy-edit-notice">
+  <div id="wpy-edit-notice-{{ wpy_context.namespace_id }}">
+    {{ wpy_context.edit_notice }}
+  </div>
+</div>
+{% if wpy_context.archived and wpy_context.user_can_edit %}
+  <div class="wpy-edit-diff-warning-box alert alert-warning" role="alert">
+    {% wpy_translate 'form.edit.revision_warning' %}
+  </div>
+{% endif %}
+{% if not wpy_context.revision and wpy_context.page_exists %}
+  <div class="wpy-edit-diff-error-box alert alert-danger" role="alert">
+    {{ wpy_context.error_notice }}
+  </div>
+{% else %}
+  <form action="{% url 'page' raw_page_title=wpy_context.full_page_title|wpy_encode_url %}?action=submit" method="post">
+    <div class="form-group">
+      <label class="sr-only" for="wpy-edit-field">{% wpy_translate 'form.edit.edit_field.label' %}</label>
+      <textarea id="wpy-edit-field" name="wpy-edit-field" rows="20" class="form-control"
+                {% if not wpy_context.user_can_edit %}disabled{% endif %}>{{ wpy_context.wikicode }}</textarea>
+    </div>
 
-    <input id="wpy-edit-minor" name="wpy-edit-minor" type="checkbox"/>
-    <label for="wpy-edit-minor" title="{% wpy_translate 'form.edit.minor_chk.tooltip' %}">
-      {% wpy_translate 'form.edit.minor_chk.label' %}
-    </label>
+    {% if wpy_context.user_can_edit %}
+      <div class="form-group">
+        <label for="wpy-edit-revision-comment">{% wpy_translate 'form.edit.revision_comment.label' %}</label>
+        <input id="wpy-edit-revision-comment" name="wpy-edit-revision-comment" type="text" class="form-control"
+               title="{% wpy_translate 'form.edit.revision_comment.tooltip' %}"/>
+      </div>
 
-    <input id="wpy-submit-btn" type="submit" value="{% wpy_translate 'form.edit.submit.label' %}" title="{% wpy_translate 'form.edit.submit.tooltip' %}"/>
-    <input id="wpy-preview-btn" type="button" value="{% wpy_translate 'form.edit.preview.label' %}" title="{% wpy_translate 'form.edit.preview.tooltip' %}"/>
-    <input id="wpy-cancel-btn" type="button" value="{% wpy_translate 'form.edit.cancel.label' %}" title="{% wpy_translate 'form.edit.cancel.tooltip' %}"/>
+      <div class="form-group text-center">
+        <div class="form-check form-check-inline">
+          <input id="wpy-edit-minor" name="wpy-edit-minor" type="checkbox" class="form-check-input"/>
+          <label for="wpy-edit-minor" title="{% wpy_translate 'form.edit.minor_chk.tooltip' %}"
+                 class="form-check-label">
+            {% wpy_translate 'form.edit.minor_chk.label' %}
+          </label>
+        </div>
 
-    <input id="wpy-edit-section-id" name="wpy-edit-section-id" type="hidden" value="{{ section_id }}"/>
-    {% csrf_token %}
-  {% endif %}
-</form>
+        <div class="form-check form-check-inline">
+          <input id="wpy-edit-followpage" name="wpy-edit-followpage" type="checkbox" class="form-check-input" disabled/>
+          <label for="wpy-edit-followpage" title="{% wpy_translate 'form.edit.follow_page_chk.tooltip' %}"
+                 class="form-check-label">
+            {% wpy_translate 'form.edit.follow_page_chk.label' %}
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group text-center">
+        <input id="wpy-submit-btn" type="submit" value="{% wpy_translate 'form.edit.submit.label' %}"
+               title="{% wpy_translate 'form.edit.submit.tooltip' %}" class="btn btn-primary"/>
+        <input id="wpy-preview-btn" type="button" value="{% wpy_translate 'form.edit.preview.label' %}" disabled
+               title="{% wpy_translate 'form.edit.preview.tooltip' %}" class="btn btn-secondary"/>{# TODO use JS #}
+        <input id="wpy-diff-btn" type="button" value="{% wpy_translate 'form.edit.diff.label' %}" disabled
+               title="{% wpy_translate 'form.edit.diff.tooltip' %}" class="btn btn-secondary"/>{# TODO use JS #}
+        <input id="wpy-cancel-btn" type="button" value="{% wpy_translate 'form.edit.cancel.label' %}" disabled
+               title="{% wpy_translate 'form.edit.cancel.tooltip' %}" class="btn btn-outline-danger"/>
+      </div>
+
+      <input id="wpy-edit-section-id" name="wpy-edit-section-id" type="hidden" value=""/>
+      {% csrf_token %}
+    {% endif %}
+  </form>
+{% endif %}

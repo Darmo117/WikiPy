@@ -27,5 +27,4 @@ urlpatterns = [
     re_path(r'.*', include(apps.WikiPyAppConfig.name + '.urls_404')),
 ]
 
-handler403 = apps.WikiPyAppConfig.name + '.views.handle403'
 handler500 = apps.WikiPyAppConfig.name + '.views.handle500'

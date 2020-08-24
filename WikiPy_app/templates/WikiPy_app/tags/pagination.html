@@ -1,0 +1,16 @@
+<nav>
+  <div class="btn-toolbar justify-content-center" role="toolbar">
+    <div class="btn-group mr-2" role="group">
+      {% for nb in numbers %}
+        {{ nb }}
+      {% endfor %}
+    </div>
+  </div>
+  <ul class="pagination justify-content-center">
+    <li class="page-item{% if at_first %} disabled{% endif %}">{{ first }}</li>
+    <li class="page-item{% if not has_prev %} disabled{% endif %}">{{ previous }}</li>
+    <li class="page-item disabled"><span class="page-link">{{ position }}</span></li>
+    <li class="page-item{% if not has_next %} disabled{% endif %}">{{ next }}</li>
+    <li class="page-item{% if at_last %} disabled{% endif %}">{{ last }}</li>
+  </ul>
+</nav>

@@ -1,23 +1,23 @@
 Enter the information to create the first administrator in the form below.
 <form action="{% url 'page' 'Special:WikiSetup' %}?action=setup" method="post">
   <label for="wpy-setup-username">Username</label>
-  <input type="text" name="wpy-setup-username" id="wpy-setup-username" required value="{{ wpy_setup_username|default_if_none:'' }}"/>
-  {% if invalid_username %}
+  <input type="text" name="wpy-setup-username" id="wpy-setup-username" required value="{{ wpy_context.setup_username|default_if_none:'' }}"/>
+  {% if wpy_context.setup_invalid_username %}
     The provided username is invalid!
   {% endif %}
   <label for="wpy-setup-password">Password</label>
   <input type="password" name="wpy-setup-password" id="wpy-setup-password" required/>
-  {% if invalid_password %}
+  {% if wpy_context.setup_invalid_password %}
     The provided password is invalid!
   {% endif %}
   <label for="wpy-setup-email">E-mail</label>
-  <input type="text" name="wpy-setup-email" id="wpy-setup-email" required value="{{ wpy_setup_email|default_if_none:'' }}"/>
-  {% if invalid_email %}
+  <input type="text" name="wpy-setup-email" id="wpy-setup-email" required value="{{ wpy_context.setup_email|default_if_none:'' }}"/>
+  {% if wpy_context.setup_invalid_email %}
     The provided e-mail is invalid!
   {% endif %}
   <label for="wpy-setup-secretkey">Secret key</label>
   <input type="password" name="wpy-setup-secretkey" id="wpy-setup-secretkey" required/>
-  {% if invalid_secret_key %}
+  {% if wpy_context.setup_invalid_secret_key %}
     The provided secret key is invalid!
   {% endif %}
 

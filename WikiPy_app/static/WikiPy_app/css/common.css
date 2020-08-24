@@ -1,0 +1,49 @@
+/*********
+ * Links *
+ *********/
+
+a.wpy-redlink {
+  color: red;
+}
+
+.wpy-self-link {
+  font-weight: bold;
+}
+
+/******************
+ * Revisions list *
+ ******************/
+
+.wpy-hidden-revision-link {
+  text-decoration: line-through;
+  color: gray;
+}
+
+.wpy-diff-size-tag-important {
+  font-weight: bold;
+}
+
+/*********
+ * Boxes *
+ *********/
+
+#wpy-revision-tags-legend-box {
+  float: right;
+  width: 400px;
+}
+
+#wpy-revision-tags-legend-box .card-header .fa {
+  transition: .3s transform ease-in-out;
+}
+
+#wpy-revision-tags-legend-box .card-header .collapsed .fa {
+  transform: rotate(90deg);
+}
+
+/*********
+ * Misc. *
+ *********/
+
+.pull-right {
+  float: right;
+}

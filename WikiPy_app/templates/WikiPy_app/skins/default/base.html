@@ -1,28 +1,134 @@
 {% extends 'WikiPy_app/base.html' %}
+{% load static %}
 {% load wpy_tags %}
 
-{% block header %}
-  {% if wpy_user.is_logged_in %}
-    {% wpy_user_link '' wpy_user.username only_username=True %}
-    {% wpy_header_link link_type='special' special_page_id='logout' add_return_to=True %}
-  {% else %}
-    {% wpy_header_link link_type='special' special_page_id='login' add_return_to=True %}
+{% block body_attr %}class="d-flex flex-column"{% endblock %}
+
+{% block pre-title %}
+  <nav id="wpy-header" class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <div class="container-fluid">
+      {% wpy_inner_link wpy_context.main_page_namespace wpy_context.main_page_title text=wpy_context.project_name ignore_current_title=True css_classes='navbar-brand' %}
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#wpy-navbar-content"
+              aria-controls="wpy-navbar-content" aria-expanded="false">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="wpy-navbar-content">
+        <div id="wpy-search-bar" class="input-group mx-auto">
+          {% wpy_translate 'header.search.input.placeholder' project_name=wpy_context.project_name as placeholder %}
+          <input type="search" class="form-control" placeholder="{{ placeholder }}" aria-label="{{ placeholder }}"
+                 aria-describedby="wpy-button-search">
+          <div class="input-group-append">
+            <button class="btn btn-outline-light" type="button" id="wpy-button-search"
+                    title="{% wpy_translate 'header.search.button.tooltip' %}">
+              <i class="fas fa-search"></i> {% wpy_translate 'header.search.button.label' %}
+            </button>
+          </div>
+        </div>
+        <ul class="navbar-nav ml-auto">
+          {% if wpy_context.user.is_logged_in %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="username-dropdown" role="button" data-toggle="dropdown"
+                 aria-haspopup="true" aria-expanded="false">
+                {{ wpy_context.user.username }}
+              </a>
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="username-dropdown">
+                {% wpy_header_link link_type='user_page' css_classes='dropdown-item' %}
+                {% wpy_header_link link_type='user_talk' css_classes='dropdown-item' %}
+                <div class="dropdown-divider"></div>
+                {% wpy_header_link link_type='special' special_page_id='logout' add_return_to=True css_classes='dropdown-item' %}
+              </div>
+            </li>
+          {% else %}
+            {% wpy_header_link link_type='special' special_page_id='login' add_return_to=True css_classes='nav-link' %}
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div id="main-container" class="container-fluid">
+  <div class="row">
+  {# TODO collapse on mobile #}
+  <nav id="nav-bar-left" class="col">
+    <div id="wpy-nav-bar-logo" class="card bg-light mb-3">
+      <a href="{% url 'page' raw_page_title=wpy_context.main_page_full_title_url %}"
+         title="{% wpy_translate 'link.main_page.tooltip' %}">
+        <img src="{% static 'WikiPy_app/icons/wiki-logo.png' %}" class="card-img-top" alt="wiki logo"/>
+      </a>
+    </div>
+    <div id="wpy-nav-bar-navigation" class="card bg-light mb-3">
+      <div class="card-header">Navigation</div>
+      <div class="card-body">
+        <ul class="list-unstyled">
+          <li><a href="#">Ipsum</a></li>
+          <li><a href="#">Dolor</a></li>
+          <li><a href="#">Sit</a></li>
+          <li><a href="#">Amet</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div id="center-col" class="col">
+  {% if wpy_context.namespace_id != -1 and wpy_context.mode != 'setup' %}
+    <ul id="wpy-article-nav-bar" class="nav nav-tabs justify-content-center sticky-top">
+      <li class="nav-item">{% wpy_header_link link_type='read' css_classes='nav-link' %}</li>
+      <li class="nav-item">{% wpy_header_link link_type='talk' css_classes='nav-link' %}</li>
+      {% if wpy_context.page_exists %}
+        {% if wpy_context.user_can_edit %}
+          <li class="nav-item">{% wpy_header_link link_type='edit' css_classes='nav-link' %}</li>
+        {% elif wpy_context.user_can_read %}
+          <li class="nav-item">{% wpy_header_link link_type='source' css_classes='nav-link' %}</li>
+        {% endif %}
+        {% if wpy_context.user_can_read %}
+          <li class="nav-item">{% wpy_header_link link_type='history' css_classes='nav-link' %}</li>
+        {% endif %}
+      {% elif wpy_context.user_can_edit %}
+        <li class="nav-item">{% wpy_header_link link_type='create' css_classes='nav-link' %}</li>
+      {% endif %}
+    </ul>
   {% endif %}
+  <main id="wpy-article">
+{% endblock pre-title %}
+
+{% block post-title %}
+  <article id="wpy-content">
 {% endblock %}
 
-{% block article_navbar %}
-  {% wpy_header_link link_type='read' %}
-  {% wpy_header_link link_type='talk' %}
-  {% if page_exists %}
-    {% if user_can_edit %}
-      {% wpy_header_link link_type='edit' %}
-    {% elif user_can_read %}
-      {% wpy_header_link link_type='source' %}
-    {% endif %}
-    {% if user_can_read %}
-      {% wpy_header_link link_type='history' %}
-    {% endif %}
-  {% elif user_can_edit %}
-    {% wpy_header_link link_type='create' %}
-  {% endif %}
-{% endblock %}
+{% block post-content %}
+  </article>
+  </main>
+  </div>
+  {# TODO collapse on mobile #}
+  <nav id="nav-bar-right" class="col">
+    <div id="wpy-nav-bar-pagetools" class="card bg-light mb-3">
+      <div class="card-header">Page tools</div>
+      <div class="card-body">
+        <ul class="list-unstyled">
+          <li><a href="#">Ipsum</a></li>
+          <li><a href="#">Dolor</a></li>
+          <li><a href="#">Sit</a></li>
+          <li><a href="#">Amet</a></li>
+        </ul>
+      </div>
+    </div>
+    <div id="wpy-nav-bar-pagetools" class="card bg-light mb-3">
+      <div class="card-header">More tools</div>
+      <div class="card-body">
+        <ul class="list-unstyled">
+          <li><a href="#">Ipsum</a></li>
+          <li><a href="#">Dolor</a></li>
+          <li><a href="#">Sit</a></li>
+          <li><a href="#">Amet</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  </div>
+  </div>
+  <footer id="wpy-footer" class="py-4 bg-dark text-white-50">
+    <div class="container-fluid">
+      TODO {# TODO footer #}
+    </div>
+  </footer>
+{% endblock post-content %}

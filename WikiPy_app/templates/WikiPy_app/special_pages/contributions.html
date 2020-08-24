@@ -1,20 +1,102 @@
 {% load wpy_tags %}
-{% if target_user_name %}
-  {% wpy_translate 'special.contributions.user_link' username=target_user_link as text %}
-  {% wpy_inner_link 6 target_user_name text %}
+
+{% if wpy_context.contribs_target_username %}
+  <span class="wpy-contributions-userlink">{% wpy_user_link wpy_context.contribs_target_username full=True %}</span>
 {% endif %}
-{# TODO create form #}
-<form>
-  Form
+
+<form id="wpy-contribs-form" method="get">
+  <div class="row">
+    <div class="col form-group">
+      <label for="wpy-contribs-form-targetuser">
+        {% wpy_translate 'special.contributions.form.target_user.label' %}
+      </label>
+      <input type="text" id="wpy-contribs-form-targetuser" name="target_user" class="form-control" required
+             value="{{ wpy_context.contribs_target_username|default_if_none:'' }}"/>
+    </div>
+
+    <div class="col form-group">
+      <label for="wpy-contribs-form-namespace">
+        {% wpy_translate 'special.contributions.form.namespace.label' %}
+      </label>
+      <select id="wpy-contribs-form-namespace" name="namespace" class="form-control" required>
+      </select>
+      <input type="hidden" id="wpy-contribs-form-selectednamespace"
+             value="{{ wpy_context.contribs_form_namespace|default_if_none:'' }}"/>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col form-group">
+      <label for="wpy-contribs-form-from">
+        {% wpy_translate 'special.contributions.form.from.label' %}
+      </label>
+      <input type="date" id="wpy-contribs-form-from" name="from" class="form-control"
+             value="{{ wpy_context.contribs_form_from_date|default_if_none:'' }}"/>
+    </div>
+
+    <div class="col form-group">
+      <label for="wpy-contribs-form-to">
+        {% wpy_translate 'special.contributions.form.to.label' %}
+      </label>
+      <input type="date" id="wpy-contribs-form-to" name="to" class="form-control"
+             value="{{ wpy_context.contribs_form_to_date|default_if_none:'' }}"/>
+    </div>
+  </div>
+
+  <div class="form-group text-center">
+    {% if wpy_context.user_can_hide %}
+      <div class="form-check form-check-inline">
+        <input type="checkbox" id="wpy-contribs-form-onlyhiddenrevisions" class="form-check-input"
+               name="only_hidden_revisions" {{ wpy_context.contribs_form_only_hidden_revisions|yesno:'checked,' }}/>
+        <label for="wpy-contribs-form-onlyhiddenrevisions" class="form-check-label">
+          {% wpy_translate 'special.contributions.form.only_hidden_revisions.label' %}
+        </label>
+      </div>
+    {% endif %}
+
+    <div class="form-check form-check-inline">
+      <input type="checkbox" id="wpy-contribs-form-onlylastedits" class="form-check-input"
+             name="only_last_edits" {{ wpy_context.contribs_form_only_last_edits|yesno:'checked,' }}/>
+      <label for="wpy-contribs-form-onlylastedits" class="form-check-label">
+        {% wpy_translate 'special.contributions.form.only_last_edits.label' %}
+      </label>
+    </div>
+
+    <div class="form-check form-check-inline">
+      <input type="checkbox" id="wpy-contribs-form-onlypagecreations" class="form-check-input"
+             name="only_page_creations" {{ wpy_context.contribs_form_only_page_creations|yesno:'checked,' }}/>
+      <label for="wpy-contribs-form-onlypagecreations" class="form-check-label">
+        {% wpy_translate 'special.contributions.form.only_page_creations.label' %}
+      </label>
+    </div>
+
+    <div class="form-check form-check-inline">
+      <input type="checkbox" id="wpy-contribs-form-hideminor" class="form-check-input"
+             name="hide_minor" {{ wpy_context.contribs_form_hide_minor|yesno:'checked,' }}/>
+      <label for="wpy-contribs-form-hideminor" class="form-check-label">
+        {% wpy_translate 'special.contributions.form.hide_minor.label' %}
+      </label>
+    </div>
+  </div>
+
+  <div class="text-center">
+    <input type="submit" id="wpy-diff-form-submit" class="btn btn-primary"
+           value="{% wpy_translate 'special.contributions.form.submit.label' %}"/>
+  </div>
 </form>
-{% if target_user_name %}
-  {% if revisions %}
-    {% wpy_contributions_list mode='contributions' %}
-  {% elif unknown_user %}
-    <span class="wpy-contributions-userdoesnotexist wpy-error">
-      {% wpy_translate 'special.contributions.unknown_user' account_name=target_user_name %}
-    </span>
+
+<hr/>
+
+{% if wpy_context.contribs_target_username %}
+  {% if wpy_context.contribs_results_found %}
+    {% wpy_contributions_list %}
+  {% elif wpy_context.contribs_unknown_user %}
+    <div id="wpy-contributions-userdoesnotexist" class="wpy-error alert alert-danger text-center" role="alert">
+      {% wpy_translate 'special.contributions.unknown_user' account_name=wpy_context.contribs_target_username %}
+    </div>
   {% else %}
-    {% wpy_translate 'special.contributions.no_results' %}
+    <div id="wpy-contributions-noresult" class="alert alert-info text-center" role="alert">
+      {% wpy_translate 'error.no_results' %}
+    </div>
   {% endif %}
 {% endif %}

@@ -1,6 +1,7 @@
 import collections
 import json
 import os
+import string
 import typing as typ
 
 from ..apps import WikiPyAppConfig
@@ -39,5 +40,5 @@ def _build_mapping(root: typ.Optional[str], json_object: typ.Mapping[str, typ.Un
 def trans(key: str, *, none_if_undefined=False, **kwargs) -> typ.Optional[str]:
     value = _ENTRIES.get(key, key if not none_if_undefined else None)
     if value is not None:
-        return value % kwargs
+        return string.Template(value).safe_substitute(kwargs)
     return None

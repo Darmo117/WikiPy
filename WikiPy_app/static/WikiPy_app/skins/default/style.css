@@ -1,0 +1,143 @@
+/*****************
+ * Bottom footer *
+ *****************/
+
+html, body {
+  height: 100%;
+}
+
+#main-container {
+  flex: 1 0 auto;
+  margin-bottom: 15px;
+}
+
+/**************
+ * Paragraphs *
+ **************/
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+/*********
+ * Links *
+ *********/
+
+a:not([class]):active, a[class=""]:active, a:not([data-toggle="collapse"]):active, a:visited:active {
+  color: goldenrod;
+}
+
+a[data-toggle="collapse"] {
+  text-decoration: none;
+}
+
+/*a:visited:not([class]), a[class=""]:visited {*/
+/*  color: #51a9ff;*/
+/*}*/
+
+a.wpy-redlink {
+  color: #ed0000;
+}
+
+/**************************
+ * Columns and menu sizes *
+ **************************/
+
+#nav-bar-left, #nav-bar-right {
+  min-width: 200px;
+  max-width: 200px;
+  padding-top: 15px;
+}
+
+#center-col {
+  width: 100%;
+}
+
+#wpy-article-nav-bar {
+  top: 56px; /* navbar height */
+  background-color: #fafafa;
+}
+
+#wpy-main-title {
+  border-bottom: gray solid 4px;
+}
+
+#wpy-article {
+  padding: 0 15px;
+}
+
+#wpy-main-title, #wpy-content {
+  margin-top: 30px;
+}
+
+#wpy-content p {
+  text-align: justify;
+}
+
+#wpy-content {
+  margin-bottom: 15px;
+}
+
+/****************************
+ * Fix search bar centering *
+ ****************************/
+
+#wpy-search-bar {
+  max-width: 700px;
+}
+
+html[dir="ltr"] #wpy-search-bar {
+  margin-right: 0 !important;
+}
+
+html[dir="rtl"] #wpy-search-bar {
+  margin-left: 0 !important;
+}
+
+/*********
+ * Lists *
+ *********/
+
+ul {
+  margin-bottom: 0;
+}
+
+/*********
+ * Misc. *
+ *********/
+
+.card, #center-col {
+  -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+}
+
+.badge.wpy-diff-size-tag, .badge.wpy-tag, .badge.wpy-page-size-tag {
+  font-weight: normal;
+  font-size: 1em;
+}
+
+.badge.wpy-diff-size-tag {
+  font-weight: normal;
+}
+
+.badge.wpy-diff-size-tag.wpy-diff-size-tag-important {
+  font-weight: bold;
+}
+
+body {
+  background-color: #f1f1f1;
+}
+
+#center-col {
+  background-color: white;
+}
+
+#wpy-revisions-list {
+  margin-top: 16px;
+}
+
+.wpy-hidden-revision-author, .wpy-hidden-revision-comment, .wpy-hidden-revision-link {
+  color: gray;
+  font-style: italic;
+  text-decoration: line-through;
+}

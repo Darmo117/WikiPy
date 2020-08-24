@@ -23,6 +23,11 @@ class PageEditForbidden(PageException):
         super().__init__('user cannot edit page', page)
 
 
+class PageReadForbidden(PageException):
+    def __init__(self, page):
+        super().__init__('user cannot read page', page)
+
+
 class PageEditConflit(PageException):
     def __init__(self, page, revision, wikicode):
         super().__init__('page edit conflict', page)
@@ -36,6 +41,16 @@ class PageEditConflit(PageException):
     @property
     def wikicode(self):
         return self.__wikicode
+
+
+class PageDoesNotExist(ValueError):
+    def __init__(self, page_title: str):
+        super().__init__(page_title)
+
+
+class RevisionDoesNotExist(ValueError):
+    def __init__(self, revision_id: int):
+        super().__init__(str(revision_id))
 
 
 class InvalidUsernameError(ValueError):

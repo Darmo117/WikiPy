@@ -1,29 +1,36 @@
+{% extends 'WikiPy_app/tags/revisions-list.html' %}
 {% load wpy_tags %}
-{% if revisions %}
-  <div class="wpy-revision-tags-legend-box">
-    <span>{% wpy_translate 'revision.tag_box.title' %}</span>
-    <ul>
-      <li>{% wpy_minor_edit_tag %} - {% wpy_translate 'tag.minor_edit.tooltip' %}</li>
-      <li>{% wpy_page_creation_tag %} - {% wpy_translate 'tag.page_creation.tooltip' %}</li>
-      <li>{% wpy_bot_edit_tag %} - {% wpy_translate 'tag.bot_edit.tooltip' %}</li>
-      <li>{% wpy_diff_size_tag 123 %} - {% wpy_translate 'revision.tag_box.diff_size_tag' %}</li>
-    </ul>
-  </div>
-  {% wpy_paginator %}
-  <ul class="wpy-revisions-list">
-    {% for revision, revision_link, user_link in revisions %}
-      <li class="wpy-revision-item">
-        {% if mode == 'contributions' %}
-          {% include 'WikiPy_app/tags/contribution-item.html' %}
-        {% elif mode == 'history' %}
-          {% include 'WikiPy_app/tags/history-item.html' %}
-        {% endif %}
-      </li>
-    {% endfor %}
-  </ul>
-  {% wpy_paginator %}
-{% elif mode == 'contributions' %}
-  {% wpy_translate 'error.no_results' %}
-{% elif mode == 'history' %}
-  {% wpy_translate 'error.no_history' %}
-{% endif %}
+
+{% block table_header %}
+  <td>{% wpy_translate 'revisions_table.header.revision' %}</td>
+  <td>{% wpy_translate 'revisions_table.header.page' %}</td>
+  <td>{% wpy_translate 'revisions_table.header.size_diff' %}</td>
+  <td>{% wpy_translate 'revisions_table.header.tags' %}</td>
+  <td>{% wpy_translate 'revisions_table.header.comment' %}</td>
+{% endblock %}
+
+{% block revision_actions %}
+  {% wpy_translate 'link.history.tooltip' as hist %}
+  {% wpy_diff_link revision against='previous' %}
+  {% wpy_history_link revision %}
+{% endblock %}
+
+{% block table_item %}
+  <td>
+    {% include 'WikiPy_app/tags/revision-link.html' %}
+  </td>
+  <td>
+    {% wpy_inner_link revision.page.namespace_id revision.page.title %}
+  </td>
+  <td>
+    {% wpy_diff_size_tag revision.diff_size revision.size %}
+  </td>
+  <td>
+    {% wpy_revision_tags revision %}
+  </td>
+  <td>
+    {% if revision.comment %}
+      {% wpy_revision_comment revision.comment hidden=revision.comment_hidden %}
+    {% endif %}
+  </td>
+{% endblock %}
