@@ -8,27 +8,27 @@
   window.WPY_CONF = undefined; // Delete global variable
 
   class Map {
-    #values;
-    #immutable;
+    _values;
+    _immutable;
 
     constructor(immutable) {
-      this.#values = {};
-      this.#immutable = !!immutable;
+      this._values = {};
+      this._immutable = !!immutable;
     }
 
     setImmutable() {
-      this.#immutable = true;
+      this._immutable = true;
     }
 
     get(key, fallback) {
-      return this.#values[key] || fallback;
+      return this._values[key] || fallback;
     }
 
     set(key, value) {
-      if (this.#immutable) {
+      if (this._immutable) {
         throw new Error("Map object is immutable");
       }
-      this.#values[key] = value;
+      this._values[key] = value;
     }
 
     [Symbol.iterator]() {
@@ -36,19 +36,19 @@
     }
 
     * entries() {
-      for (let [k, v] of Object.entries(this.#values)) {
+      for (let [k, v] of Object.entries(this._values)) {
         yield [k, v];
       }
     }
 
     * keys() {
-      for (let k of Object.keys(this.#values)) {
+      for (let k of Object.keys(this._values)) {
         yield k;
       }
     }
 
     * values() {
-      for (let v of Object.values(this.#values)) {
+      for (let v of Object.values(this._values)) {
         yield v;
       }
     }
@@ -144,4 +144,19 @@
       },
     },
   };
-})()
+
+  /* Add keystroke in tooltips of elements with accesskey attribute. */
+  (function () {
+    let accessKeyLabel = 'alt+shift+';
+
+    $("*[accesskey]").each(function (_, e) {
+      let $element = $(e);
+      let tooltip = $element.attr("title");
+      let accessKey = $element.attr("accesskey");
+
+      if (tooltip) {
+        $element.attr("title", $element.attr("title") + ` [${accessKeyLabel + accessKey}]`);
+      }
+    });
+  })();
+})();

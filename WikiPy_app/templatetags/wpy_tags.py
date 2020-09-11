@@ -299,11 +299,12 @@ def wpy_inner_link(context: page_context.TemplateContext, namespace_id: int, pag
 @register.simple_tag(takes_context=True)
 def wpy_header_link(context: page_context.TemplateContext, link_type: str, special_page_id: str = None,
                     no_redirect: bool = False, add_return_to: bool = False, no_red_link: bool = False,
-                    css_classes: str = None):
+                    css_classes: str = None, special_page_subtitle: str = None, no_access_key: bool = False):
     if link_type not in ['read', 'talk', 'edit', 'create', 'source', 'history', 'special', 'user_page', 'user_talk']:
         raise ValueError(f'invalid link type "{link_type}"')
 
     wpy_context: page_context.PageContext = context.get('wpy_context')
+    access_key = None
 
     params = {}
     if add_return_to:
@@ -312,14 +313,18 @@ def wpy_header_link(context: page_context.TemplateContext, link_type: str, speci
     if link_type == 'special':
         special_page = special_pages.get_special_page_for_id(special_page_id)
         page_title = api.get_full_page_title(-1, special_page.get_title())
+        if special_page_subtitle:
+            page_title += '/' + special_page_subtitle
         text = special_page.display_title
         tooltip = text
         icon = {
-            'login': 'sign-in-alt',
-            'logout': 'sign-out-alt',
+            'login': ('sign-in-alt', None),
+            'logout': ('sign-out-alt', None),
+            'contributions': ('puzzle-piece', 'c'),
         }.get(special_page_id)
         if icon:
-            text = f'<i class="fa fa-{icon}"></i> ' + text
+            text = f'<i class="fa fa-{icon[0]}"></i> ' + text
+            access_key = icon[1]
     else:
         page_title = wpy_context.full_page_title
         text = settings.i18n.trans(f'link.header.{link_type}.label')
@@ -328,17 +333,21 @@ def wpy_header_link(context: page_context.TemplateContext, link_type: str, speci
         if link_type == 'read':
             ns_id = api.get_base_page_namespace(ns_id)
             text = '<i class="fa fa-book-open"></i> ' + text
+            access_key = 'v'
         elif link_type == 'talk':
             ns_id = api.get_talk_page_namespace(ns_id)
             text = '<i class="far fa-comments"></i> ' + text
+            access_key = 't'
         elif link_type == 'user_page':
             ns_id = 6
             title = wpy_context.user.username
             text = '<i class="far fa-user"></i> ' + text
+            access_key = 'u'
         elif link_type == 'user_talk':
             ns_id = 7
             title = wpy_context.user.username
             text = '<i class="far fa-comment"></i> ' + text
+            access_key = 'w'
         page_title = api.get_full_page_title(ns_id, title)
 
         if link_type in ['edit', 'create', 'source']:
@@ -347,9 +356,11 @@ def wpy_header_link(context: page_context.TemplateContext, link_type: str, speci
                 if revision := wpy_context.revision:
                     params['revision_id'] = revision.id
             text = '<i class="fa fa-edit"></i> ' + text
+            access_key = 'e'
         elif link_type == 'history':
             params['action'] = 'history'
             text = '<i class="fa fa-history"></i> ' + text
+            access_key = 'h'
 
         if no_redirect:
             params['no_redirect'] = '1'
@@ -357,7 +368,8 @@ def wpy_header_link(context: page_context.TemplateContext, link_type: str, speci
     classes = css_classes.split() if css_classes else []
     skin = skins.get_skin(wpy_context.skin_name)
     link = skin.format_internal_link(api, '', page_title, text=text, tooltip=tooltip, no_red_link=no_red_link,
-                                     css_classes=classes, **params)
+                                     css_classes=classes, access_key=access_key if not no_access_key else None,
+                                     **params)
 
     return dj_safe.mark_safe(link)
 
@@ -419,7 +431,7 @@ def wpy_paginator(context: typ.Dict[str, typ.Any], top: bool):
     last_link, not_at_last = _get_paginator_link('last', current_page_title, paginator, page,
                                                  wpy_context.writing_direction, skin, **url_params)
 
-    position = settings.i18n.trans('link.pagination.position', page=page, total=paginator.num_pages)
+    position = settings.i18n.trans('pagination.position', page=page, total=paginator.num_pages)
 
     offset_links = []
     offsets = [25, 50, 100, 250, 500]
@@ -434,6 +446,8 @@ def wpy_paginator(context: typ.Dict[str, typ.Any], top: bool):
                                          tooltip=current_page_title, css_classes=classes, **params)
         offset_links.append(dj_safe.mark_safe(link))
 
+    page_obj = paginator.get_page(page)
+
     return {
         'first': dj_safe.mark_safe(first_link),
         'previous': dj_safe.mark_safe(prev_link),
@@ -444,6 +458,9 @@ def wpy_paginator(context: typ.Dict[str, typ.Any], top: bool):
         'at_first': not not_at_first,
         'at_last': not not_at_last,
         'numbers': offset_links,
+        'start_index': page_obj.start_index(),
+        'end_index': page_obj.end_index(),
+        'total': paginator.count,
         'page': page,
         'pages_number': paginator.num_pages,
         'position': position,
@@ -466,7 +483,7 @@ def _get_paginator_link(link_type: str, current_page_title: str, paginator: dj_p
         arrow = arrow_rtl
     else:
         arrow = arrow_ltr
-    text = settings.i18n.trans('link.pagination.' + link_type, nb_per_page=paginator.per_page)
+    text = settings.i18n.trans('pagination.' + link_type, nb_per_page=paginator.per_page)
     if before_text:
         text = arrow + '\u00a0' + text
     else:

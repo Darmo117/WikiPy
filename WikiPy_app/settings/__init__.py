@@ -16,6 +16,9 @@ VERSION = '0.1'
 
 ALLOWED_HOSTS = []
 
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+
 PROJECT_NAME = ''
 
 LANGUAGE_CODE = ''
@@ -43,7 +46,7 @@ DIFF_SIZE_TAG_IMPORTANT = 500
 def init(base_dir: str):
     global ALLOWED_HOSTS, PROJECT_NAME, LANGUAGE_CODE, MAIN_PAGE_NAMESPACE_ID, MAIN_PAGE_TITLE, \
         HIDE_TITLE_ON_MAIN_PAGE, CASE_SENSITIVE_TITLE, INVALID_TITLE_REGEX, TIME_ZONE, WRITING_DIRECTION, NAMESPACES, \
-        GROUPS, DATETIME_FORMATS, MAIN_NAMESPACE_NAME
+        GROUPS, DATETIME_FORMATS, MAIN_NAMESPACE_NAME, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
 
     _logging.basicConfig(format='%(levelname)s:%(message)s', level=_logging.DEBUG)
 
@@ -52,6 +55,8 @@ def init(base_dir: str):
         json_config = _json.load(_config_file)
 
         ALLOWED_HOSTS = list(map(str, json_config['hosts']))
+        EMAIL_HOST_USER = str(json_config.get('email_host_user', ''))
+        EMAIL_HOST_PASSWORD = str(json_config.get('email_host_password', ''))
 
         PROJECT_NAME = str(json_config['project_name'])
 

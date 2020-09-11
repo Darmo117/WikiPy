@@ -82,15 +82,15 @@ a.wpy-redlink {
  * Fix search bar centering *
  ****************************/
 
-#wpy-search-bar {
+#wpy-header-search-form {
   max-width: 700px;
 }
 
-html[dir="ltr"] #wpy-search-bar {
+html[dir="ltr"] #wpy-header-search-form {
   margin-right: 0 !important;
 }
 
-html[dir="rtl"] #wpy-search-bar {
+html[dir="rtl"] #wpy-header-search-form {
   margin-left: 0 !important;
 }
 
@@ -140,4 +140,12 @@ body {
   color: gray;
   font-style: italic;
   text-decoration: line-through;
+}
+
+li .wpy-search-result {
+  padding-bottom: 15px;
+}
+
+li:first-child .wpy-search-result {
+  padding-top: 15px;
 }

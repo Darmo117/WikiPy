@@ -160,12 +160,15 @@ def handle500(request):
 def _generate_js(context: page_context.PageContext) -> str:
     ns_name_to_id = {}
     ns_id_to_name = {}
+    talk_namespaces = []
     for ns_id, ns in settings.NAMESPACES.items():
         ns_id_to_name[str(ns_id)] = ns.get_name(local=True)
         ns_name_to_id[ns.get_name(local=False)] = ns_id
         ns_name_to_id[ns.get_name(local=True)] = ns_id
         if ns.alias:
             ns_name_to_id[ns.alias] = ns_id
+        if ns.is_talk:
+            talk_namespaces.append(ns_id)
 
     url_path = dj_scut.reverse('page', args=[''])
 
@@ -196,6 +199,7 @@ window.WPY_CONF = {{
     wpyMainNamespaceName: "{settings.MAIN_NAMESPACE_NAME}",
     wpyNamespaces: {ns_id_to_name},
     wpyNamespacesIds: {ns_name_to_id},
+    wpyTalkNamespaces: {talk_namespaces},
     wpyGroups: {list(settings.GROUPS.keys())},
     wpyGroupNames: {[g.label for g in settings.GROUPS.values()]},
     wpyUrlPath: "{url_path}",

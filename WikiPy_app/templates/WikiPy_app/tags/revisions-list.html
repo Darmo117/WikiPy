@@ -1,15 +1,14 @@
 {% load wpy_tags %}
 
-<!-- TODO move elsewhere
 <div id="wpy-revision-tags-legend-box" class="card">
   <div class="card-header">
     <a data-toggle="collapse" href="#wpy-revision-collapse-body" aria-expanded="true"
-       aria-controls="wpy-revision-collapse-body" id="wpy-revision-collapse-title">
+       aria-controls="wpy-revision-collapse-body" id="wpy-revision-collapse-title" class="collapsed">
       {% wpy_translate 'revision.tag_box.title' %}
       <i class="fa fa-chevron-down pull-right"></i>
     </a>
   </div>
-  <div id="wpy-revision-collapse-body" class="collapse show" aria-labelledby="wpy-revision-collapse-title">
+  <div id="wpy-revision-collapse-body" class="collapse" aria-labelledby="wpy-revision-collapse-title">
     <div class="card-body">
       <ul class="list-unstyled">
         <li>{% wpy_revision_tags None get_tag='new' %} - {% wpy_translate 'tag.page_creation.tooltip' %}</li>
@@ -20,7 +19,8 @@
       </ul>
     </div>
   </div>
-</div>-->
+</div>
+
 {% wpy_paginator top=True %}
 <table id="wpy-revisions-list" class="table table-striped table-hover text-center">
   <tbody>

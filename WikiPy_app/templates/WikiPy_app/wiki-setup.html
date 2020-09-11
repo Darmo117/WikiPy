@@ -1,26 +1,48 @@
-Enter the information to create the first administrator in the form below.
-<form action="{% url 'page' 'Special:WikiSetup' %}?action=setup" method="post">
-  <label for="wpy-setup-username">Username</label>
-  <input type="text" name="wpy-setup-username" id="wpy-setup-username" required value="{{ wpy_context.setup_username|default_if_none:'' }}"/>
-  {% if wpy_context.setup_invalid_username %}
-    The provided username is invalid!
-  {% endif %}
-  <label for="wpy-setup-password">Password</label>
-  <input type="password" name="wpy-setup-password" id="wpy-setup-password" required/>
-  {% if wpy_context.setup_invalid_password %}
-    The provided password is invalid!
-  {% endif %}
-  <label for="wpy-setup-email">E-mail</label>
-  <input type="text" name="wpy-setup-email" id="wpy-setup-email" required value="{{ wpy_context.setup_email|default_if_none:'' }}"/>
-  {% if wpy_context.setup_invalid_email %}
-    The provided e-mail is invalid!
-  {% endif %}
-  <label for="wpy-setup-secretkey">Secret key</label>
-  <input type="password" name="wpy-setup-secretkey" id="wpy-setup-secretkey" required/>
-  {% if wpy_context.setup_invalid_secret_key %}
-    The provided secret key is invalid!
-  {% endif %}
+<div class="alert alert-primary text-center" role="alert">
+  Enter the information to create the initial administrator and setup the wiki.
+</div>
 
-  <input type="submit" value="Setup">
+<form action="{% url 'page' 'Special:WikiSetup' %}?action=setup" method="post">
+  <div class="form-group">
+    <label for="wpy-setup-username">Username</label>
+    <input type="text" name="wpy-setup-username" id="wpy-setup-username" required
+           value="{{ wpy_context.setup_username|default_if_none:'' }}"
+           class="form-control {% if wpy_context.setup_invalid_username %}is-invalid{% endif %}"/>
+    <div class="wpy-error invalid-feedback">
+      The provided username is invalid!
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="wpy-setup-password">Password</label>
+    <input type="password" name="wpy-setup-password" id="wpy-setup-password" required
+           class="form-control {% if wpy_context.setup_invalid_password %}is-invalid{% endif %}"/>
+    <div class="wpy-error invalid-feedback">
+      The provided password is invalid!
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="wpy-setup-email">E-mail</label>
+    <input type="text" name="wpy-setup-email" id="wpy-setup-email" required
+           value="{{ wpy_context.setup_email|default_if_none:'' }}"
+           class="form-control {% if wpy_context.setup_invalid_email %}is-invalid{% endif %}"/>
+    <div class="wpy-error invalid-feedback">
+      The provided e-mail is invalid!
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="wpy-setup-secretkey">Secret key</label>
+    <input type="password" name="wpy-setup-secretkey" id="wpy-setup-secretkey" required
+           class="form-control {% if wpy_context.setup_invalid_secret_key %}is-invalid{% endif %}"/>
+    <div class="wpy-error invalid-feedback">
+      The provided secret key is invalid!
+    </div>
+  </div>
+
+  <div class="text-center">
+    <input type="submit" class="btn btn-primary" value="Setup">
+  </div>
   {% csrf_token %}
 </form>

@@ -1,3 +1,4 @@
+import dataclasses
 import datetime as dt
 import logging
 import random
@@ -174,12 +175,24 @@ def group_exists(group_id: str) -> bool:
     return group_id in settings.GROUPS
 
 
-def get_param(query_dict, param_name: str, *, expected_type: typ.Type[typ.Any] = str, default=None):
+T = typ.TypeVar('T')
+
+
+def get_param(query_dict, param_name: str, *,
+              is_list: bool = False,
+              expected_type: typ.Callable[[str], T] = str,
+              default: T = None) -> T:
     try:
-        value = query_dict.get(param_name, default)
-        if value == '':
-            raise ValueError('')
-        return expected_type(value) if value is not None else None
+        if not is_list:
+            value = query_dict.get(param_name, default)
+            if value == '':
+                return default
+            return expected_type(value) if value is not None else None
+        else:
+            values = query_dict.getlist(param_name, default)
+            if values:
+                return list(map(expected_type, values))
+            return values
     except ValueError:
         return default
 
@@ -296,8 +309,20 @@ def check_title(page_title: str):
         raise _errors.BadTitleException(m.group(1))
 
 
-def as_url_title(full_page_title: str) -> str:
-    return full_page_title.strip().replace(' ', '_')
+def as_url_title(full_page_title: str, escape: bool = False) -> str:
+    special_chars = [
+        ('%', '%25'),
+        ('&', '%26'),
+        ('?', '%3F'),
+        ('=', '%3D'),
+    ]
+    title = full_page_title.strip().replace(' ', '_')
+
+    if escape:
+        for c1, c2 in special_chars:
+            title = title.replace(c1, c2)
+
+    return title
 
 
 def title_from_url(url_title: str) -> str:
@@ -309,7 +334,6 @@ def title_from_url(url_title: str) -> str:
 #########
 
 
-# TODO check user hide right
 def get_diff(revision_id1: int, revision_id2: int, current_user: models.User, escape_html: bool, keep_lines: int):
     try:
         revision1 = models.PageRevision.objects.get(id=revision_id1)
@@ -355,6 +379,51 @@ def paginate(values: typ.Iterable[typ.Any], url_params: typ.Dict[str, str]) -> t
         number_per_page = 50
 
     return dj_page.Paginator(values, number_per_page), page
+
+
+@dataclasses.dataclass(frozen=True)
+class SearchResult:
+    namespace_id: int
+    title: str
+    date: dt.datetime
+    snapshot: str
+
+
+def search(query: str, current_user: models.User, namespaces: typ.List[int]) \
+        -> typ.List[SearchResult]:
+    results = []
+
+    for ns, title, date, snapshot in _perform_search(query, current_user, namespaces=namespaces):
+        results.append(SearchResult(
+            namespace_id=ns,
+            title=title,
+            date=date,
+            snapshot=snapshot
+        ))
+
+    return results
+
+
+def _perform_search(query: str, current_user: models.User, namespaces: typ.List[int]) \
+        -> typ.List[typ.Tuple[int, str, dt.datetime, str]]:
+    ns_id, title = extract_namespace_and_title(query, ns_as_id=True)
+    if ns_id:
+        ns_list = [ns_id]
+    else:
+        ns_list = namespaces
+    results = []
+
+    for page in models.Page.objects.filter(title__icontains=title, namespace_id__in=ns_list):
+        ns = page.namespace_id
+        title = page.title
+        if current_user.can_read_page(ns, title):
+            revision = page.get_latest_revision()
+            snapshot = revision.content[:200]
+            if snapshot != revision.content:
+                snapshot += "…"
+            results.append((ns, title, revision.date, snapshot))
+
+    return results
 
 
 def get_base_page_namespace(namespace_id: int) -> typ.Optional[int]:
@@ -450,6 +519,11 @@ def submit_page_content(namespace_id: int, title: str, current_user: models.User
         revision = models.PageRevision(page=page, author=current_user.django_user, content=wikicode, comment=comment,
                                        minor=minor, diff_size=size)
         revision.save()
+
+
+####################
+# Helper functions #
+####################
 
 
 def _get_page(namespace_id: int, title: str) -> models.Page:

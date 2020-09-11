@@ -1,0 +1,72 @@
+{% load wpy_tags %}
+{% load wpy_utils %}
+{% load search_tags %}
+
+<form id="wpy-contribs-form" action="{% url 'page' 'Special:Search' %}" method="get">
+  <div class="form-group input-group">
+    <label for="wpy-search-form-query" class="sr-only">
+      {% wpy_translate 'special.search.form.query.label' %}
+    </label>
+    <input type="search" id="wpy-search-form-query" name="query" class="form-control"
+           value="{{ wpy_context.search_query }}"/>
+    <div class="input-group-append">
+      <button type="submit" id="wpy-search-form-submit" class="btn btn-primary">
+        <i class="fa fa-search"></i> {% wpy_translate 'special.search.form.submit.label' %}
+      </button>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="wpy-search-form-namespaces">{% wpy_translate 'special.search.form.namespaces.label' %}</label>
+    <div class="row">
+      <div class="col">
+        <select id="wpy-search-form-namespaces" name="namespaces" class="form-control" multiple
+                data-role="tagsinput"></select>
+        <input type="hidden" id="wpy-search-form-query-namespaces"
+               value="{{ wpy_context.search_namespace_ids|join:',' }}"/>
+      </div>
+      <div class="col">
+        <div class="form-check">
+          <input id="wpy-search-form-defaultns" type="checkbox"
+                 class="form-check-input"/>
+          <label for="wpy-search-form-defaultns" class="form-check-label">
+            {% wpy_translate 'special.search.form.default_ns_chk.label' %}
+          </label>
+        </div>
+
+        <div class="form-check">
+          <input id="wpy-search-form-talkns" type="checkbox" class="form-check-input"/>
+          <label for="wpy-search-form-talkns" class="form-check-label">
+            {% wpy_translate 'special.search.form.talk_ns_chk.label' %}
+          </label>
+        </div>
+
+        <div class="form-check">
+          <input id="wpy-search-form-helpns" type="checkbox" class="form-check-input"/>
+          <label for="wpy-search-form-helpns" class="form-check-label">
+            {% wpy_translate 'special.search.form.help_ns_chk.label' %}
+          </label>
+        </div>
+
+        <div class="form-check">
+          <input id="wpy-search-form-allns" type="checkbox" class="form-check-input"/>
+          <label for="wpy-search-form-allns" class="form-check-label">
+            {% wpy_translate 'special.search.form.all_ns_chk.label' %}
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<hr/>
+
+{% if wpy_context.search_query %}
+  {% if wpy_context.search_results_found %}
+    {% search_results %}
+  {% else %}
+    <div id="wpy-contributions-noresult" class="alert alert-info text-center" role="alert">
+      {% wpy_translate 'error.no_results' %}
+    </div>
+  {% endif %}
+{% endif %}

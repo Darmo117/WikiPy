@@ -119,6 +119,11 @@ wpy_settings.init(BASE_DIR)
 LANGUAGE_CODE = wpy_settings.LANGUAGE_CODE
 TIME_ZONE = wpy_settings.TIME_ZONE
 ALLOWED_HOSTS = wpy_settings.ALLOWED_HOSTS
+EMAIL_HOST_USER = wpy_settings.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = wpy_settings.EMAIL_HOST_PASSWORD
+
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/

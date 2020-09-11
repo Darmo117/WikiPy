@@ -1,4 +1,6 @@
+{% load wpy_tags %}
 <nav>
+  <div class="text-center">{% wpy_translate 'pagination.count' start=start_index end=end_index total=total %}</div>
   <div class="btn-toolbar justify-content-center" role="toolbar">
     <div class="btn-group mr-2" role="group">
       {% for nb in numbers %}

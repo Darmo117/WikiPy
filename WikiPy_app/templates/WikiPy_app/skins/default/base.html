@@ -14,17 +14,19 @@
       </button>
 
       <div class="collapse navbar-collapse" id="wpy-navbar-content">
-        <div id="wpy-search-bar" class="input-group mx-auto">
+        <form id="wpy-header-search-form" class="input-group mx-auto"
+              action="{% url 'page' 'Special:Search' %}" method="get">
           {% wpy_translate 'header.search.input.placeholder' project_name=wpy_context.project_name as placeholder %}
-          <input type="search" class="form-control" placeholder="{{ placeholder }}" aria-label="{{ placeholder }}"
-                 aria-describedby="wpy-button-search">
+          <input type="search" class="form-control" name="query" placeholder="{{ placeholder }}"
+                 aria-label="{{ placeholder }}" aria-describedby="wpy-header-search-button" accesskey="f">
           <div class="input-group-append">
-            <button class="btn btn-outline-light" type="button" id="wpy-button-search"
+            <button class="btn btn-outline-light" type="submit" id="wpy-header-search-button"
                     title="{% wpy_translate 'header.search.button.tooltip' %}">
               <i class="fas fa-search"></i> {% wpy_translate 'header.search.button.label' %}
             </button>
           </div>
-        </div>
+          <input type="hidden" name="search_bar" value="1"/>
+        </form>
         <ul class="navbar-nav ml-auto">
           {% if wpy_context.user.is_logged_in %}
             <li class="nav-item dropdown">
@@ -35,6 +37,7 @@
               <div class="dropdown-menu dropdown-menu-right" aria-labelledby="username-dropdown">
                 {% wpy_header_link link_type='user_page' css_classes='dropdown-item' %}
                 {% wpy_header_link link_type='user_talk' css_classes='dropdown-item' %}
+                {% wpy_header_link link_type='special' special_page_id='contributions' special_page_subtitle=wpy_context.user.username css_classes='dropdown-item' %}
                 <div class="dropdown-divider"></div>
                 {% wpy_header_link link_type='special' special_page_id='logout' add_return_to=True css_classes='dropdown-item' %}
               </div>
@@ -85,6 +88,9 @@
         {% endif %}
       {% elif wpy_context.user_can_edit %}
         <li class="nav-item">{% wpy_header_link link_type='create' css_classes='nav-link' %}</li>
+      {% endif %}
+      {% if wpy_context.namespace_id == 6 %}
+        <li class="nav-item">{% wpy_header_link link_type='special' special_page_id='contributions' special_page_subtitle=wpy_context.page_title no_access_key=True css_classes='nav-link' %}</li>
       {% endif %}
     </ul>
   {% endif %}

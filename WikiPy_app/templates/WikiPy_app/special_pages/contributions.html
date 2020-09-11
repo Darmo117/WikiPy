@@ -1,7 +1,10 @@
 {% load wpy_tags %}
 
 {% if wpy_context.contribs_target_username %}
-  <span class="wpy-contributions-userlink">{% wpy_user_link wpy_context.contribs_target_username full=True %}</span>
+  <div class="text-center">
+    <span class="wpy-contributions-userlink">{% wpy_user_link wpy_context.contribs_target_username full=True %}</span>
+  </div>
+  <hr/>
 {% endif %}
 
 <form id="wpy-contribs-form" method="get">
@@ -80,7 +83,7 @@
   </div>
 
   <div class="text-center">
-    <input type="submit" id="wpy-diff-form-submit" class="btn btn-primary"
+    <input type="submit" id="wpy-contribs-form-submit" class="btn btn-primary"
            value="{% wpy_translate 'special.contributions.form.submit.label' %}"/>
   </div>
 </form>

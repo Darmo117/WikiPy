@@ -8,14 +8,18 @@ def load_skin(settings):
         def __init__(self):
             super().__init__('default', 'Default Skin', settings)
 
-        def _format_link(self, api, url: str, text: str, tooltip: str, page_exists: bool, css_classes: typ.List[str]):
+        def _format_link(self, api, url: str, text: str, tooltip: str, page_exists: bool, css_classes: typ.List[str],
+                         access_key: str = None):
             if not page_exists:
                 css_classes += ['wpy-redlink']
-            attributes = ''
+            attributes = []
             if 'disabled' in css_classes:
-                attributes = 'aria-disabled="true"'
+                attributes.append('aria-disabled="true"')
                 url = ''
-            return f'<a href="{url}" class="{" ".join(css_classes)}" title="{tooltip}" {attributes}>{text}</a>'
+            if access_key:
+                attributes.append(f'accesskey="{access_key}"')
+            return f'<a href="{url}" class="{" ".join(css_classes)}" title="{tooltip}" ' \
+                   f'{" ".join(attributes)}>{text}</a>'
 
         def _render_wikicode_impl(self, api, parsed_wikicode) -> str:
             """

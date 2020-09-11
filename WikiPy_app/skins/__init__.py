@@ -23,7 +23,7 @@ class Skin(_abc.ABC):
 
     def format_internal_link(self, api, current_page_title: str, page_title: str, text: str = None,
                              tooltip: str = None, anchor: str = None, no_red_link: bool = False,
-                             css_classes: _typ.List[str] = None, **url_params):
+                             css_classes: _typ.List[str] = None, access_key: str = None, **url_params):
         ns_id, title = api.extract_namespace_and_title(page_title, ns_as_id=True)
         page_exists = no_red_link or api.page_exists(ns_id, title)
         url = dj_urls.reverse('page', kwargs={'raw_page_title': api.as_url_title(page_title)})
@@ -45,10 +45,11 @@ class Skin(_abc.ABC):
             paren = self._settings.i18n.trans('link.redlink.tooltip')
             link_tooltip += f' ({paren})'
 
-        return self._format_link(api, url, link_text, link_tooltip, page_exists, css_classes or [])
+        return self._format_link(api, url, link_text, link_tooltip, page_exists, css_classes or [], access_key)
 
     @_abc.abstractmethod
-    def _format_link(self, api, url: str, text: str, tooltip: str, page_exists: bool, css_classes: _typ.List[str]):
+    def _format_link(self, api, url: str, text: str, tooltip: str, page_exists: bool, css_classes: _typ.List[str],
+                     access_key: str = None):
         pass
 
     def render_wikicode(self, api, parsed_wikicode, disable_comment: bool = False) -> str:

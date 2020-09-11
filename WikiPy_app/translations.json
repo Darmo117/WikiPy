@@ -122,14 +122,15 @@
     },
     "main_page": {
       "tooltip": "Go to main page"
-    },
-    "pagination": {
-      "first": "First $nb_per_page",
-      "previous": "Previous $nb_per_page",
-      "next": "Next $nb_per_page",
-      "last": "Last $nb_per_page",
-      "position": "Page $page of $total"
     }
+  },
+  "pagination": {
+    "first": "First $nb_per_page",
+    "previous": "Previous $nb_per_page",
+    "next": "Next $nb_per_page",
+    "last": "Last $nb_per_page",
+    "position": "Page $page of $total",
+    "count": "Results <strong>$start</strong> to <strong>$end</strong> of <strong>$total</strong>"
   },
   "revisions_table": {
     "header": {
@@ -169,7 +170,7 @@
         "label": "Edit zone:"
       },
       "revision_comment": {
-        "label": "Comment:",
+        "label": "Comment",
         "tooltip": "Enter a short summary"
       },
       "minor_chk": {
@@ -323,6 +324,32 @@
     },
     "empty_page": {
       "notice": "This page is left (almost) empty on purpose."
+    },
+    "search": {
+      "title_results": "Search results for “$query”",
+      "form": {
+        "query": {
+          "label": "Query"
+        },
+        "submit": {
+          "label": "Search"
+        },
+        "namespaces": {
+          "label": "Namespaces"
+        },
+        "default_ns_chk": {
+          "label": "Default"
+        },
+        "talk_ns_chk": {
+          "label": "Talk pages"
+        },
+        "help_ns_chk": {
+          "label": "General help"
+        },
+        "all_ns_chk": {
+          "label": "All namespaces"
+        }
+      }
     }
   }
 }
