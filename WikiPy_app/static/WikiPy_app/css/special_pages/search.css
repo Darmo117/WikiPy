@@ -1,0 +1,7 @@
+.wpy-search-result:first-child {
+  margin-top: 10px;
+}
+
+.wpy-search-result {
+  margin-bottom: 10px;
+}

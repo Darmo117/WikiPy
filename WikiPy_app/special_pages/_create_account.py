@@ -1,100 +1,79 @@
 import dataclasses
 import typing as typ
 
+import django.core.handlers.wsgi as dj_wsgi
 import django.utils.safestring as dj_safe
 
-from . import SpecialPage, RedirectPageContext
-from .. import page_context
+from . import SpecialPage, ReturnToPageContext, CONNECTION_CAT
+from .. import page_context, api, forms, settings, util
 
 
-def load_special_page(settings) -> SpecialPage:
-    @dataclasses.dataclass(init=False)
-    class CreateAccountPageContext(page_context.PageContext):
-        create_account_notice: str
-        create_account_username: typ.Optional[str]
-        create_account_email: typ.Optional[str]
-        create_account_invalid_username: bool
-        create_account_duplicate_username: bool
-        create_account_invalid_password: bool
-        create_account_invalid_email: bool
+@dataclasses.dataclass(init=False)
+class CreateAccountPageContext(page_context.PageContext):
+    create_account_notice: str
+    create_account_form: forms.SignUpForm
+    create_account_form_global_errors: typ.List[str]
 
-        def __init__(self, context: page_context.PageContext, /, create_account_notice: str,
-                     create_account_username: typ.Optional[str], create_account_email: typ.Optional[str],
-                     create_account_invalid_username: bool, create_account_duplicate_username: bool,
-                     create_account_invalid_password: bool, create_account_invalid_email: bool):
-            self._context = context
-            self.create_account_notice = create_account_notice
-            self.create_account_username = create_account_username
-            self.create_account_email = create_account_email
-            self.create_account_invalid_username = create_account_invalid_username
-            self.create_account_duplicate_username = create_account_duplicate_username
-            self.create_account_invalid_password = create_account_invalid_password
-            self.create_account_invalid_email = create_account_invalid_email
+    def __init__(self, context: page_context.PageContext, /, create_account_notice: str,
+                 form: forms.SignUpForm = None, global_errors: typ.List[str] = None):
+        self._context = context
+        self.create_account_notice = create_account_notice
+        self.create_account_form = form
+        self.create_account_form_global_errors = global_errors
 
-    class CreateAccountPage(SpecialPage):
-        def __init__(self):
-            super().__init__(settings, 'create_account', 'Create account')
 
-        def _get_data_impl(self, api, sub_title, base_context, request, **_):
-            get_params = request.GET
+class CreateAccountPage(SpecialPage):
+    def __init__(self):
+        super().__init__('create_account', 'Create account', category=CONNECTION_CAT, has_form=True)
 
-            notice = dj_safe.mark_safe(api.render_wikicode(
-                api.get_page_content(4, 'Message-CreateAccountDisclaimer')[0],
-                base_context.skin_name,
-                disable_comment=True
-            ))
+    def _get_data_impl(self, sub_title, base_context, request, **_):
+        get_params = request.GET
+        return_to = util.get_param(get_params, 'return_to')
+        return_to_path = util.get_param(get_params, 'is_path', default=False, expected_type=bool)
 
-            context = base_context
-            kwargs = {
-                'create_account_username': None,
-                'create_account_email': None,
-                'create_account_invalid_username': False,
-                'create_account_duplicate_username': False,
-                'create_account_invalid_password': False,
-                'create_account_invalid_email': False,
-            }
-            if api.get_param(get_params, 'action') == 'create_account':
-                kwargs, redirect_to = self.__create_account(api, request)
-                if redirect_to:
-                    context = RedirectPageContext(context, to=redirect_to)
+        context = ReturnToPageContext(base_context, to=return_to, is_path=return_to_path)
 
-            context = CreateAccountPageContext(context, create_account_notice=notice, **kwargs)
+        notice = dj_safe.mark_safe(api.render_wikicode(
+            api.get_message('CreateAccountDisclaimer')[0],
+            base_context
+        ))
 
-            return context, [], None
+        if request.method == 'POST':
+            context = self.__create_account(context, request, notice)
+        else:
+            context = self.__get_form(context, request, notice)
 
-        def __create_account(self, api, request) -> typ.Tuple[dict, str]:
-            main_page_title = api.as_url_title(api.get_full_page_title(
-                self._settings.MAIN_PAGE_NAMESPACE_ID,
-                self._settings.MAIN_PAGE_TITLE
-            ))
-            post_params = request.POST
-            username = api.get_param(post_params, 'wpy-createaccount-username')
-            password = api.get_param(post_params, 'wpy-createaccount-password')
-            email = api.get_param(post_params, 'wpy-createaccount-email')
+        return context, [], None
 
-            context = {
-                'create_account_username': username,
-                'create_account_email': email,
-                'create_account_invalid_username': False,
-                'create_account_duplicate_username': False,
-                'create_account_invalid_password': False,
-                'create_account_invalid_email': False,
-            }
-            redirect_to = None
+    @staticmethod
+    def __get_form(base_context: page_context.PageContext, request: dj_wsgi.WSGIRequest, notice: str) \
+            -> page_context.PageContext:
+        return CreateAccountPageContext(base_context, create_account_notice=notice,
+                                        form=forms.SignUpForm(initial=request.GET))
 
-            try:
-                api.create_user(username, password=password, email=email)
-            except api.InvalidUsernameError:
-                context['create_account_invalid_username'] = True
-            except api.DuplicateUsernameError:
-                context['create_account_duplicate_username'] = True
-            except api.InvalidPasswordError:
-                context['create_account_invalid_password'] = True
-            except api.InvalidEmailError:
-                context['create_account_invalid_email'] = True
+    def __create_account(self, context: page_context.PageContext, request: dj_wsgi.WSGIRequest, notice: str) \
+            -> CreateAccountPageContext:
+        form = forms.SignUpForm(request.POST)
+        errors = []
+
+        if form.is_valid():
+            if form.passwords_match():
+                username = form.cleaned_data['username']
+                password = form.cleaned_data['password']
+                email = form.cleaned_data['email']
+                try:
+                    api.create_user(username, password=password, email=email)
+                except api.DuplicateUsernameError:
+                    errors.append('duplicate_username')
+                else:
+                    main_page_title = api.get_full_page_title(settings.MAIN_PAGE_NAMESPACE_ID, settings.MAIN_PAGE_TITLE)
+                    return_to, is_path = self._get_return_to_path(form, main_page_title)
+                    context = page_context.RedirectPageContext(context, to=return_to, is_path=is_path)
             else:
-                redirect_to = main_page_title
+                errors.append('passwords_mismatch')
 
-            return context, redirect_to
+        return CreateAccountPageContext(context, create_account_notice=notice, form=form, global_errors=errors)
 
+
+def load_special_page() -> SpecialPage:
     return CreateAccountPage()

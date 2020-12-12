@@ -3,9 +3,11 @@
 {% wpy_paginator top=True %}
 <ul class="list-unstyled">
   {% for result_link, result_date, result_snapshot in results %}
-    <li>
-      <div class="wpy-search-result">
-        {{ result_link }} <span class="wpy-search-result-date">({{ result_date }})</span><br/>
+    <li class="wpy-search-result card">
+      <div class="card-header">
+        {{ result_link }} <span class="wpy-search-result-date pull-right text-muted">{{ result_date }}</span>
+      </div>
+      <div class="card-body">
         <span class="wpy-search-result-snapshot">{{ result_snapshot }}</span>
       </div>
     </li>

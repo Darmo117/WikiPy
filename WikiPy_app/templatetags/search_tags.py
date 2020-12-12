@@ -14,12 +14,12 @@ def search_results(context: page_context.TemplateContext):
     page = wpy_context.page
 
     results = []
-    for result in paginator.get_page(page):
+    for result in paginator.get_page_context(page):
         link = dj_safe.mark_safe(wpy_tags.wpy_inner_link(context, result.namespace_id, result.title))
         results.append((link, result.date, result.snapshot))
 
     return {
         'wpy_context': wpy_context,
         'results': results,
-        'url_params': context.get('request').GET,
+        'url_params': context.request.GET,
     }

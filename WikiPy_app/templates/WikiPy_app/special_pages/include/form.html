@@ -1,0 +1,52 @@
+{% load static %}
+{% load wpy_tags %}
+{% load wpy_utils %}
+
+{% with trans_prefix='special.'|add:form.name|replace:'-,_'|add:'.form.' %}
+  {% with form_name=form.name|replace:'-,_'|add:'_form_global_errors' %}
+    {% with global_errors=wpy_context|get_attr:form_name %}
+      {% if global_errors %}
+        <div class="alert alert-danger">
+          <ul class="list-unstyled">
+            {% for error in global_errors %}
+              <li>{% wpy_translate trans_prefix|add:'error.'|add:error %}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    {% endwith %}
+  {% endwith %}
+  <form method="post" id="wpy-{{ form.name }}-form" {% if action %}action="{{ action }}"{% endif %}>
+    {% csrf_token %}
+    {% for field in form %}
+      {% with trans_field_prefix=trans_prefix|add:field.label|add:'.' %}
+        {% if field.is_hidden %}
+          {{ field }}
+        {% else %}
+          <div class="form-group" id="wpy-{{ form.name }}-form-field-{{ field.label }}">
+            <label for="{{ field.id_for_label }}">
+              {% wpy_translate trans_field_prefix|add:'label' %}
+            </label>
+            {{ field }}
+            {% if field.help_text %}
+              <small class="form-text text-muted">
+                {% wpy_translate trans_field_prefix|add:'help' %}
+              </small>
+            {% endif %}
+            {% if field.errors %}
+              <div class="invalid-feedback" style="display: block">
+                {% for error in field.errors.as_data %}
+                  {% wpy_translate trans_field_prefix|add:'error.'|add:error.code %}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endwith %}
+    {% endfor %}
+    <div class="text-center">
+      <input id="wpy-{{ form.name }}-form-submit" type="submit" class="btn btn-primary"
+             value="{% wpy_translate trans_prefix|add:'submit.label' %}"/>
+    </div>
+  </form>
+{% endwith %}

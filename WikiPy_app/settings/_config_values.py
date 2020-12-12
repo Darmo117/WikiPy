@@ -11,7 +11,7 @@ GROUP_ADMINISTRATORS = 'administrators'
 GROUP_BOTS = 'bots'
 GROUP_RIGHTS_MANAGERS = 'rights_managers'
 
-USER_GROUPS_IDS = [
+USER_GROUPS_IDS = (
     GROUP_ALL,
     GROUP_USERS,
     GROUP_EMAIL_CONFIRMED,
@@ -19,7 +19,7 @@ USER_GROUPS_IDS = [
     GROUP_ADMINISTRATORS,
     GROUP_BOTS,
     GROUP_RIGHTS_MANAGERS,
-]
+)
 
 ##########
 # Rights #
@@ -56,3 +56,53 @@ GLOBAL_RIGHTS = (
     RIGHT_EDIT_USERS_GROUPS,
     RIGHT_EDIT_USER_PAGES,
 )
+
+##############
+# Page types #
+##############
+
+PAGE_TYPE_WIKI = 'wiki_page'
+PAGE_TYPE_STYLESHEET = 'css'
+PAGE_TYPE_JAVASCRIPT = 'javascript'
+PAGE_TYPE_MODULE = 'module'
+
+PAGE_TYPES = (
+    PAGE_TYPE_WIKI,
+    PAGE_TYPE_STYLESHEET,
+    PAGE_TYPE_JAVASCRIPT,
+    PAGE_TYPE_MODULE,
+)
+
+##############
+# File types #
+##############
+
+IMAGE_FORMATS = (
+    'jpeg',
+    'jpg',
+    'png',
+    'bmp',
+    'gif',
+    'svg',
+    'tiff',
+)
+
+VIDEO_FORMATS = (
+    'mp4',
+    'ogg',
+    'ogv',
+    'webm',
+)
+
+AUDIO_FORMATS = (
+    'mp3',
+    'ogg',
+    'oga',
+    'mid',
+)
+
+MEDIA_FORMATS = tuple({
+    *IMAGE_FORMATS,
+    *VIDEO_FORMATS,
+    *AUDIO_FORMATS,
+})

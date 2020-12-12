@@ -1,17 +1,46 @@
-import abc as _abc
-import importlib as _importlib
-import logging as _logging
-import time as _time
-import typing as _typ
+import abc
+import collections as coll
+import importlib
+import logging
+import time
+import typing as typ
 
 import django.urls as dj_urls
+import django.utils.safestring as dj_safe
+
+from .. import api, settings
+
+MenuItem = coll.namedtuple('MenuItem', ['page_id', 'requires_page_title', 'requires_page_exists'])
 
 
-class Skin(_abc.ABC):
-    def __init__(self, name: str, label: str, settings):
+class PageTemplate:
+    def __init__(self):
+        with open('', mode='r', encoding='UTF-8') as f:
+            pass
+        self.__menus_links = {
+        }
+
+    def get_menu_links(self, menu_id: str, context):
+        """
+        Returns the items for a specific menu ID.
+        Items will be filtered using the given page context.
+
+        :param menu_id: ID of the menu to return the items of.
+        :param context: Context of the page being rendered.
+        :type context: WikiPy_app.page_context.PageContext
+        :return: The list of items for the given menu ID.
+        """
+        pass
+
+
+_PAGE_TEMPLATE = PageTemplate()
+
+
+class Skin(abc.ABC):
+    def __init__(self, name: str, label: str, **body_attrs: str):
         self.__name = name
         self.__label = label
-        self._settings = settings
+        self.__body_attrs = dict(body_attrs)
 
     @property
     def name(self) -> str:
@@ -21,17 +50,34 @@ class Skin(_abc.ABC):
     def label(self) -> str:
         return self.__label
 
-    def format_internal_link(self, api, current_page_title: str, page_title: str, text: str = None,
-                             tooltip: str = None, anchor: str = None, no_red_link: bool = False,
-                             css_classes: _typ.List[str] = None, access_key: str = None, **url_params):
+    @property
+    def body_attrs(self):
+        return dj_safe.mark_safe(' '.join(map(lambda e: f'{e[0]}="{e[1]}"', self.__body_attrs.items())))
+
+    def get_menu_items(self, menu_id: str, context):
+        """
+        Returns the items for a specific menu ID.
+        Items will be filtered using the given page context.
+
+        :param menu_id: ID of the menu to return the items of.
+        :param context: Context of the page being rendered.
+        :type context: WikiPy_app.page_context.PageContext
+        :return: The list of items for the given menu ID.
+        """
+        return _PAGE_TEMPLATE.get_menu_links(menu_id, context)
+
+    def format_internal_link(self, language, current_page_title: str, page_title: str,
+                             text: str = None, tooltip: str = None, anchor: str = None, no_red_link: bool = False,
+                             css_classes: typ.List[str] = None, access_key: str = None, only_url: bool = False,
+                             **url_params) -> str:
         ns_id, title = api.extract_namespace_and_title(page_title, ns_as_id=True)
         page_exists = no_red_link or api.page_exists(ns_id, title)
-        url = dj_urls.reverse('page', kwargs={'raw_page_title': api.as_url_title(page_title)})
+        url = dj_urls.reverse('wikipy:page', kwargs={'raw_page_title': api.as_url_title(page_title)})
         link_text = text or page_title
-        link_tooltip = tooltip or link_text
+        link_tooltip = tooltip or page_title
 
         if current_page_title == page_title and not anchor and len(url_params) == 0:
-            return f'<b class="wpy-self-link">{link_text}</b>'
+            return f'<strong class="wpy-self-link">{link_text}</strong>' if not only_url else ''
         elif page_exists:
             if url_params == {}:
                 if anchor:
@@ -40,31 +86,39 @@ class Skin(_abc.ABC):
                 params = [f'{p}={v}' for p, v in url_params.items() if v is not None]
                 if params:
                     url += '?' + '&'.join(params)
-        elif ns_id != -1:
+        elif ns_id != settings.SPECIAL_NS.id:
             url += '?action=edit&redlink=1'
-            paren = self._settings.i18n.trans('link.redlink.tooltip')
+            paren = language.translate('link.redlink.tooltip')
             link_tooltip += f' ({paren})'
 
-        return self._format_link(api, url, link_text, link_tooltip, page_exists, css_classes or [], access_key)
+        if not only_url:
+            return self._format_link(url, link_text, link_tooltip, page_exists, css_classes or [], access_key)
+        else:
+            return url
 
-    @_abc.abstractmethod
-    def _format_link(self, api, url: str, text: str, tooltip: str, page_exists: bool, css_classes: _typ.List[str],
-                     access_key: str = None):
+    def format_external_link(self, url: str, text: str = None, css_classes: typ.List[str] = None) -> str:
+        return self._format_link(url, text or url, tooltip=url, page_exists=True, css_classes=css_classes or [],
+                                 external=True)
+
+    @abc.abstractmethod
+    def _format_link(self, url: str, text: str, tooltip: str, page_exists: bool, css_classes: typ.List[str],
+                     access_key: str = None, external: bool = False) -> str:
         pass
 
-    def render_wikicode(self, api, parsed_wikicode, disable_comment: bool = False) -> str:
+    def render_wikicode(self, parsed_wikicode, context, enable_comment: bool = False) -> str:
         """
         Renders the given parsed wikicode.
-        :param api: The "WikiPy_app.api" module.
         :param parsed_wikicode: The parsed wikicode to render.
-        :type parsed_wikicode: django_wiki.api.ParsedWikicode
-        :param disable_comment: If true, the generation comment will not be appended to the rendered HTML.
-        :return: The parsed wikicode.
+        :type parsed_wikicode: WikiPy_app.parser.WikicodeNode
+        :param context: Context of the page being rendered.
+        :type context: WikiPy_app.page_context.PageContext
+        :param enable_comment: If true, the generation comment will be appended to the rendered HTML.
+        :return: The wikicode rendered as HTML.
         """
-        start = _time.time()
-        render = self._render_wikicode_impl(api, parsed_wikicode)
-        total = (_time.time() - start) * 1000
-        if not disable_comment:
+        start = time.time()
+        render = parsed_wikicode.render(self, context)
+        total = (time.time() - start) * 1000
+        if enable_comment:
             comment = f"""
 <!--
 Page generated by WikiPy in {total:0.4}\u00a0ms.
@@ -75,29 +129,18 @@ Skin: {self.label}
 
         return render + comment
 
-    @_abc.abstractmethod
-    def _render_wikicode_impl(self, api, parsed_wikicode) -> str:
-        """
-        Renders the given parsed wikicode.
-
-        :param parsed_wikicode: The parsed wikicode to render.
-        :type parsed_wikicode: django_wiki.api.ParsedWikicode
-        :return: The parsed wikicode.
-        """
-        pass
-
 
 _LOADED_SKINS = {}
 
 
-def load_skin(name: str, settings):
+def load_skin(name: str):
     try:
-        module = _importlib.import_module('._' + name, package=__name__)
+        module = importlib.import_module('._' + name, package=__name__)
         # noinspection PyUnresolvedReferences
-        skin = module.load_skin(settings)
+        skin = module.load_skin()
         _LOADED_SKINS[skin.name] = skin
     except ModuleNotFoundError:
-        _logging.warning(f'unknown skin name "{name}", ignored')
+        logging.warning(f'unknown skin name "{name}", ignored')
 
 
 def get_skin(name: str) -> Skin:
@@ -106,5 +149,13 @@ def get_skin(name: str) -> Skin:
     return _LOADED_SKINS['default']
 
 
-def get_loaded_skins_names() -> _typ.List[str]:
+def get_loaded_skins_names() -> typ.List[str]:
     return sorted(_LOADED_SKINS.keys())
+
+
+__all__ = [
+    'Skin',
+    'load_skin',
+    'get_skin',
+    'get_loaded_skins_names',
+]

@@ -10,6 +10,30 @@ a.wpy-redlink {
   font-weight: bold;
 }
 
+/**************
+ * Formatting *
+ **************/
+
+.text-bold {
+  font-weight: bold;
+}
+
+.text-italic {
+  font-style: italic;
+}
+
+.text-underlined {
+  text-decoration: underline;
+}
+
+.text-overlined {
+  text-decoration: overline;
+}
+
+.text-stroke {
+  text-decoration: line-through;
+}
+
 /******************
  * Revisions list *
  ******************/
@@ -30,6 +54,7 @@ a.wpy-redlink {
 #wpy-revision-tags-legend-box {
   float: right;
   width: 400px;
+  margin-bottom: 10px;
 }
 
 #wpy-revision-tags-legend-box .card-header .fa {
@@ -38,6 +63,26 @@ a.wpy-redlink {
 
 #wpy-revision-tags-legend-box .card-header .collapsed .fa {
   transform: rotate(90deg);
+}
+
+/*********
+ * Media *
+ *********/
+
+figure {
+  display: inline-block;
+}
+
+figure > figcaption > a[role="button"] {
+  font-size: 120%;
+}
+
+/*****************
+ * Parser output *
+ *****************/
+
+.wpy-parser-error {
+  color: red;
 }
 
 /*********

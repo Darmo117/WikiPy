@@ -3,13 +3,13 @@ from __future__ import annotations
 import typing as typ
 
 from ._config_values import *
+from ._i18n import Language
 
 
 class UserGroup:
-    def __init__(self, name: str, label: str, hide_rc: bool, needs_validation: bool, global_rights: typ.Iterable[str],
+    def __init__(self, name: str, hide_rc: bool, needs_validation: bool, global_rights: typ.Iterable[str],
                  namespace_edit_rights: typ.Dict[int, typ.Iterable[str]], editable: bool):
         self.__name = name
-        self.__label = label
         self.__hide_rc = hide_rc
         self.__needs_validation = needs_validation
         self.__namespace_edit_rights = {}
@@ -35,9 +35,8 @@ class UserGroup:
     def name(self) -> str:
         return self.__name
 
-    @property
-    def label(self):
-        return self.__label
+    def label(self, language: Language):
+        return language.translate(f'group.{self.__name}')
 
     @property
     def editable(self):
@@ -82,5 +81,5 @@ class UserGroup:
         return RIGHT_EDIT_PAGES in self.__namespace_edit_rights[namespace_id]
 
     def __repr__(self):
-        return f'{self.__name}[label={self.__label},hide_rc={self.__hide_rc},global_rights={self.__global_rights},' \
+        return f'{self.__name}[hide_rc={self.__hide_rc},global_rights={self.__global_rights},' \
                f'namespace_rights={self.__namespace_edit_rights}]'

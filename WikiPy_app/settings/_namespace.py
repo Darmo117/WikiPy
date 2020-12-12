@@ -2,10 +2,10 @@ import typing as typ
 
 
 class Namespace:
-    def __init__(self, ident: int, name: str, is_talk: bool, local_name: str = None, alias: str = None):
+    def __init__(self, ident: int, canonical_name: str, is_talk: bool, name: str = None, alias: str = None):
         self.__id = ident
+        self.__canonical_name = canonical_name
         self.__name = name
-        self.__local_name = local_name
         self.__alias = alias
         self.__is_talk = is_talk
 
@@ -14,12 +14,12 @@ class Namespace:
         return self.__id
 
     @property
-    def name(self) -> str:
-        return self.__name
+    def canonical_name(self) -> str:
+        return self.__canonical_name
 
     @property
-    def local_name(self) -> typ.Optional[str]:
-        return self.__local_name
+    def name(self) -> typ.Optional[str]:
+        return self.__name
 
     @property
     def alias(self) -> typ.Optional[str]:
@@ -29,14 +29,18 @@ class Namespace:
     def is_talk(self):
         return self.__is_talk
 
-    def get_name(self, local: bool) -> str:
-        if local and self.__local_name is not None:
-            return self.__local_name
+    def get_name(self, local: bool, as_url: bool = False) -> str:
+        if local and self.__name is not None:
+            name = self.__name
         else:
-            return self.__name
+            name = self.__canonical_name
+        if as_url:
+            from .. import api
+            name = api.as_url_title(name)
+        return name
 
     def matches_name(self, name: str) -> bool:
         name = name.lower()
-        return (self.__name.lower() == name
-                or self.__local_name is not None and self.__local_name.lower() == name
+        return (self.__canonical_name.lower() == name
+                or self.__name is not None and self.__name.lower() == name
                 or self.__alias is not None and self.__alias.lower() == name)

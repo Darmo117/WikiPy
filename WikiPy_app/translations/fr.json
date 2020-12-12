@@ -1,0 +1,547 @@
+{
+  "code": "fr",
+  "name": "Français",
+  "writing_direction": "ltr",
+  "main_namespace_name": "Principal",
+  "month_names": [
+    ["Janvier", "Jan"],
+    ["Février", "Fév"],
+    ["Mars", "Mar"],
+    ["Avril", "Avr"],
+    ["Mai", "Mai"],
+    ["Juin", "Jui"],
+    ["Juillet", "Juil"],
+    ["Aout", "Aou"],
+    ["Septembre", "Sep"],
+    ["Octobre", "Oct"],
+    ["Novembre", "Nov"],
+    ["Décembre", "Déc"]
+  ],
+  "day_names": [
+    "Lundi",
+    "Mardi",
+    "Mercredi",
+    "Jeudi",
+    "Vendredi",
+    "Samedi",
+    "Dimanche"
+  ],
+  "datetime_formats": [
+    "%B %d, %Y à %H:%M",
+    "%d %B %Y à %H:%M",
+    "%Y %B %d à %H:%M",
+    "%Y-%m-%dT%H:%M:%S"
+  ],
+  "mappings": {
+    "group": {
+      "all": "Tous",
+      "users": "Utilisateurs/Utilisatrices",
+      "email_confirmed": "Mail confirmé",
+      "autopatrolled": "Autoconfirmé·es",
+      "patrollers": "Patrouilleurs/Patrouilleuses",
+      "administrators": "Administrateurs/Administratrices",
+      "rights_managers": "Gestionnaires de droits",
+      "bots": "Robots"
+    },
+    "header": {
+      "menu_button": "Menu",
+      "search": {
+        "input": {
+          "placeholder": "Chercher une page sur $project_name"
+        },
+        "button": {
+          "label": "Rechercher",
+          "tooltip": "Accéder à une page du même nom si elle existe"
+        }
+      },
+      "language_select": {
+        "tooltip": "Sélecteur de langue"
+      }
+    },
+    "title": {
+      "edit": "Modification de «\u00a0$page_title\u00a0»",
+      "create": "Création de «\u00a0$page_title\u00a0»",
+      "source": "Sources de «\u00a0$page_title\u00a0»",
+      "history": "Historique des versions de «\u00a0$page_title\u00a0»"
+    },
+    "menu": {
+      "navigation": "Navigation",
+      "wiki_tools": "Outils wiki",
+      "page_tools": "Outils de page",
+      "more_tools": "Plus d’outils",
+      "categories": "Catégories"
+    },
+    "media": {
+      "button": {
+        "size_up": {
+          "tooltip": "Agrandir"
+        }
+      },
+      "format": {
+        "not_supported": "Le format multimédia «\u00a0$media_type\u00a0» n’est pas supporté.",
+        "video": {
+          "not_supported": "Votre navigateur ne supporte pas les vidéos intégrées."
+        },
+        "audio": {
+          "not_supported": "Votre navigateur ne supporte pas les fichiers audio intégrés."
+        }
+      }
+    },
+    "redirection_info": {
+      "is_redirection": "Page de redirection",
+      "redirected_from": "Redirigé depuis $link"
+    },
+    "tag": {
+      "page_size": {
+        "label": "$content_size\u00a0o"
+      },
+      "diff_size": {
+        "tooltip": "$content_size octets après modificationn"
+      },
+      "page_creation": {
+        "label": "N",
+        "tooltip": "Cette modification a créé une nouvelle page."
+      },
+      "minor_edit": {
+        "label": "m",
+        "tooltip": "Cette modification est mineure."
+      },
+      "bot_edit": {
+        "label": "b",
+        "tooltip": "Cette modification a été effectuée par un robot."
+      },
+      "current_revision": {
+        "label": "c",
+        "tooltip": "Version courante de la page."
+      }
+    },
+    "link": {
+      "talk": "discussion",
+      "contributions": "contributions",
+      "uploads": "fichiers mis en ligne",
+      "blocks": "bloquages",
+      "journals": "journaux",
+      "block": "bloquer",
+      "deleted_contributions": "contributions supprimées",
+      "permissions": "permissions",
+      "mass_deletion": "suppression de masse",
+      "difference": {
+        "tooltip": "Comparer avec la version précédente"
+      },
+      "current": {
+        "tooltip": "Comparer avec la version courante"
+      },
+      "history": {
+        "tooltip": "Afficher l’historique"
+      },
+      "show_hide": {
+        "tooltip": "Montrer/cacher"
+      },
+      "edit": {
+        "tooltip": "Modifier la page"
+      },
+      "previous_revision": "← Version précédente",
+      "current_revision": "Version courante",
+      "next_revision": "Version suivante →",
+      "redlink": {
+        "tooltip": "page inexistante"
+      },
+      "menu": {
+        "user_page": {
+          "label": "Ma page",
+          "tooltip": "Votre page utilisateur"
+        },
+        "user_talk": {
+          "label": "Ma page de discussion",
+          "tooltip": "Votre page de discussion"
+        },
+        "read": {
+          "label": "Lire",
+          "tooltip": "Voir le contenu de la page"
+        },
+        "talk": {
+          "label": "Discussion",
+          "tooltip": "Discuter du contenu de la page"
+        },
+        "edit": {
+          "label": "Modifier",
+          "tooltip": "Modifier le contenu de la page"
+        },
+        "create": {
+          "label": "Créer",
+          "tooltip": "Créer la page"
+        },
+        "source": {
+          "label": "Voir les sources",
+          "tooltip": "Voir le wikicode de la page"
+        },
+        "history": {
+          "label": "Historique",
+          "tooltip": "Voir l’historique des versions de la page"
+        },
+        "permalink": {
+          "label": "Lien permanent",
+          "tooltip": "Lien permanent vers cette version de la page"
+        }
+      },
+      "main_page": {
+        "tooltip": "Aller à la page principale"
+      }
+    },
+    "pagination": {
+      "first": "$nb_per_page premiers",
+      "previous": "$nb_per_page précédents",
+      "next": "$nb_per_page suivants",
+      "last": "$nb_per_page derniers",
+      "position": "Page $page sur $total",
+      "count": "Résultat(s) <strong>$start</strong> à <strong>$end</strong> sur <strong>$total</strong>"
+    },
+    "revisions_table": {
+      "header": {
+        "actions": "Actions",
+        "revision": "Version",
+        "page": "Page",
+        "size": "Taille",
+        "size_diff": "Diff",
+        "author": "Auteur/Autrice",
+        "tags": "Tags",
+        "comment": "Commentaire"
+      }
+    },
+    "revision": {
+      "nav_box": {
+        "label": "Version datée du $date par $user_link."
+      },
+      "hidden_revision": {
+        "tooltip": "Cette version est masquée"
+      },
+      "hidden_username": {
+        "label": "Nom d’utilisateur caché",
+        "tooltip": "Ce nom d’utilisateur est masqué"
+      },
+      "hidden_comment": {
+        "tooltip": "Ce commentaire est masqué"
+      },
+      "tag_box": {
+        "title": "Légende des tags",
+        "diff_size_tag": "Indique le nombre d’octets ajoutés/retirés par la modification."
+      }
+    },
+    "form": {
+      "all_namespaces": "Tous",
+      "edit": {
+        "revision_warning": "<strong>Attention\u00a0: vous êtes actuellement en train de modifier une ancienne version de cette page.</strong> Si vous publiez vos modifications, toutes celles effectuées depuis cette version seront perdues.",
+        "content": {
+          "label": "Zone de modification\u00a0:"
+        },
+        "comment": {
+          "label": "Commentaire",
+          "tooltip": "Entrez un court résumé"
+        },
+        "minor_edit": {
+          "label": "Modification mineure",
+          "tooltip": "Marquer cette modification comme mineure"
+        },
+        "follow_page": {
+          "label": "Suivre cette page",
+          "tooltip": "Cliquez pour suivre cette page"
+        },
+        "submit": {
+          "label": "Publier les modifications",
+          "tooltip": "Publier vos modifications"
+        },
+        "preview": {
+          "label": "Prévisualiser",
+          "tooltip": "Merci de prévisualiser vos modifications avant de les publier"
+        },
+        "diff": {
+          "label": "Voir les modifications",
+          "tooltip": "Afficher les modifications que vous avez effectué"
+        },
+        "cancel": {
+          "label": "Annuler",
+          "tooltip": "Annuler toutes vos modifications"
+        }
+      }
+    },
+    "error": {
+      "no_results": "Aucun résultat pour les critères sélectionnés.",
+      "no_history": "Il n’y a pas d’historique des versions pour cette page.",
+      "undefined_revision": "Le numéro de version «\u00a0$revision_id\u00a0» n’existe pas pour cette page."
+    },
+    "special": {
+      "error": {
+        "permission_required": "Vous ne pouvez pas accéder à cette page spéciale car elle nécessite le(s) droit(s) suivant(s)\u00a0: $rights."
+      },
+      "setup": {
+        "display_title": "Configuration du wiki",
+        "notice": "Entrez les informations pour créer le premier administrateur et procéder à la configuration du wiki.",
+        "form": {
+          "error": {
+            "passwords_mismatch": "Les mots de passe ne correspondent pas.",
+            "invalid_secret_key": "Clé secrète invalide."
+          },
+          "username": {
+            "label": "Nom d’utilisateur",
+            "help": "Requis. Caractères non autorisés\u00a0: <em>/</em>, <em>&lt;</em>, <em>></em>, <em>_</em>, <em>#</em>, <em>|</em>, <em>{</em>, <em>}</em>, <em>[</em> et <em>]</em>. Ne peut pas commencer par <em>Anonymous-</em>",
+            "error": {
+              "invalid": "Le nom d’utilisateur renseigné est invalide.",
+              "duplicate": "Le nom d’utilisateur renseigné existe déjà ou ressemble trop à un autre déjà existant."
+            }
+          },
+          "email": {
+            "label": "Adresse mail",
+            "help": "Requise.",
+            "error": "Adresse mail invalide."
+          },
+          "password": {
+            "label": "Mot de passe",
+            "help": "Requis.",
+            "error": "Mot de passe invalide."
+          },
+          "password_confirm": {
+            "label": "Confirmer le mot de passe",
+            "help": "Requis.",
+            "error": "Les mots de passe ne correspondent pas."
+          },
+          "secret_key": {
+            "label": "Clé secrète",
+            "help": "Requise. Située dans le fichier «\u00a0SETUP_SECRET_KEY\u00a0»."
+          },
+          "submit": {
+            "label": "Configurer"
+          }
+        }
+      },
+      "create_account": {
+        "display_title": "Créer un compte",
+        "form": {
+          "error": {
+            "passwords_mismatch": "Les mots de passe ne correspondent pas."
+          },
+          "username": {
+            "label": "Nom d’utilisateur",
+            "help": "Requis. Caractères non autorisés\u00a0: <em>/</em>, <em>&lt;</em>, <em>></em>, <em>_</em>, <em>#</em>, <em>|</em>, <em>{</em>, <em>}</em>, <em>[</em> et <em>]</em>. Ne peut pas commencer par <em>Anonymous-</em>",
+            "error": {
+              "invalid": "Le nom d’utilisateur renseigné est invalide.",
+              "duplicate": "Le nom d’utilisateur renseigné existe déjà ou ressemble trop à un autre déjà existant."
+            }
+          },
+          "email": {
+            "label": "Adresse mail",
+            "help": "Requise.",
+            "error": "Adresse mail invalide."
+          },
+          "password": {
+            "label": "Mot de passe",
+            "help": "Requis.",
+            "error": "Mot de passe invalide."
+          },
+          "password_confirm": {
+            "label": "Confirmer le mot de passe",
+            "help": "Requis.",
+            "error": "Les mots de passe ne correspondent pas."
+          },
+          "submit": {
+            "label": "Créer le compte"
+          }
+        }
+      },
+      "login": {
+        "display_title": "Connexion",
+        "form": {
+          "error": {
+            "invalid_credentials": "Identifiants invalides."
+          },
+          "username": {
+            "label": "Nom d’utilisateur",
+            "help": "Requis.",
+            "error": {
+              "required": "Ce champ est requis.",
+              "not_exists": "Il n’existe pas de compte avec ce nom d’utilisateur."
+            }
+          },
+          "password": {
+            "label": "Mot de passe",
+            "help": "Requis.",
+            "error": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "submit": {
+            "label": "Se connecter"
+          }
+        }
+      },
+      "logout": {
+        "display_title": "Déconnexion",
+        "form": {
+          "submit": {
+            "label": "Se déconnecter"
+          }
+        }
+      },
+      "contributions": {
+        "display_title": "Contributions",
+        "title_user": "Contributions de «\u00a0$username\u00a0»",
+        "tooltip": "Voir la liste des contributions",
+        "form": {
+          "target_user": {
+            "label": "Nom d’utilisateur",
+            "error": {
+              "not_exists": "Aucun compte ne correspond à ce nom d’utilisateur."
+            }
+          },
+          "namespace": {
+            "label": "Espace de nom",
+            "error": {
+              "invalid_choice": "Numéro d’espace de nom invalide."
+            }
+          },
+          "from_date": {
+            "label": "À partir de",
+            "error": {
+              "invalid": "Date invalide."
+            }
+          },
+          "to_date": {
+            "label": "Jusqu’à",
+            "error": {
+              "invalid": "Date invalide."
+            }
+          },
+          "only_hidden_revisions": {
+            "label": "Montrer seulement les version masquée"
+          },
+          "only_last_edits": {
+            "label": "Montrer seulement les versions actuelles"
+          },
+          "only_page_creations": {
+            "label": "Montrer seulement les créations de pages"
+          },
+          "hide_minor": {
+            "label": "Cacher les modifications mineures"
+          },
+          "submit": {
+            "label": "Rechercher"
+          }
+        }
+      },
+      "page_differences": {
+        "title": "Différences de pages",
+        "display_title": "Différences de pages",
+        "title_same_page": "Différences entre versions de «\u00a0$page_title\u00a0»",
+        "title_two_pages": "Différences entre versions de «\u00a0$page_title1\u00a0» et «\u00a0$page_title2\u00a0»",
+        "nb_not_shown": "$nb version intermédiaires non affichées",
+        "no_differences": "Aucune différence",
+        "line_number": "Ligne $line_nb\u00a0:",
+        "form": {
+          "revision_id1": {
+            "label": "Numéro de version 1"
+          },
+          "revision_id2": {
+            "label": "Numéro de version 2"
+          },
+          "submit": {
+            "label": "Afficher les différences"
+          }
+        },
+        "diff_header": {
+          "previous_diff": "← Modification précédente",
+          "next_diff": "Modification suivante →"
+        },
+        "error": {
+          "undefined_revision_id": "Le numéro de révision «\u00a0$revision_id\u00a0» n’existe pas.",
+          "invalid_revision_id": "Numéro de révision «\u00a0$revision_id\u00a0» invalide.",
+          "missing_revision_id": "Numéro de révision manquant.",
+          "read_forbidden": "Vous n’êtes pas autorisé à visualiser une des versions demandées."
+        }
+      },
+      "empty_page": {
+        "display_title": "Page vide",
+        "notice": "Cette page est laissée intentionnellement (presque) vide."
+      },
+      "search": {
+        "display_title": "Rechercher",
+        "title_results": "Résultats de recherche pour «\u00a0$query\u00a0»",
+        "form": {
+          "query": {
+            "label": "Requête"
+          },
+          "submit": {
+            "label": "Rechercher"
+          },
+          "namespaces": {
+            "label": "Espaces de nom"
+          },
+          "default_ns_chk": {
+            "label": "Défaut"
+          },
+          "talk_ns_chk": {
+            "label": "Pages de discussion"
+          },
+          "help_ns_chk": {
+            "label": "Aide générale"
+          },
+          "all_ns_chk": {
+            "label": "Tous les espaces de nom"
+          }
+        }
+      },
+      "delete_page": {
+        "display_title": "Supprimer",
+        "tooltip": "Supprimer cette page"
+      },
+      "rename_page": {
+        "display_title": "Renommer",
+        "tooltip": "Renommer cette page"
+      },
+      "protect_page": {
+        "display_title": "Protéger",
+        "tooltip": "Protéger cette page"
+      },
+      "linked_pages": {
+        "display_title": "Page liées",
+        "tooltip": "Afficher les pages qui pointent vers celle-ci"
+      },
+      "random_page": {
+        "display_title": "Page aléatoire",
+        "tooltip": "Aller sur une page aléatoire"
+      },
+      "page_information": {
+        "display_title": "Informations sur la page",
+        "tooltip": "Plus d’informations sur cette page"
+      },
+      "journals": {
+        "display_title": "Journaux de la page",
+        "tooltip": "Voir les journaux de cette page"
+      },
+      "block": {
+        "display_title": "Bloquer"
+      },
+      "hide_revisions": {
+        "display_title": "Masquer des modifications"
+      },
+      "my_page": {
+        "display_title": "Ma page"
+      },
+      "special_pages": {
+        "display_title": "Pages spéciales",
+        "tooltip": "Liste de toutes les pages spéciales",
+        "legend": "Les pages marquées avec cette icone demandent des droits particuliers.",
+        "requires_rights": {
+          "tooltip": "Cette page nécessite des droits particuliers"
+        },
+        "category": {
+          "page_lists": "Listes de pages",
+          "connection": "Connexion et création de compte",
+          "users_and_rights": "Utilisateurs et gestion des droits",
+          "journals": "Journaux",
+          "redirections": "Pages redirigeantes",
+          "page_tools": "Outils de page",
+          "misc": "Autres pages spéciales"
+        }
+      }
+    }
+  }
+}

@@ -21,25 +21,23 @@ def diff_format(line: str, indices: typ.List[typ.Tuple[int, int]], inserted: boo
 def diff_header(context: page_context.TemplateContext, revision: models.PageRevision, previous: bool,
                 show_nav_link: bool):
     wpy_context: page_context.PageContext = context.get('wpy_context')
-    user = wpy_context.user
-    skin_id = wpy_context.skin_name
-    skin = skins.get_skin(skin_id)
-    current_title = wpy_context.full_page_title
+    current_user = wpy_context.user
+    language = wpy_context.language
+    skin = wpy_context.skin
+    current_title = wpy_context.page.full_title
     page_title = api.get_full_page_title(revision.page.namespace_id, revision.page.title)
-    text = settings.i18n.trans('special.page_differences.diff_header.' + ('previous_diff' if previous else 'next_diff'))
+    text = language.translate('special.page_differences.diff_header.' + ('previous_diff' if previous else 'next_diff'))
 
-    edit_text = settings.i18n.trans('link.edit')
-
-    page_link = skin.format_internal_link(api, current_title, page_title)
+    page_link = skin.format_internal_link(language, current_title, page_title)
     edit_link = wpy_tags.wpy_edit_link(context, revision, ignore_revision_id=True)
     history_link = wpy_tags.wpy_history_link(context, revision)
-    if user.can_edit_page(revision.page.namespace_id, revision.page.title):
+    if current_user.can_edit_page(revision.page.namespace_id, revision.page.title):
         page_link += ' ({} {})'.format(edit_link, history_link)
     else:
         page_link += ' ({})'.format(history_link)
 
-    revision_date = api.format_datetime(revision.date, user)
-    revision_link = skin.format_internal_link(api, current_title, page_title, revision_date, page_title,
+    revision_date = api.format_datetime(revision.date, current_user)
+    revision_link = skin.format_internal_link(language, current_title, page_title, revision_date, page_title,
                                               revision_id=revision.id)
     revision_link += ' ({})'.format(wpy_tags.wpy_edit_link(context, revision, ignore_revision_id=False))
 
@@ -52,7 +50,7 @@ def diff_header(context: page_context.TemplateContext, revision: models.PageRevi
         comment += wpy_tags.wpy_revision_comment(context, revision.comment, revision.comment_hidden)
 
     actions = ''
-    if user.has_right(settings.RIGHT_HIDE_REVISIONS):
+    if current_user.has_right(settings.RIGHT_HIDE_REVISIONS):
         actions = wpy_tags.wpy_show_hide_revision_link(context, revision)
 
     if show_nav_link:
@@ -72,7 +70,7 @@ def diff_header(context: page_context.TemplateContext, revision: models.PageRevi
         if target_revision:
             title = api.get_full_page_title(-1, special_pages.get_special_page_for_id('page_differences').get_title())
             title += f'/{revision_id1}/{revision_id2}'
-            link = skin.format_internal_link(api, current_title, title, text, title, no_red_link=True)
+            link = skin.format_internal_link(language, current_title, title, text, title, no_red_link=True)
         else:
             link = text
     else:

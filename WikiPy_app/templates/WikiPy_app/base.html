@@ -1,17 +1,18 @@
 {% load static %}
 {% load wpy_tags %}
 <!DOCTYPE html>
-<html class="no-js" lang="{{ wpy_context.language }}" dir="{{ wpy_context.writing_direction }}">
+<html class="no-js" lang="{{ wpy_context.language.code }}"
+      dir="{{ wpy_context.language.writing_direction }}">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
     {% if wpy_context.show_title %}
-      {% if wpy_context.mode == 'special' %}
+      {% if wpy_context.mode == 'special' and wpy_context.page_exists %}
         {{ wpy_context.display_title }}
       {% else %}
-        {{ wpy_context.full_page_title }}
+        {{ wpy_context.page.full_title }}
       {% endif %}
       &mdash;
     {% endif %}
@@ -21,7 +22,7 @@
 
   {# CSS #}
 
-  {% if wpy_context.writing_direction == 'ltr' %}
+  {% if wpy_context.language.writing_direction == 'ltr' %}
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
           integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
   {% else %}
@@ -32,7 +33,7 @@
 
   <link href="{% static 'WikiPy_app/css/common.css' %}" rel="stylesheet"/>
   {# Using "with" to avoid warning #}
-  {% with path='WikiPy_app/skins/'|add:wpy_context.skin_name|add:'/style.css' %}
+  {% with path='WikiPy_app/skins/'|add:wpy_context.skin.name|add:'/style.css' %}
     <link href="{% static path %}" rel="stylesheet"/>
   {% endwith %}
   {% if wpy_context.mode == 'special' and wpy_context.load_special_page_css %}
@@ -43,67 +44,72 @@
   {% endif %}
   {% if wpy_context.mode != 'setup' %}
     {% wpy_static 4 'Common.css' %}
-    {% wpy_static 4 wpy_context.skin_name|add:'.css' %}
+    {% wpy_static 4 wpy_context.skin.name|add:'.css' %}
     {% if not wpy_context.user.is_anonymous %}
       {% wpy_static 6 wpy_context.user.username|add:'/common.css' %}
-      {% if wpy_context.mode == 'special' %}
-        {% wpy_static 6 wpy_context.user.username|add:'/'|add:wpy_context.special_page_id|add:'.css' %}
-      {% endif %}
+      {% wpy_static 6 wpy_context.user.username|add:'/'|add:wpy_context.skin.name|add:'.css' %}
     {% endif %}
   {% endif %}
 
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
-        integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous"/>
+  <link rel="stylesheet" href="//cdn.materialdesignicons.com/5.4.55/css/materialdesignicons.min.css"/>
 
   {% block head %}{% endblock %}
   {% if wpy_context.noindex %}
     <meta name="robots" content="noindex"/>
   {% endif %}
 </head>
-<body {% block body_attr %}{% endblock %}>
+<body {{ wpy_context.skin.body_attrs }}>
   {% block pre-title %}{% endblock %}
+  <main id="wpy-article">
 
-  {% if wpy_context.show_title %}
-    <h1 id="wpy-main-title" {% block title_attr %}{% endblock %}><!--
+    {% if wpy_context.show_title %}
+      <h1 id="wpy-main-title" {% block title_attr %}{% endblock %}><!--
         {% if wpy_context.mode == 'setup' %}
-          -->Wiki setup<!--
-        {% elif wpy_context.mode == 'special' %}
+          -->{% wpy_translate 'special.setup.display_title' %}<!--
+        {% elif wpy_context.mode == 'special' and wpy_context.page_exists %}
           -->{{ wpy_context.display_title }}<!--
-        {% elif wpy_context.mode == 'read' %}
-          -->{{ wpy_context.full_page_title }}<!--
+        {% elif wpy_context.mode == 'read' or wpy_context.mode == 'special' and not wpy_context.page_exists %}
+          -->{{ wpy_context.page.full_title }}<!--
         {% elif wpy_context.mode == 'edit' %}
           {% if wpy_context.page_exists %}
             {% if wpy_context.user_can_edit %}
-              -->{% wpy_translate 'title.edit' page_title=wpy_context.full_page_title %}<!--
+              -->{% wpy_translate 'title.edit' page_title=wpy_context.page.full_title %}<!--
             {% else %}
-              -->{% wpy_translate 'title.source' page_title=wpy_context.full_page_title %}<!--
+              -->{% wpy_translate 'title.source' page_title=wpy_context.page.full_title %}<!--
             {% endif %}
           {% else %}
-            -->{% wpy_translate 'title.create' page_title=wpy_context.full_page_title %}<!--
+            -->{% wpy_translate 'title.create' page_title=wpy_context.page.full_title %}<!--
           {% endif %}
         {% elif wpy_context.mode == 'history' %}
-          -->{% wpy_translate 'title.history' page_title=wpy_context.full_page_title %}<!--
+          -->{% wpy_translate 'title.history' page_title=wpy_context.page.full_title %}<!--
         {% endif %}
       --></h1>
-  {% endif %}
+    {% endif %}
 
-  {% block post-title %}{% endblock %}
-
-  {% if wpy_context.mode == 'setup' %}
-    {% include 'WikiPy_app/wiki-setup.html' %}
-  {% elif wpy_context.mode == 'special' %}
-    {# Using with to avoid warning #}
-    {% with path='WikiPy_app/special_pages/'|add:wpy_context.special_page_id|add:'.html' %}
-      {% include path %}
-    {% endwith %}
-  {% elif wpy_context.mode == 'read' %}
-    {% include 'WikiPy_app/read-component.html' %}
-  {% elif wpy_context.mode == 'edit' %}
-    {% include 'WikiPy_app/editor-component.html' %}
-  {% elif wpy_context.mode == 'history' %}
-    {% include 'WikiPy_app/history-component.html' %}
-  {% endif %}
-
+    {% block post-title %}{% endblock %}
+    <article id="wpy-content" lang="{{ wpy_context.content_language.code }}">
+      {% if wpy_context.mode == 'setup' %}
+        {% include 'WikiPy_app/wiki-setup.html' %}
+      {% elif wpy_context.mode == 'special' %}
+        {% if not wpy_context.page_exists %}
+          {{ wpy_context.rendered_page_content }}
+        {% elif wpy_context.user_can_read %}
+          {# Using with to avoid warning #}
+          {% with path='WikiPy_app/special_pages/'|add:wpy_context.special_page_id|add:'.html' %}
+            {% include path %}
+          {% endwith %}
+        {% else %}
+          {% wpy_translate 'special.error.permission_required' rights=wpy_context.required_rights|join:', ' %}
+        {% endif %}
+      {% elif wpy_context.mode == 'read' %}
+        {% include 'WikiPy_app/read-component.html' %}
+      {% elif wpy_context.mode == 'edit' %}
+        {% include 'WikiPy_app/editor-component.html' %}
+      {% elif wpy_context.mode == 'history' %}
+        {% include 'WikiPy_app/history-component.html' %}
+      {% endif %}
+    </article>
+  </main>
   {% block post-content %}{% endblock %}
 
   {# JS #}
@@ -113,7 +119,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
           integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
           crossorigin="anonymous"></script>
-  {% if wpy_context.writing_direction == 'ltr' %}
+  {% if wpy_context.language.writing_direction == 'ltr' %}
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
             integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
             crossorigin="anonymous"></script>
@@ -125,24 +131,45 @@
 
   <script src="{% static 'WikiPy_app/js/common.js' %}"></script>
   {# Using "with" to avoid warning #}
-  {% with path='WikiPy_app/skins/'|add:wpy_context.skin_name|add:'/script.js' %}
+  {% with path='WikiPy_app/skins/'|add:wpy_context.skin.name|add:'/script.js' %}
     <script src="{% static path %}"></script>
   {% endwith %}
-  {% if wpy_context.mode == 'special' and wpy_context.load_special_page_js %}
-    {# Using "with" to avoid warning #}
-    {% with path='WikiPy_app/js/special_pages/'|add:wpy_context.special_page_id|add:'.js' %}
-      <script src="{% static path %}"></script>
+  {% if wpy_context.mode == 'special' and wpy_context.page_exists %}
+    {% with path='WikiPy_app/js/special_pages/' %}
+      {% if wpy_context.load_special_page_js %}
+        {# Using "with" to avoid warning #}
+        {% with p=path|add:wpy_context.special_page_id|add:'.js' %}
+          <script src="{% static p %}"></script>
+        {% endwith %}
+      {% endif %}
+      {% if wpy_context.load_special_page_form %}
+        {# Using "with" to avoid warning #}
+        {% with p=path|add:'include/forms.js' %}
+          <script src="{% static p %}"></script>
+        {% endwith %}
+      {% endif %}
     {% endwith %}
   {% endif %}
+
   {% if wpy_context.mode != 'setup' %}
     {% wpy_static 4 'Common.js' %}
-    {% wpy_static 4 wpy_context.skin_name|add:'.js' %}
+    {% wpy_static 4 wpy_context.skin.name|add:'.js' %}
     {% if not wpy_context.user.is_anonymous %}
       {% wpy_static 6 wpy_context.user.username|add:'/common.js' %}
-      {% if wpy_context.mode == 'special' %}
-        {% wpy_static 6 wpy_context.user.username|add:'/'|add:wpy_context.special_page_id|add:'.js' %}
-      {% endif %}
+      {% wpy_static 6 wpy_context.user.username|add:'/'|add:wpy_context.skin.name|add:'.js' %}
     {% endif %}
+  {% else %}
+    <script src="{% static 'WikiPy_app/js/special_pages/include/forms.js' %}"></script>
   {% endif %}
+
+  {# TODO let users choose style #}
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/highlight.min.js"></script>
+  <!--suppress JSUnresolvedVariable -->
+  <script>
+    $('code.wpy-code-highlight').each(function () {
+      hljs.highlightBlock(this);
+    });
+  </script>
 </body>
 </html>

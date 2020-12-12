@@ -4,28 +4,19 @@
     "::1",
     "localhost"
   ],
+  "app_name": "WikiPy",
   "project_name": "TestWiki",
-  "language": "en",
-  "writing_direction": "ltr",
+  "default_language": "en",
   "time_zone": "UTC",
-  "datetime_formats": [
-    "%B %d, %Y at %H:%M",
-    "%d %B, %Y at %H:%M",
-    "%Y %B %d at %H:%M",
-    "%Y-%m-%dT%H:%M:%S",
-    "%B %d, %Y at %I:%M %p",
-    "%d %B, %Y at %I:%M %p",
-    "%Y %B %d at %I:%M %p",
-    "%Y-%m-%dT%H:%I:%S %p"
-  ],
-  "main_namespace_name": "Main",
   "main_page_namespace_id": -3,
   "main_page_title": "Main Page",
   "hide_title_on_main_page": true,
   "case_sensitive_titles": false,
+  "random_page_namespaces": [0, 100],
   "rights": {},
   "additional_groups": {},
   "skins": [
     "default"
-  ]
+  ],
+  "media_backend": "wikimedia_commons"
 }

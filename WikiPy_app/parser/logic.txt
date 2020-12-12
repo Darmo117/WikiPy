@@ -1,0 +1,6 @@
+4 steps:
+  - substitute magic keywords
+  - parse variables
+  - parse functions
+  - parse transclusions
+  - parse resulting code

@@ -15,10 +15,10 @@
     The above page could not be found.
   </p>
   <p>
-    Did you mean <a href="{% url 'page' raw_page_title=url %}">/wiki/{{ url }}</a>?
+    Did you mean <a href="{% url 'wikipy:page' raw_page_title=url %}">/wiki/{{ url }}</a>?
   </p>
   <p>
-    Alternatively, you can visit the <a href="{% url 'main_page' %}">Main Page</a>
+    Alternatively, you can visit the <a href="{% url 'wikipy:main_page' %}">Main Page</a>
     or read <a href="https://en.wikipedia.org/wiki/HTTP_404">more information</a> about this type of error.
   </p>
 </body>

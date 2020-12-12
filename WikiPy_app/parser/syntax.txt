@@ -1,0 +1,53 @@
+titles
+= text
+== text
+=== text
+==== text
+===== text
+====== text
+
+bold
+**text**
+
+italics
+//text//
+
+underlined
+__text__
+
+strikethrough
+~~text~~
+
+overlined
+++text++
+
+unordered lists
+- item 1
+-- subitem 1
+- …
+
+ordered lists
+# item 1
+## subitem 1
+# …
+
+internal links
+[[ns:page_title#anchor|text]]
+
+external links
+[(url|text)]
+
+images/videos
+[{file name|width|legend}]
+
+variables
+{[name|default value]}
+
+templates/transclusions
+{{name|args}}
+
+function
+{(name|args)}
+
+magic keywords
+$$name$$

@@ -1,14 +1,18 @@
-from . import SpecialPage, RedirectPageContext
+from . import SpecialPage, REDIRECTIONS_CAT
+from .. import page_context, api, settings
 
 
-def load_special_page(settings) -> SpecialPage:
-    class MyPage(SpecialPage):
-        def __init__(self):
-            super().__init__(settings, 'my_page', 'My page')
+class MyPage(SpecialPage):
+    def __init__(self):
+        super().__init__('my_page', 'My page', category=REDIRECTIONS_CAT)
 
-        def _get_data_impl(self, api, sub_title, base_context, request, **kwargs):
-            user = api.get_user_from_request(request)
-            context = RedirectPageContext(base_context, to=api.get_full_page_title(6, user.username))
-            return context, [], None
+    def _get_data_impl(self, sub_title, base_context, request, **kwargs):
+        user = api.get_user_from_request(request)
+        context = page_context.RedirectPageContext(base_context,
+                                                   to=api.get_full_page_title(settings.USER_NS.id, user.username))
 
+        return context, [], None
+
+
+def load_special_page() -> SpecialPage:
     return MyPage()

@@ -1,0 +1,52 @@
+{
+  "menus": {
+    "navigation": [
+      {
+        "page_id": "random_page",
+        "requires_page_title": false,
+        "requires_page_exists": false
+      }
+    ],
+    "wiki_tools": [
+      {
+        "page_id": "special_pages",
+        "requires_page_title": false,
+        "requires_page_exists": false
+      }
+    ],
+    "page_tools": [
+      {
+        "page_id": "delete_page",
+        "requires_page_title": true,
+        "requires_page_exists": true
+      },
+      {
+        "page_id": "rename_page",
+        "requires_page_title": true,
+        "requires_page_exists": true
+      },
+      {
+        "page_id": "protect_page",
+        "requires_page_title": true,
+        "requires_page_exists": false
+      }
+    ],
+    "more_tools": [
+      {
+        "page_id": "linked_pages",
+        "requires_page_title": true,
+        "requires_page_exists": false
+      },
+      {
+        "page_id": "page_information",
+        "requires_page_title": true,
+        "requires_page_exists": false
+      },
+      {
+        "page_id": "journals",
+        "requires_page_title": true,
+        "requires_page_exists": false
+      }
+    ]
+  }
+}

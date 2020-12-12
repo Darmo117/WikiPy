@@ -7,7 +7,7 @@
 {% endif %}
 
 {% if wpy_context.user.is_logged_in %}
-  <form action="{% url 'page' wpy_context.full_page_title_url %}?return_to={{ wpy_context.full_page_title_url }}"
+  <form action="{% url 'wikipy:page' wpy_context.full_page_title_url %}?return_to={{ wpy_context.full_page_title_url }}"
         method="post">
     <input type="submit" class="btn btn-primary" value="{% wpy_translate 'special.logout.form.submit.label' %}">
     {% csrf_token %}

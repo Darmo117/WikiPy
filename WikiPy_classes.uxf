@@ -1,0 +1,862 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.3.0">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>0</x>
+      <y>60</y>
+      <w>240</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>Page
+bg=pink
+--
+namespace_id: int
+title: string
+deleted: boolean
+protection_level: group_name
+--
+get_latest_revision(): PageRevision</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>440</x>
+      <y>60</y>
+      <w>260</w>
+      <h>150</h>
+    </coordinates>
+    <panel_attributes>PageRevision
+bg=pink
+--
+date: datetime
+content: string
+hidden: boolean
+validated: boolean
+reverted_to: int
+--
+get_previous(): PageRevision
+get_reverted_revision(): PageRevision</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>430</x>
+      <y>520</y>
+      <w>250</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>UserData
+bg=pink
+--
+is_male: bool?
+ip_address: string?
+creation_date: datetime
+--
+can_edit_page(page: Page): boolean</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>410</x>
+      <y>790</y>
+      <w>370</w>
+      <h>190</h>
+    </coordinates>
+    <panel_attributes>Group
+bg=green
+--
+name: string
+local_name: string
+hide_from_recent_changes: boolean
+needs_validation: boolean
+rights: string[*]
+namespace_edit_rights: map&lt;int, boolean[2]&gt;
+--
+has_right(right: string): boolean
+can_read_page(page: Page): boolean
+can_edit_page(page: Page): boolean
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>230</x>
+      <y>90</y>
+      <w>230</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=page
+m2=1,n
+r2=revisions</panel_attributes>
+    <additional_attributes>10.0;20.0;210.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>570</x>
+      <y>200</y>
+      <w>120</w>
+      <h>150</h>
+    </coordinates>
+    <panel_attributes>lt=-&gt;
+m1=*
+r1=contributions
+m2=1
+r2=author</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;130.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>950</x>
+      <y>180</y>
+      <w>130</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>JournalEntry
+bg=pink
+--
+date: datetime
+message: string</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>280</x>
+      <y>830</y>
+      <w>150</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=0,1
+r1=inherited_group</panel_attributes>
+    <additional_attributes>130.0;70.0;110.0;70.0;110.0;10.0;130.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>220</x>
+      <y>240</y>
+      <w>150</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>UserGroupRel
+bg=pink
+--
+group_name: integer
+until: datetime</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>670</x>
+      <y>400</y>
+      <w>160</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>BlockJournalEntry
+bg=pink
+--
+duration: int</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>780</x>
+      <y>330</y>
+      <w>30</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>850</x>
+      <y>400</y>
+      <w>210</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>UserRenamingJournalEntry
+bg=pink
+--
+old_username: string
+new_username: string</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>840</x>
+      <y>330</y>
+      <w>60</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;40.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>610</x>
+      <y>330</y>
+      <w>170</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=target_user</panel_attributes>
+    <additional_attributes>10.0;50.0;150.0;50.0;150.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>610</x>
+      <y>230</y>
+      <w>360</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=performer</panel_attributes>
+    <additional_attributes>10.0;110.0;100.0;110.0;100.0;10.0;340.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1040</x>
+      <y>310</y>
+      <w>200</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>AccountCreationJournalEntry
+bg=pink
+--
+username: string</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1020</x>
+      <y>240</y>
+      <w>130</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;110.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>750</x>
+      <y>310</y>
+      <w>160</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>UserActionJournalEntry
+bg=pink</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>820</x>
+      <y>240</y>
+      <w>200</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>180.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1090</x>
+      <y>400</y>
+      <w>230</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>UserGroupChangeJournalEntry
+bg=pink
+--
+added: boolean
+group_name: string
+until: datetime?</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>860</x>
+      <y>330</y>
+      <w>370</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;350.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>280</x>
+      <y>290</y>
+      <w>230</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=user
+m2=1,n
+r2=groups</panel_attributes>
+    <additional_attributes>210.0;70.0;10.0;70.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>1620</x>
+      <y>510</y>
+      <w>140</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>bg=yellow
+style=wordwrap
+Edit types:
+- Creation
+- Deletion</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1280</x>
+      <y>310</y>
+      <w>200</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>PageActionJournalEntry
+bg=pink</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1060</x>
+      <y>240</y>
+      <w>340</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;320.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>90</x>
+      <y>170</y>
+      <w>1280</w>
+      <h>500</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=page</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;480.0;1260.0;480.0;1260.0;170.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>1130</x>
+      <y>520</y>
+      <w>140</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>bg=yellow
+style=wordwrap
+Field "until" should be null if added is false.</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1370</x>
+      <y>440</y>
+      <w>200</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>PageProtectionJournalEntry
+bg=pink
+--
+old_group_name: string
+new_group_name: string</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1390</x>
+      <y>330</y>
+      <w>90</w>
+      <h>130</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;70.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1580</x>
+      <y>440</y>
+      <w>200</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>PageEditJournalEntry
+bg=pink
+--
+edit_type: string</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1430</x>
+      <y>330</y>
+      <w>270</w>
+      <h>130</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;250.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1790</x>
+      <y>440</y>
+      <w>200</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>PageRenamingJournalEntry
+bg=pink
+--
+old_name: string
+new_name: string</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>0</x>
+      <y>170</y>
+      <w>1870</w>
+      <h>520</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=old_page</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;500.0;1850.0;500.0;1850.0;340.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1460</x>
+      <y>330</y>
+      <w>470</w>
+      <h>130</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;450.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1590</x>
+      <y>310</y>
+      <w>150</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>RevisionJournalEntry
+bg=pink
+--
+action: string</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1070</x>
+      <y>230</y>
+      <w>590</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;570.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>510</x>
+      <y>0</y>
+      <w>1190</w>
+      <h>330</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=validated_revision</panel_attributes>
+    <additional_attributes>10.0;60.0;10.0;10.0;1170.0;10.0;1170.0;310.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>490</x>
+      <y>330</y>
+      <w>130</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>User
+bg=magenta
+--
+username: string
+email: string?
+password: string</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>1770</x>
+      <y>310</y>
+      <w>140</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>bg=yellow
+style=wordwrap
+Action types:
+- Validation
+- Thanked</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>450</x>
+      <y>1000</y>
+      <w>310</w>
+      <h>210</h>
+    </coordinates>
+    <panel_attributes>bg=yellow
+style=wordwrap
+Rights:
+- read pages (per namespace)
+- edit pages (per namespace)
+- rename pages (only pages with edit rights)
+- delete pages (only pages with edit rights)
+- protect pages (only pages with edit rights)
+- revoke (only pages with edit rights)
+- hide revisions
+- block users
+- rename users
+- change users groups
+- validate changes</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>280</x>
+      <y>540</y>
+      <w>140</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>bg=yellow
+style=wordwrap
+Account creation is disabled for blocked IPs.</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1360</x>
+      <y>840</y>
+      <w>100</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>All</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1360</x>
+      <y>910</y>
+      <w>100</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>Users</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1330</x>
+      <y>1050</y>
+      <w>160</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>Autoconfirmed users</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1360</x>
+      <y>1190</y>
+      <w>110</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>Administrators</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1480</x>
+      <y>1120</y>
+      <w>100</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>Bureaucrats</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1360</x>
+      <y>1120</y>
+      <w>100</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>Patrollers</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1400</x>
+      <y>860</y>
+      <w>30</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1400</x>
+      <y>1000</y>
+      <w>30</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1400</x>
+      <y>1070</y>
+      <w>30</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1440</x>
+      <y>1070</y>
+      <w>110</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;90.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1400</x>
+      <y>1140</y>
+      <w>30</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1350</x>
+      <y>980</y>
+      <w>120</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>Email confirmed</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1400</x>
+      <y>930</y>
+      <w>30</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>1510</x>
+      <y>960</y>
+      <w>240</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>bg=yellow
+style=wordwrap
+Conditions:
+- Users has confirmed their email</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>1510</x>
+      <y>1010</y>
+      <w>270</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>bg=yellow
+style=wordwrap
+Conditions (can be disabled):
+- User has confirmed their email
+- User has made more than n_e edits
+- Account is older than n_d days</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>1230</x>
+      <y>810</y>
+      <w>360</w>
+      <h>420</h>
+    </coordinates>
+    <panel_attributes>Groups hierarchy
+--
+bg=orange
+layer=-1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1240</x>
+      <y>1120</y>
+      <w>100</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>Bots</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1280</x>
+      <y>1070</y>
+      <w>110</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>90.0;10.0;10.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>200</x>
+      <y>380</y>
+      <w>190</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>UserBlock
+bg=pink
+--
+username: string
+page_or_namespace: string
+duration: int
+reason: string?</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>380</x>
+      <y>400</y>
+      <w>180</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=user
+m2=*
+r2=blocks</panel_attributes>
+    <additional_attributes>130.0;10.0;130.0;60.0;10.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>860</x>
+      <y>810</y>
+      <w>270</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>Namespace
+bg=green
+--
+id: int
+name: string
+local_name: string?
+alias: string?
+--
+get_name(local: boolean): string
+matches_name(name: string): boolean</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>570</x>
+      <y>400</y>
+      <w>90</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=user
+m2=1
+r2=user_data</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;120.0</additional_attributes>
+  </element>
+</diagram>

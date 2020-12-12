@@ -1,11 +1,13 @@
-(function () {
-  "use strict";
+"use strict";
 
+(function () {
   let WPY_CONF = {};
+  // noinspection JSUnresolvedVariable
   for (let [k, v] of Object.entries(window.WPY_CONF || {})) {
     WPY_CONF[k] = v;
   }
-  window.WPY_CONF = undefined; // Delete global variable
+  // noinspection JSUnresolvedVariable
+  delete window.WPY_CONF;
 
   class Map {
     _values;
@@ -146,17 +148,45 @@
   };
 
   /* Add keystroke in tooltips of elements with accesskey attribute. */
-  (function () {
-    let accessKeyLabel = 'alt+shift+';
+  let accessKeyLabel = 'alt+shift+';
 
-    $("*[accesskey]").each(function (_, e) {
-      let $element = $(e);
-      let tooltip = $element.attr("title");
-      let accessKey = $element.attr("accesskey");
+  $("*[accesskey]").each(function (_, e) {
+    let $element = $(e);
+    let tooltip = $element.attr("title");
+    let accessKey = $element.attr("accesskey");
 
-      if (tooltip) {
-        $element.attr("title", $element.attr("title") + ` [${accessKeyLabel + accessKey}]`);
+    if (tooltip) {
+      $element.attr("title", $element.attr("title") + ` [${accessKeyLabel + accessKey}]`);
+    }
+  });
+
+  function addLanguageParam(url, value) {
+    let params = new URLSearchParams(url.search);
+    params.set("use_lang", value);
+    url.search = params.toString();
+  }
+
+  // Language select handler
+  $("#wpy-language-select").change(function () {
+    let language = $(this).val();
+    let url = new URL(location.href);
+    addLanguageParam(url, language);
+    location.href = url.toString();
+  });
+
+  let language = new URL(location.href).searchParams.get("use_lang");
+
+  if (language) {
+    // Add use_lang parameter to all internal links that are not dropdown toggles
+    $("a:not([data-toggle])").each(function () {
+      let $anchor = $(this);
+      let href = $anchor.prop("href");
+
+      if (href) {
+        let url = new URL(href);
+        addLanguageParam(url, language);
+        $anchor.prop("href", url.toString());
       }
     });
-  })();
+  }
 })();

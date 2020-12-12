@@ -3,13 +3,23 @@ import typing as typ
 
 import django.utils.html as dj_html
 
+DiffType = typ.List[typ.Union[
+    typ.Tuple[
+        typ.Optional[str],
+        typ.Optional[str],
+        typ.List[typ.Tuple[int, int]],
+        typ.List[typ.Tuple[int, int]]
+    ],
+    typ.Tuple[int, int]
+]]
+
 
 class Diff:
     def __init__(self, revision1, revision2):
         self.__revision1 = revision1
         self.__revision2 = revision2
 
-    def get(self, escape_html: bool, keep_lines: int):
+    def get(self, escape_html: bool, keep_lines: int) -> DiffType:
         content1 = self.__revision1.content.splitlines()
         content2 = self.__revision2.content.splitlines()
         if escape_html:
@@ -20,7 +30,7 @@ class Diff:
 
     # TODO line numbers
     # TODO keep only N lines before and after each change
-    def __extract_diff(self, diff_gen: typ.List[str], keep_lines: int):
+    def __extract_diff(self, diff_gen: typ.List[str], keep_lines: int) -> DiffType:
         diff = []
         skip = 0
         line_old = 1
@@ -61,7 +71,7 @@ class Diff:
         return diff
 
     @staticmethod
-    def __get_indices(s: str):
+    def __get_indices(s: str) -> typ.List[typ.Tuple[int, int]]:
         indices = []
         start = None
 

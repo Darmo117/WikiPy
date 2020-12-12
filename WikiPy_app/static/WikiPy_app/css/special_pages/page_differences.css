@@ -8,7 +8,7 @@
   vertical-align: top;
 }
 
-#wpy-diff-table-subtitle {
+#wpy-diff-table-subtitle, #wpy-diff-table-no-differences {
   text-align: center;
 }
 

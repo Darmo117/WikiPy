@@ -1,6 +1,6 @@
 import typing as typ
 
-from . import settings, api
+from . import settings
 
 HELP_PAGE = 'help'
 RESULT_PAGE = 'result'

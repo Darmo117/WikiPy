@@ -43,10 +43,20 @@ a.wpy-redlink {
  * Columns and menu sizes *
  **************************/
 
-#nav-bar-left, #nav-bar-right {
-  min-width: 200px;
-  max-width: 200px;
+#nav-bar-left,
+#nav-bar-right {
+  min-width: 250px;
+  max-width: 250px;
   padding-top: 15px;
+  font-size: 90%;
+}
+
+#nav-bar-left {
+  margin-left: 50px;
+}
+
+#nav-bar-right {
+  margin-right: 50px;
 }
 
 #center-col {
@@ -59,6 +69,7 @@ a.wpy-redlink {
 }
 
 #wpy-main-title {
+  text-align: center;
   border-bottom: gray solid 4px;
 }
 
@@ -66,16 +77,26 @@ a.wpy-redlink {
   padding: 0 15px;
 }
 
-#wpy-main-title, #wpy-content {
+#wpy-main-title,
+#wpy-content {
+  margin-top: 30px;
+}
+
+#wpy-content {
+  margin-bottom: 15px;
+}
+
+#wpy-content h1:not(:first-child),
+#wpy-content h2:not(:first-child),
+#wpy-content h3:not(:first-child),
+#wpy-content h4:not(:first-child),
+#wpy-content h5:not(:first-child),
+#wpy-content h6:not(:first-child) {
   margin-top: 30px;
 }
 
 #wpy-content p {
   text-align: justify;
-}
-
-#wpy-content {
-  margin-bottom: 15px;
 }
 
 /****************************
@@ -106,12 +127,15 @@ ul {
  * Misc. *
  *********/
 
-.card, #center-col {
+.card,
+#center-col {
   -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
 }
 
-.badge.wpy-diff-size-tag, .badge.wpy-tag, .badge.wpy-page-size-tag {
+.badge.wpy-diff-size-tag,
+.badge.wpy-tag,
+.badge.wpy-page-size-tag {
   font-weight: normal;
   font-size: 1em;
 }
@@ -136,7 +160,9 @@ body {
   margin-top: 16px;
 }
 
-.wpy-hidden-revision-author, .wpy-hidden-revision-comment, .wpy-hidden-revision-link {
+.wpy-hidden-revision-author,
+.wpy-hidden-revision-comment,
+.wpy-hidden-revision-link {
   color: gray;
   font-style: italic;
   text-decoration: line-through;
@@ -148,4 +174,8 @@ li .wpy-search-result {
 
 li:first-child .wpy-search-result {
   padding-top: 15px;
+}
+
+#wpy-redirect-info {
+  font-size: 80%;
 }
