@@ -44,6 +44,9 @@
       "bots": "Robots"
     },
     "header": {
+      "brand": {
+        "tooltip": "Visiter la page d’accueil"
+      },
       "menu_button": "Menu",
       "search": {
         "input": {
@@ -57,6 +60,10 @@
       "language_select": {
         "tooltip": "Sélecteur de langue"
       }
+    },
+    "footer": {
+      "last_edit": "Dernière modification le $date",
+      "license": "Les textes sont disponibles sous licence $license_link ; d’autres termes peuvent s’appliquer. Voyez les $tou_link pour plus de détails et la $policy_link."
     },
     "title": {
       "edit": "Modification de «\u00a0$page_title\u00a0»",

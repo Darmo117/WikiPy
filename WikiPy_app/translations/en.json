@@ -48,6 +48,9 @@
       "bots": "Bots"
     },
     "header": {
+      "brand": {
+        "tooltip": "Visit the main page"
+      },
       "menu_button": "Menu",
       "search": {
         "input": {
@@ -61,6 +64,10 @@
       "language_select": {
         "tooltip": "Language selector"
       }
+    },
+    "footer": {
+      "last_edit": "Page last edited on $date",
+      "license": "Text is available under the $license_link; additional terms may apply. By using this site, you agree to the $tou_link and $policy_link."
     },
     "title": {
       "edit": "Editing “$page_title”",

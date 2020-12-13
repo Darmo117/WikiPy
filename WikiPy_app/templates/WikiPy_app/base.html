@@ -59,7 +59,7 @@
   {% endif %}
 </head>
 <body {{ wpy_context.skin.body_attrs }}>
-  {% block pre-title %}{% endblock %}
+  {% block pre-content %}{% endblock %}
   <main id="wpy-article">
 
     {% if wpy_context.show_title %}
@@ -86,7 +86,15 @@
       --></h1>
     {% endif %}
 
-    {% block post-title %}{% endblock %}
+    <div id="wpy-redirect-info" class="text-muted">
+      {% if wpy_context.is_redirection %}
+        {% wpy_translate 'redirection_info.is_redirection' %}
+      {% elif wpy_context.redirected_from %}
+        {% wpy_inner_link namespace_id=wpy_context.redirected_from.0 page_title=wpy_context.redirected_from.1 no_redirect=1 as link %}
+        {% wpy_translate 'redirection_info.redirected_from' link=link %}
+      {% endif %}
+    </div>
+
     <article id="wpy-content" lang="{{ wpy_context.content_language.code }}">
       {% if wpy_context.mode == 'setup' %}
         {% include 'WikiPy_app/wiki-setup.html' %}

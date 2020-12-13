@@ -62,7 +62,6 @@ class LoginPage(SpecialPage):
     def __login(self, base_context: page_context.PageContext, request: dj_wsgi.WSGIRequest, login_notice: str) \
             -> page_context.PageContext:
         return_to = None
-        is_path = False
         success = False
         errors = []
 
@@ -73,10 +72,10 @@ class LoginPage(SpecialPage):
             success = api.log_in(request, username, password)
             if success:
                 main_page_title = api.get_full_page_title(settings.MAIN_PAGE_NAMESPACE_ID, settings.MAIN_PAGE_TITLE)
-                return_to, is_path = self._get_return_to_path(form, main_page_title)
+                return_to = self._get_return_to_path(form, main_page_title)
 
         if success and return_to:
-            context = page_context.RedirectPageContext(base_context, to=return_to, is_path=is_path)
+            context = page_context.RedirectPageContext(base_context, to=return_to, is_path=True)
         else:
             if not success:
                 errors.append('invalid_credentials')

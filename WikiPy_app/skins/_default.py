@@ -7,7 +7,7 @@ class DefaultSkin(Skin):
 
     def _format_link(self, url, text, tooltip, page_exists, css_classes, access_key=None, external=None):
         if not page_exists:
-            css_classes += ['wpy-redlink']
+            css_classes = [*css_classes, 'wpy-redlink']
         attributes = []
         if 'disabled' in css_classes:
             attributes.append('aria-disabled="true"')

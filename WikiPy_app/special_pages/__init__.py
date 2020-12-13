@@ -73,12 +73,10 @@ class SpecialPageContext(page_context.PageContext):
 @dataclasses.dataclass(init=False)
 class ReturnToPageContext(page_context.PageContext):
     return_to: str
-    return_to_path: bool
 
-    def __init__(self, context: page_context.PageContext, /, to: str, is_path: bool = False):
+    def __init__(self, context: page_context.PageContext, /, to: str):
         self._context = context
         self.return_to = to
-        self.return_to_path = is_path
 
 
 class SpecialPage(abc.ABC):
@@ -223,30 +221,29 @@ class SpecialPage(abc.ABC):
     def _get_return_to_context(request: dj_wsgi.WSGIRequest, base_context: page_context.PageContext) \
             -> ReturnToPageContext:
         return_to = util.get_param(request.GET, 'return_to')
-        return_to_path = util.get_param(request.GET, 'is_path', default=False, expected_type=bool)
-        return ReturnToPageContext(base_context, to=return_to, is_path=return_to_path)
+        return ReturnToPageContext(base_context, to=return_to)
 
     @staticmethod
-    def _get_return_to_path(form: forms.SupportsReturnTo, default_path: str = None) -> typ.Tuple[str, bool]:
-        return_to = form.cleaned_data['return_to'] or default_path
-        is_path = bool(form.cleaned_data['return_to_path'])
-        return return_to, is_path
+    def _get_return_to_path(form: forms.SupportsReturnTo, default_path: str = None) -> str:
+        return form.cleaned_data['return_to'] or default_path
 
 
 _SPECIAL_PAGES: typ.Dict[str, SpecialPage] = {}
 
 
 # TODO load extensions’ special pages
-# TODO look out for duplicate titles
 def load_special_pages():
     titles = set()
     files = os.listdir(os.path.join(dj_settings.BASE_DIR, apps.WikiPyAppConfig.name, 'special_pages'))
     for filename in filter(lambda fn: not fn.startswith('__') and fn.endswith('.py'), files):
-        module = importlib.import_module('.' + filename[:-3], package=__name__)
+        module = importlib.import_module(f'.{filename[:-3]}', package=__name__)
         # noinspection PyUnresolvedReferences
         sp: SpecialPage = module.load_special_page()
-        if sp.get_title(local=False) in titles or sp.get_title(local=True) in titles:
+        if sp.id in _SPECIAL_PAGES:
+            raise ValueError(f'duplicate special page ID "{sp.id}"')
+        if sp.get_title(local=False) in titles:
             raise ValueError(f'duplicate special page title for ID "{sp.id}"')
+        titles.add(sp.get_title(local=False))
         _SPECIAL_PAGES[sp.id] = sp
 
 

@@ -1,51 +1,115 @@
 {
   "menus": {
+    "user": [
+      {
+        "item_id": "user_page",
+        "icon": "account",
+        "access_key": "u",
+        "requires_logged_in": true
+      },
+      {
+        "item_id": "user_talk",
+        "icon": "forum",
+        "access_key": "w",
+        "requires_logged_in": true
+      },
+      {
+        "special_page_id": "contributions",
+        "add_user_name": true,
+        "requires_logged_in": true,
+        "disable_access_key": true
+      },
+      {
+        "special_page_id": "logout",
+        "requires_logged_in": true,
+        "add_return_to": true
+      },
+      {
+        "special_page_id": "login",
+        "requires_logged_out": true,
+        "add_return_to": true
+      }
+    ],
+    "page": [
+      {
+        "item_id": "read",
+        "icon": "book-open-variant",
+        "access_key": "v"
+      },
+      {
+        "item_id": "talk",
+        "icon": "forum",
+        "access_key": "t"
+      },
+      {
+        "item_id": "edit",
+        "icon": "file-document-edit",
+        "access_key": "e",
+        "requires_user_can_read": true
+      },
+      {
+        "item_id": "history",
+        "icon": "history",
+        "access_key": "h",
+        "requires_page_exists": true,
+        "requires_user_can_read": true
+      },
+      {
+        "special_page_id": "contributions",
+        "requires_user_page": true,
+        "add_base_page_title": true
+      }
+    ],
     "navigation": [
       {
-        "page_id": "random_page",
-        "requires_page_title": false,
-        "requires_page_exists": false
+        "special_page_id": "random_page",
+        "access_key": "x"
       }
     ],
     "wiki_tools": [
       {
-        "page_id": "special_pages",
-        "requires_page_title": false,
-        "requires_page_exists": false
+        "special_page_id": "special_pages"
       }
     ],
     "page_tools": [
       {
-        "page_id": "delete_page",
-        "requires_page_title": true,
+        "special_page_id": "delete_page",
+        "access_key": "d",
+        "add_page_title": true,
         "requires_page_exists": true
       },
       {
-        "page_id": "rename_page",
-        "requires_page_title": true,
+        "special_page_id": "rename_page",
+        "access_key": "r",
+        "add_page_title": true,
         "requires_page_exists": true
       },
       {
-        "page_id": "protect_page",
-        "requires_page_title": true,
-        "requires_page_exists": false
+        "special_page_id": "protect_page",
+        "access_key": "=",
+        "add_page_title": true
       }
     ],
     "more_tools": [
       {
-        "page_id": "linked_pages",
-        "requires_page_title": true,
-        "requires_page_exists": false
+        "special_page_id": "linked_pages",
+        "access_key": "l",
+        "add_page_title": true
       },
       {
-        "page_id": "page_information",
-        "requires_page_title": true,
-        "requires_page_exists": false
+        "item_id": "permalink",
+        "icon": "format-section",
+        "requires_page_exists": true
       },
       {
-        "page_id": "journals",
-        "requires_page_title": true,
-        "requires_page_exists": false
+        "special_page_id": "page_information",
+        "access_key": "i",
+        "add_page_title": true
+      },
+      {
+        "special_page_id": "journals",
+        "access_key": "j",
+        "add_page_title": true
       }
     ]
   }

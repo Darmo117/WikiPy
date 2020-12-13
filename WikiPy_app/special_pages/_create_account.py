@@ -27,11 +27,7 @@ class CreateAccountPage(SpecialPage):
         super().__init__('create_account', 'Create account', category=CONNECTION_CAT, has_form=True)
 
     def _get_data_impl(self, sub_title, base_context, request, **_):
-        get_params = request.GET
-        return_to = util.get_param(get_params, 'return_to')
-        return_to_path = util.get_param(get_params, 'is_path', default=False, expected_type=bool)
-
-        context = ReturnToPageContext(base_context, to=return_to, is_path=return_to_path)
+        context = self._get_return_to_context(request, base_context)
 
         notice = dj_safe.mark_safe(api.render_wikicode(
             api.get_message('CreateAccountDisclaimer')[0],
@@ -67,8 +63,8 @@ class CreateAccountPage(SpecialPage):
                     errors.append('duplicate_username')
                 else:
                     main_page_title = api.get_full_page_title(settings.MAIN_PAGE_NAMESPACE_ID, settings.MAIN_PAGE_TITLE)
-                    return_to, is_path = self._get_return_to_path(form, main_page_title)
-                    context = page_context.RedirectPageContext(context, to=return_to, is_path=is_path)
+                    return_to = self._get_return_to_path(form, main_page_title)
+                    context = page_context.RedirectPageContext(context, to=return_to, is_path=True)
             else:
                 errors.append('passwords_mismatch')
 

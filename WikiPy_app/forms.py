@@ -54,11 +54,6 @@ class SupportsReturnTo(WikiPyForm):
         required=False,
         widget=dj_forms.HiddenInput()
     )
-    return_to_path = dj_forms.CharField(
-        label='return_to',
-        required=False,
-        widget=dj_forms.HiddenInput()
-    )
 
 
 class ConfirmPasswordForm:

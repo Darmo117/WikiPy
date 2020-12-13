@@ -70,7 +70,7 @@ def wpy_user_link(context: page_context.TemplateContext, username: str, ignore_t
         if only_username:
             res = user_link
         else:
-            talk_page_title = api.get_full_page_title(settings.USER_NS_TALK.id, username)
+            talk_page_title = api.get_full_page_title(settings.USER_TALK_NS.id, username)
             contribs_page_title = api.get_full_page_title(settings.SPECIAL_NS.id, 'Contributions/' + username)
             links = [
                 skin.format_internal_link(
@@ -304,7 +304,7 @@ def wpy_inner_link(context: page_context.TemplateContext, namespace_id: int, pag
         text = sp.display_title(language)
         tooltip = text
     full_title = api.get_full_page_title(namespace_id, page_title)
-    if not tooltip:
+    if tooltip is None:
         tooltip = full_title
     classes = css_classes.split() if css_classes else []
     link = skin.format_internal_link(language, current_title, full_title, text, tooltip, no_red_link=no_red_link,
@@ -332,7 +332,7 @@ def _revisions_list(context: page_context.TemplateContext, mode: str):
     skin = wpy_context.skin
 
     if paginator:
-        for revision in paginator.get_page_context(wpy_context.page).object_list:
+        for revision in paginator.get_page(wpy_context.paginator_page).object_list:
             full_title = revision.page.full_title
             revision_link = skin.format_internal_link(language, current_page_title, full_title,
                                                       text=api.format_datetime(revision.date, current_user),
@@ -412,6 +412,7 @@ def _get_paginator_link(language: settings.i18n.Language, link_type: str, curren
         -> typ.Tuple[str, bool]:
     page_obj = paginator.get_page(page)
     arrows = {
+        # (left arrow, right arrow, before text?, enabled?, page number provider)
         'previous': ('‹', '›', True, page_obj.has_previous(), page_obj.previous_page_number),
         'next': ('›', '‹', False, page_obj.has_next(), page_obj.next_page_number),
         'first': ('«', '»', True, page > 1, lambda: 1),
@@ -435,92 +436,3 @@ def _get_paginator_link(language: settings.i18n.Language, link_type: str, curren
         return skin.format_internal_link(language, current_page_title, current_page_title, text=text,
                                          tooltip=current_page_title, css_classes=classes, **url_params), True
     return f'<span class="{" ".join(classes)}">{text}</span>', False
-
-
-@register.simple_tag(takes_context=True)
-def wpy_menu_content(context: page_context.TemplateContext, menu_id: str):
-    wpy_context: page_context.PageContext = context.get('wpy_context')
-    skin = wpy_context.skin
-    items = skin.get_menu_items(menu_id, wpy_context)
-    print(items)
-
-    return ''
-
-
-@register.simple_tag(takes_context=True)
-def wpy_menu_link(context: page_context.TemplateContext, link_type: str, special_page_id: str = None,
-                  no_redirect: bool = False, add_return_to: bool = False, no_red_link: bool = False,
-                  css_classes: str = None, special_page_subtitle: str = None, no_access_key: bool = False):
-    if link_type not in ['read', 'talk', 'edit', 'create', 'source', 'history', 'special', 'user_page', 'user_talk',
-                         'permalink']:
-        raise ValueError(f'invalid link type "{link_type}"')
-
-    wpy_context: page_context.PageContext = context.get('wpy_context')
-    language = wpy_context.language
-    access_key = None
-
-    params = {}
-    if add_return_to:
-        params['return_to'] = wpy_context.page.url_full_title
-
-    if link_type == 'special':
-        special_page = special_pages.get_special_page_for_id(special_page_id)
-        page_title = api.get_full_page_title(settings.SPECIAL_NS.id, special_page.get_title())
-        if special_page_subtitle:
-            page_title += '/' + special_page_subtitle
-        text = special_page.display_title(language)
-        tooltip = language.translate(f'special.{special_page_id}.tooltip', none_if_undefined=True) or text
-        icon = special_page.icon
-        access_key = special_page.access_key
-        if icon:
-            text = f'<span class="mdi mdi-{icon}"></span> ' + text
-    else:
-        page_title = wpy_context.page.full_title
-        text = language.translate(f'link.menu.{link_type}.label')
-        tooltip = language.translate(f'link.menu.{link_type}.tooltip')
-        ns_id, title = api.extract_namespace_and_title(page_title, ns_as_id=True)
-        if link_type == 'read':
-            ns_id = api.get_base_page_namespace(ns_id)
-            text = '<span class="mdi mdi-book-open-variant"></span> ' + text
-            access_key = 'v'
-        elif link_type == 'talk':
-            ns_id = api.get_talk_page_namespace(ns_id)
-            text = '<span class="mdi mdi-forum"></span> ' + text
-            access_key = 't'
-        elif link_type == 'user_page':
-            ns_id = settings.USER_NS.id
-            title = wpy_context.user.username
-            text = '<span class="mdi mdi-account"></span> ' + text
-            access_key = 'u'
-        elif link_type == 'user_talk':
-            ns_id = settings.USER_NS_TALK.id
-            title = wpy_context.user.username
-            text = '<span class="mdi mdi-forum"></span> ' + text
-            access_key = 'w'
-        elif link_type == 'permalink':
-            text = '<span class="mdi mdi-format-section"></span> ' + text
-            params['revision_id'] = wpy_context.revision.id
-        page_title = api.get_full_page_title(ns_id, title)
-
-        if link_type in ['edit', 'create', 'source']:
-            params['action'] = 'edit'
-            if isinstance(wpy_context, page_context.RevisionPageContext) and wpy_context.archived:
-                if revision := wpy_context.revision:
-                    params['revision_id'] = revision.id
-            text = '<span class="mdi mdi-file-document-edit"></span> ' + text
-            access_key = 'e'
-        elif link_type == 'history':
-            params['action'] = 'history'
-            text = '<span class="mdi mdi-history"></span> ' + text
-            access_key = 'h'
-
-        if no_redirect:
-            params['no_redirect'] = '1'
-
-    classes = css_classes.split() if css_classes else []
-    skin = wpy_context.skin
-    link = skin.format_internal_link(language, '', page_title, text=text, tooltip=tooltip, no_red_link=no_red_link,
-                                     css_classes=classes, access_key=access_key if not no_access_key else None,
-                                     **params)
-
-    return dj_safe.mark_safe(link)

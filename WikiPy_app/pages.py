@@ -103,7 +103,7 @@ def _get_special_page_context(
 ) -> typ.Tuple[page_context.PageContext, int]:
     base_title = api.get_special_page_title(title)
     sub_title = api.get_special_page_sub_title(title)
-    page, page_exists = api.get_page(settings.SPECIAL_NS.id, base_title)
+    page, page_exists = api.get_page(settings.SPECIAL_NS.id, title)
 
     if page_exists:
         special_page = special_pages.get_special_page(base_title)

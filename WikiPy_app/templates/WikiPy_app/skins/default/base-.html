@@ -1,17 +1,16 @@
 {% extends 'WikiPy_app/base.html' %}
-{% load wpy_skin_tags %}
+{% load static %}
 {% load wpy_tags %}
 
 {% block pre-content %}
   <nav id="wpy-header" class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">{# FIXME sticky-top #}
     <div class="container-fluid">
-      {% wpy_inner_link wpy_context.main_page_namespace wpy_context.main_page_title text=wpy_context.project_name tooltip='' ignore_current_title=True css_classes='navbar-brand' %}
+      {% wpy_inner_link wpy_context.main_page_namespace wpy_context.main_page_title text=wpy_context.project_name ignore_current_title=True css_classes='navbar-brand' %}
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#wpy-navbar-content"
               aria-controls="wpy-navbar-content" aria-expanded="false">
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      {# TODO abstraire #}
       <div class="collapse navbar-collapse" id="wpy-navbar-content">
         <form id="wpy-header-search-form" class="input-group mx-auto" method="get"
               action="{% wpy_inner_link namespace_id=-1 page_title='search' ignore_current_title=True only_url=True %}">
@@ -28,7 +27,6 @@
         </form>
 
         <ul class="navbar-nav ml-auto">
-          {# TODO abstraire #}
           {% if wpy_context.languages|length > 1 %}
             <li class="nav-item" id="wpy-language-select-item"
                 title="{% wpy_translate 'header.language_select.tooltip' %}">
@@ -56,19 +54,16 @@
               </a>
               <div class="dropdown-menu dropdown-menu-right" aria-labelledby="wpy-username-dropdown"
                    style="z-index: 9999;">{# FIXME marche pas à cause de position: sticky du menu #}
-                {% wpy_skin_render 'menu.user.items' links_class='dropdown-item' as menu_items %}
-                {% for menu_item in menu_items %}
-                  {% if forloop.last %}
-                    <div class="dropdown-divider"></div>
-                  {% endif %}
-                  {{ menu_item }}
-                {% endfor %}
+                {% wpy_menu_link link_type='user_page' css_classes='dropdown-item' %}
+                {% wpy_menu_link link_type='user_talk' css_classes='dropdown-item' %}
+                {% wpy_menu_link link_type='special' special_page_id='contributions' special_page_subtitle=wpy_context.user.username css_classes='dropdown-item' %}
+                <div class="dropdown-divider"></div>
+                {% wpy_menu_link link_type='special' special_page_id='logout' add_return_to=True css_classes='dropdown-item' %}
               </div>
             </li>
           {% else %}
             <li class="nav-item">
-              {% wpy_skin_render 'menu.user.items' links_class='nav-link' as menu_items %}
-              {{ menu_items.0 }}
+              {% wpy_menu_link link_type='special' special_page_id='login' add_return_to=True css_classes='nav-link' %}
             </li>
           {% endif %}
         </ul>
@@ -81,39 +76,50 @@
   {# TODO collapse on mobile #}
   <nav id="nav-bar-left" class="col">
     <div id="wpy-nav-bar-logo" class="card bg-light mb-3">
-      {% wpy_skin_render 'project_logo' image_class='card-img-top' %}
+      <a href="{% url 'wikipy:page' raw_page_title=wpy_context.main_page_full_title_url %}"
+         title="{% wpy_translate 'link.main_page.tooltip' %}">
+        <img src="{% static 'WikiPy_app/icons/wiki-logo.png' %}" class="card-img-top" alt="wiki logo"/>
+      </a>
     </div>
     <div id="wpy-nav-bar-navigation" class="card bg-light mb-3">
-      <div class="card-header">{% wpy_skin_render 'menu.side.navigation.title' %}</div>
+      <div class="card-header">{% wpy_translate 'menu.navigation' %}</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          {% wpy_skin_render 'menu.side.navigation.items' as menu_items %}
-          {% for menu_item in menu_items %}
-            <li>{{ menu_item }}</li>
-          {% endfor %}
+          <li>{% wpy_menu_link link_type='special' special_page_id='random_page' %}</li>
         </ul>
       </div>
     </div>
     <div id="wpy-nav-bar-wiki-tools" class="card bg-light mb-3">
-      <div class="card-header">{% wpy_skin_render 'menu.side.wiki_tools.title' %}</div>
+      <div class="card-header">{% wpy_translate 'menu.wiki_tools' %}</div>
       <div class="card-body">
         <ul class="list-unstyled">
-          {% wpy_skin_render 'menu.side.wiki_tools.items' as menu_items %}
-          {% for menu_item in menu_items %}
-            <li>{{ menu_item }}</li>
-          {% endfor %}
+          <li>{% wpy_menu_link link_type='special' special_page_id='special_pages' %}</li>
         </ul>
       </div>
     </div>
   </nav>
-
   <div id="center-col" class="col">
-  <ul id="wpy-article-nav-bar" class="nav nav-tabs justify-content-center sticky-top">
-    {% wpy_skin_render 'menu.page.items' links_class='nav-link' as page_items %}
-    {% for page_item in page_items %}
-      <li class="nav-item">{{ page_item }}</li>
-    {% endfor %}
-  </ul>
+  {% if wpy_context.page.namespace_id != -1 and wpy_context.mode != 'setup' %}
+    <ul id="wpy-article-nav-bar" class="nav nav-tabs justify-content-center sticky-top">
+      <li class="nav-item">{% wpy_menu_link link_type='read' css_classes='nav-link' %}</li>
+      <li class="nav-item">{% wpy_menu_link link_type='talk' css_classes='nav-link' %}</li>
+      {% if wpy_context.page_exists %}
+        {% if wpy_context.user_can_edit %}
+          <li class="nav-item">{% wpy_menu_link link_type='edit' css_classes='nav-link' %}</li>
+        {% elif wpy_context.user_can_read %}
+          <li class="nav-item">{% wpy_menu_link link_type='source' css_classes='nav-link' %}</li>
+        {% endif %}
+        {% if wpy_context.user_can_read %}
+          <li class="nav-item">{% wpy_menu_link link_type='history' css_classes='nav-link' %}</li>
+        {% endif %}
+      {% elif wpy_context.user_can_edit %}
+        <li class="nav-item">{% wpy_menu_link link_type='create' css_classes='nav-link' %}</li>
+      {% endif %}
+      {% if wpy_context.page.namespace_id == 6 %}
+        <li class="nav-item">{% wpy_menu_link link_type='special' special_page_id='contributions' special_page_subtitle=wpy_context.page.title no_access_key=True css_classes='nav-link' %}</li>
+      {% endif %}
+    </ul>
+  {% endif %}
 {% endblock pre-content %}
 
 {% block post-content %}
@@ -122,36 +128,36 @@
   <nav id="nav-bar-right" class="col">
     {% if wpy_context.mode != 'special' %}
       <div id="wpy-nav-bar-page-tools" class="card bg-light mb-3">
-        <div class="card-header">{% wpy_skin_render 'menu.side.page_tools.title' %}</div>
+        <div class="card-header">{% wpy_translate 'menu.page_tools' %}</div>
         <div class="card-body">
           <ul class="list-unstyled">
-            {% wpy_skin_render 'menu.side.page_tools.items' as menu_items %}
-            {% for menu_item in menu_items %}
-              <li>{{ menu_item }}</li>
-            {% endfor %}
+            {% if wpy_context.page_exists %}
+              <li>{% wpy_menu_link link_type='special' special_page_id='delete_page' special_page_subtitle=wpy_context.page.full_title %}</li>
+              <li>{% wpy_menu_link link_type='special' special_page_id='rename_page' special_page_subtitle=wpy_context.page.full_title %}</li>
+            {% endif %}
+            <li>{% wpy_menu_link link_type='special' special_page_id='protect_page' special_page_subtitle=wpy_context.page.full_title %}</li>
           </ul>
         </div>
       </div>
       <div id="wpy-nav-bar-more-page-tools" class="card bg-light mb-3">
-        <div class="card-header">{% wpy_skin_render 'menu.side.more_tools.title' %}</div>
+        <div class="card-header">{% wpy_translate 'menu.more_tools' %}</div>
         <div class="card-body">
           <ul class="list-unstyled">
-            {% wpy_skin_render 'menu.side.more_tools.items' as menu_items %}
-            {% for menu_item in menu_items %}
-              <li>{{ menu_item }}</li>
-            {% endfor %}
+            <li>{% wpy_menu_link link_type='special' special_page_id='linked_pages' special_page_subtitle=wpy_context.page.full_title %}</li>
+            {% if wpy_context.page_exists and wpy_context.revision and wpy_context.mode == 'read' %}
+              <li>{% wpy_menu_link link_type='permalink' %}</li>
+            {% endif %}
+            <li>{% wpy_menu_link link_type='special' special_page_id='page_information' special_page_subtitle=wpy_context.page.full_title %}</li>
+            <li>{% wpy_menu_link link_type='special' special_page_id='journals' special_page_subtitle=wpy_context.page.full_title %}</li>
           </ul>
         </div>
       </div>
       {% if wpy_context.categories %}
         <div id="wpy-nav-bar-categories" class="card bg-light mb-3">
-          <div class="card-header">{% wpy_skin_render 'menu.side.categories.title' %}</div>
+          <div class="card-header">{% wpy_translate 'menu.categories' %}</div>
           <div class="card-body">
             <ul class="list-unstyled">
-              {% wpy_skin_render 'menu.side.categories.items' as menu_items %}
-              {% for menu_item in menu_items %}
-                <li>{{ menu_item }}</li>
-              {% endfor %}
+              {# TODO #}
             </ul>
           </div>
         </div>
@@ -162,7 +168,7 @@
   </div>
   <footer id="wpy-footer" class="py-4 bg-dark text-white-50">
     <div class="container-fluid">
-      {% wpy_skin_render 'footer' %}
+      TODO {# TODO footer #}
     </div>
   </footer>
 {% endblock post-content %}

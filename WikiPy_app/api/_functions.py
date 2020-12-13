@@ -11,7 +11,7 @@ import django.core.validators as dj_valid
 import django.db.models as dj_db
 
 from . import _errors, _diff
-from .. import models, skins, settings, special_pages, parser, media_backends, util
+from .. import models, settings, special_pages, parser, media_backends, util
 
 DiffType = _diff.DiffType
 
@@ -78,7 +78,7 @@ def create_user(username: str, is_male: bool = None, email: str = None, password
 
     talk_text = settings.i18n.get_language(settings.DEFAULT_LANGUAGE_CODE).translate('link.talk')
     user_ns = settings.USER_NS.get_name(local=True)
-    user_talk_ns = settings.USER_NS_TALK.get_name(local=True)
+    user_talk_ns = settings.USER_TALK_NS.get_name(local=True)
     kwargs = {
         'user': dj_user,
         'is_male': is_male,
@@ -277,7 +277,7 @@ def get_actual_page_title(raw_title: str) -> str:
             if sub_title:
                 title += '/' + sub_title
     # Convert first letter to caps if case sensitivity is disabled and not a user page/talk page
-    elif not settings.CASE_SENSITIVE_TITLE and namespace_id not in (settings.USER_NS.id, settings.USER_NS_TALK.id):
+    elif not settings.CASE_SENSITIVE_TITLE and namespace_id not in (settings.USER_NS.id, settings.USER_TALK_NS.id):
         title = title[0].upper() + title[1:]
 
     return get_full_page_title(namespace_id, title)
@@ -368,7 +368,7 @@ def get_diff(revision_id1: int, revision_id2: int, current_user: models.User, es
 
 
 def paginate(values: typ.Iterable[typ.Any], url_params: typ.Dict[str, str]) -> typ.Tuple[dj_page.Paginator, int]:
-    page = min(1, util.get_param(url_params, 'page', expected_type=int, default=1))
+    page = max(1, util.get_param(url_params, 'page', expected_type=int, default=1))
     number_per_page = min(500, max(1, util.get_param(url_params, 'limit', expected_type=int, default=50)))
 
     return dj_page.Paginator(values, number_per_page), page

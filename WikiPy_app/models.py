@@ -294,13 +294,13 @@ class User:
         return any(map(lambda g: g.has_right_on_pages_in_namespace(right, namespace_id, title), self.__data.groups))
 
     def can_read_page(self, namespace_id: int, title: str) -> bool:  # TODO prendre en compte les blocages
-        return (namespace_id in [settings.USER_NS.id, settings.USER_NS_TALK.id] and
+        return (namespace_id in [settings.USER_NS.id, settings.USER_TALK_NS.id] and
                 re.fullmatch(fr'{self.username}(/.*)?', title) or
                 self.has_right(settings.RIGHT_EDIT_USER_PAGES) or
                 any(map(lambda g: g.can_read_pages_in_namespace(namespace_id), self.__data.groups)))
 
     def can_edit_page(self, namespace_id: int, title: str) -> bool:  # TODO prendre en compte les blocages
-        return (namespace_id in [settings.USER_NS.id, settings.USER_NS_TALK.id] and
+        return (namespace_id in [settings.USER_NS.id, settings.USER_TALK_NS.id] and
                 re.fullmatch(fr'{self.username}(/.*)?', title) or
                 self.has_right(settings.RIGHT_EDIT_USER_PAGES) or
                 any(map(lambda g: g.can_edit_pages_in_namespace(namespace_id), self.__data.groups)))
