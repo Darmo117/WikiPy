@@ -5,7 +5,7 @@ import django.template as dj_template
 import django.templatetags.static as dj_static
 import django.utils.safestring as dj_safe
 
-from .. import page_context
+from .. import api, page_context
 
 register = dj_template.Library()
 
@@ -28,7 +28,13 @@ def wpy_skin_render(context: page_context.TemplateContext, key: str, **kwargs: t
               f'<img src="{image_source}" class="{image_class}" alt="wiki logo" id="wpy-wiki-logo"/></a>'
 
     elif key == 'footer':
-        pass
+        res = ''
+        if wpy_context.page.latest_revision:
+            formatted_date = api.format_datetime(wpy_context.page.latest_revision.date, wpy_context.user, language)
+            last_edit = language.translate('footer.last_edit', date=formatted_date)
+            res = f'<p>{last_edit}</p>'
+        license_ = language.translate('footer.license')
+        res += f'<p>{license_}</p>'
 
     else:
         levels = key.split('.')

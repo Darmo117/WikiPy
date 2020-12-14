@@ -4,27 +4,27 @@
   "writing_direction": "ltr",
   "main_namespace_name": "Main",
   "month_names": [
-    ["January", "Jan"],
-    ["February", "Feb"],
-    ["March", "Mar"],
-    ["April", "Apr"],
+    ["January", "Jan."],
+    ["February", "Feb."],
+    ["March", "Mar."],
+    ["April", "Apr."],
     ["May", "May"],
-    ["June", "Jun"],
-    ["July", "Jul"],
-    ["August", "Aug"],
-    ["September", "Sep"],
-    ["October", "Oct"],
-    ["November", "Nov"],
-    ["December", "Dec"]
+    ["June", "Jun."],
+    ["July", "Jul."],
+    ["August", "Aug."],
+    ["September", "Sep."],
+    ["October", "Oct."],
+    ["November", "Nov."],
+    ["December", "Dec."]
   ],
   "day_names": [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday"
+    ["Monday", "Mon"],
+    ["Tuesday", "Tue"],
+    ["Wednesday", "Wed"],
+    ["Thursday", "Thu"],
+    ["Friday", "Fri"],
+    ["Saturday", "Sat"],
+    ["Sunday", "Sun"]
   ],
   "datetime_formats": [
     "%B %d, %Y at %H:%M",
@@ -36,6 +36,7 @@
     "%Y %B %d at %I:%M %p",
     "%Y-%m-%dT%H:%I:%S %p"
   ],
+  "default_datetime_format": 0,
   "mappings": {
     "group": {
       "all": "All",
@@ -66,8 +67,8 @@
       }
     },
     "footer": {
-      "last_edit": "Page last edited on $date",
-      "license": "Text is available under the $license_link; additional terms may apply. By using this site, you agree to the $tou_link and $policy_link."
+      "last_edit": "Page last edited on $date.",
+      "license": "Text is available under the <a href=\"https://creativecommons.org/licenses/by-sa/3.0/\">Creative Commons Attribution-ShareAlike License</a> unless otherwise noted. Other licenses may apply to multimedia content (click on each file for more details)."
     },
     "title": {
       "edit": "Editing “$page_title”",
@@ -393,6 +394,7 @@
         }
       },
       "contributions": {
+        "display_title": "Contributions",
         "title_user": "Contributions of user “$username”",
         "tooltip": "See the list of contributions",
         "form": {
@@ -437,8 +439,20 @@
           }
         }
       },
+      "preferences": {
+        "display_title": "Preferences",
+        "tooltip": "Your preferences",
+        "form": {
+          "prefered_language": {
+            "label": "Prefered language"
+          },
+          "submit": {
+            "label": "Save changes"
+          }
+        }
+      },
       "page_differences": {
-        "title": "Page differences",
+        "display_title": "Page differences",
         "title_same_page": "Differences between revisions of “$page_title”",
         "title_two_pages": "Differences between revisions of “$page_title1” and “$page_title2”",
         "nb_not_shown": "$nb intermediate revision(s) not shown",

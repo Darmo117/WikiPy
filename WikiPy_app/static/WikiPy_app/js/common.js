@@ -166,27 +166,34 @@
     url.search = params.toString();
   }
 
-  // Language select handler
-  $("#wpy-language-select").change(function () {
-    let language = $(this).val();
-    let url = new URL(location.href);
-    addLanguageParam(url, language);
-    location.href = url.toString();
-  });
+  let $languageSelector = $("#wpy-language-select");
 
-  let language = new URL(location.href).searchParams.get("use_lang");
+  if ($languageSelector.length) {
+    // Select current language
+    $languageSelector.val(wpy.config.get("wpyLanguageCode"));
 
-  if (language) {
-    // Add use_lang parameter to all internal links that are not dropdown toggles
-    $("a:not([data-toggle])").each(function () {
-      let $anchor = $(this);
-      let href = $anchor.prop("href");
-
-      if (href) {
-        let url = new URL(href);
-        addLanguageParam(url, language);
-        $anchor.prop("href", url.toString());
-      }
+    // Language select handler
+    $languageSelector.change(function () {
+      let language = $(this).val();
+      let url = new URL(location.href);
+      addLanguageParam(url, language);
+      location.href = url.toString();
     });
+
+    let language = new URL(location.href).searchParams.get("use_lang");
+
+    if (language) {
+      // Add use_lang parameter to all internal links that are not dropdown toggles
+      $("a:not([data-toggle])").each(function () {
+        let $anchor = $(this);
+        let href = $anchor.prop("href");
+
+        if (href) {
+          let url = new URL(href);
+          addLanguageParam(url, language);
+          $anchor.prop("href", url.toString());
+        }
+      });
+    }
   }
 })();

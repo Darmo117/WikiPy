@@ -175,7 +175,7 @@ class UserData(LockableModel, dj_models.Model):
     skin = dj_models.CharField(max_length=50, default='default')
     lang_code = dj_models.CharField(max_length=10, default=settings.DEFAULT_LANGUAGE_CODE)
     timezone = dj_models.CharField(max_length=50)
-    datetime_format_id = dj_models.IntegerField()
+    datetime_format_id = dj_models.IntegerField(null=True, default=None)
     signature = dj_models.CharField(max_length=100)
 
     @property
@@ -196,10 +196,10 @@ class UserData(LockableModel, dj_models.Model):
     def prefered_language(self) -> settings.i18n.Language:
         return settings.i18n.get_language(self.lang_code)
 
-    @property
-    def datetime_format(self):
+    def get_datetime_format(self, default: int) -> str:
         formats = self.prefered_language.datetime_formats
-        return formats[self.datetime_format_id % len(formats)]
+        format_id = self.datetime_format_id if self.datetime_format_id is not None else default
+        return formats[format_id % len(formats)]
 
     def __str__(self):
         return repr(self)
@@ -261,10 +261,6 @@ class User:
             return settings.i18n.get_language(settings.DEFAULT_LANGUAGE_CODE)
 
     @property
-    def datetime_format(self):
-        return self.data.datetime_format
-
-    @property
     def groups(self) -> typ.List[settings.UserGroup]:
         return self.__data.groups
 
@@ -283,6 +279,9 @@ class User:
     @property
     def is_logged_in(self) -> bool:
         return self.__django_user.is_authenticated and not self.is_anonymous
+
+    def get_datetime_format(self, default: int) -> str:
+        return self.data.get_datetime_format(default)
 
     def is_in_group(self, group_id: str) -> bool:
         return self.__data.is_in_group(group_id)

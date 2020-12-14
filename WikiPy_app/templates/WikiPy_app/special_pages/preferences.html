@@ -1,0 +1,34 @@
+{% load wpy_tags %}
+
+{% if wpy_context.contribs_target_username %}
+  <div class="text-center">
+    <span class="wpy-contributions-userlink">{% wpy_user_link wpy_context.contribs_target_username full=True %}</span>
+  </div>
+  <hr/>
+{% endif %}
+<form id="wpy-prefs-form" method="post">
+  {% with form=wpy_context.prefs_form trans_prefix='special.preferences.form.' %}
+    <div class="form-group row">
+      <label for="{{ form.prefered_language.id_for_label }}" class="col-sm-2 col-form-label">
+        {% wpy_translate trans_prefix|add:'prefered_language.label' %}
+      </label>
+      <div class="col-sm-5">
+        {{ form.prefered_language }}
+        {% if form.prefered_language.errors %}
+          <div class="invalid-feedback" style="display: block">
+            {% for error in form.prefered_language.errors.as_data %}
+              {% wpy_translate trans_prefix|add:'prefered_language.error.'|add:error.code %}
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% csrf_token %}
+
+    <div class="text-center">
+      <input type="submit" id="wpy-prefs-form-submit" class="btn btn-primary"
+             value="{% wpy_translate trans_prefix|add:'submit.label' %}"/>
+    </div>
+  {% endwith %}
+</form>

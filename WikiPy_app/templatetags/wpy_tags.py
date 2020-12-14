@@ -46,7 +46,8 @@ def wpy_render(context: page_context.TemplateContext, wikicode: str):
 
 @register.simple_tag(takes_context=True)
 def wpy_format_date(context: page_context.TemplateContext, date):
-    return dj_safe.mark_safe(api.format_datetime(date, context.get('wpy_context').user))
+    return dj_safe.mark_safe(
+        api.format_datetime(date, context.get('wpy_context').user, context['wpy_context'].language))
 
 
 @register.simple_tag(takes_context=True)
@@ -335,7 +336,7 @@ def _revisions_list(context: page_context.TemplateContext, mode: str):
         for revision in paginator.get_page(wpy_context.paginator_page).object_list:
             full_title = revision.page.full_title
             revision_link = skin.format_internal_link(language, current_page_title, full_title,
-                                                      text=api.format_datetime(revision.date, current_user),
+                                                      text=api.format_datetime(revision.date, current_user, language),
                                                       tooltip=full_title, revision_id=revision.id)
             user_link = wpy_user_link(context, revision.author.username)
             revisions_.append((revision, revision_link, user_link))

@@ -13,8 +13,7 @@ class ContributionsPageContext(page_context.PageContext):
     contribs_form_global_errors: typ.List[str]
 
     def __init__(self, context: page_context.PageContext, /, contribs_target_username: str,
-                 contribs_results_found: bool, form: forms.ContributionsForm = None,
-                 global_errors: typ.List[str] = None):
+                 contribs_results_found: bool, form: forms.ContributionsForm, global_errors: typ.List[str]):
         self._context = context
         self.contribs_target_username = contribs_target_username
         self.contribs_results_found = contribs_results_found

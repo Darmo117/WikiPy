@@ -15,9 +15,10 @@ class Language:
     name: str
     writing_direction: str
     main_namespace_name: str
+    default_datetime_format_id: int
     datetime_formats: typ.Tuple[str]
     month_names: typ.Tuple[typ.Tuple[str, str]]
-    day_names: typ.Tuple[str]
+    day_names: typ.Tuple[typ.Tuple[str, str]]
     _mappings: typ.Dict[str, str]
 
     def get_month_name(self, index) -> str:
@@ -27,7 +28,10 @@ class Language:
         return self.month_names[index - 1][1]
 
     def get_day_name(self, index) -> str:
-        return self.day_names[index - 1]
+        return self.day_names[index - 1][0]
+
+    def get_day_abbreviation(self, index) -> str:
+        return self.day_names[index - 1][1]
 
     def translate(self, key: str, *, none_if_undefined=False, **kwargs) -> typ.Optional[str]:
         value = self._mappings.get(key, key if not none_if_undefined else None)
@@ -52,17 +56,29 @@ def load_languages(base_dir: str):
             lang_code = str(json_obj['code'])
             writing_direction = str(json_obj['writing_direction'])
             main_ns = str(json_obj['main_namespace_name'])
+            defaut_format = int(json_obj['default_datetime_format'])
             formats = list(map(str, json_obj['datetime_formats']))
             _check_datetime_formats(formats, lang_code)
             # noinspection PyTypeChecker
-            months: typ.Tuple[typ.Tuple[str, str]] = tuple(tuple(map(str, name)) for name in json_obj['month_names'])
+            months: typ.Tuple[typ.Tuple[str, str], ...] = \
+                tuple(tuple(map(str, name)) for name in json_obj['month_names'])
             _check_month_names(months, lang_code)
-            days = tuple(map(str, json_obj['day_names']))
+            # noinspection PyTypeChecker
+            days: typ.Tuple[typ.Tuple[str, str], ...] = \
+                tuple(tuple(map(str, name)) for name in json_obj['day_names'])
             _check_day_names(days, lang_code)
             mappings = _build_mapping(json_obj['mappings'])
-            _LANGUAGES[lang_code] = Language(code=lang_code, name=lang_name, writing_direction=writing_direction,
-                                             main_namespace_name=main_ns, datetime_formats=tuple(formats),
-                                             month_names=months, day_names=days, _mappings=mappings)
+            _LANGUAGES[lang_code] = Language(
+                code=lang_code,
+                name=lang_name,
+                writing_direction=writing_direction,
+                main_namespace_name=main_ns,
+                default_datetime_format_id=defaut_format,
+                datetime_formats=tuple(formats),
+                month_names=months,
+                day_names=days,
+                _mappings=mappings
+            )
 
 
 def _check_datetime_formats(formats: typ.Sequence[str], lang_code: str):
@@ -88,6 +104,9 @@ def _check_month_names(names: typ.Sequence, lang_code: str):
 def _check_day_names(names: typ.Sequence, lang_code: str):
     if len(names) != 7:
         raise ValueError(f'invalid number of day name entries ({len(names)}) for language "{lang_code}"')
+    for e in names:
+        if len(e) != 2:
+            raise ValueError(f'invalid day name entry for language "{lang_code}"')
 
 
 def get_language(code: str) -> typ.Optional[Language]:

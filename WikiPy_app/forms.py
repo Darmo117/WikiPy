@@ -6,7 +6,7 @@ import django.forms as dj_forms
 from . import api, settings
 
 
-def _init_choices(add_all: bool) -> typ.Iterable[typ.Tuple[str, str]]:
+def _init_namespace_choices(add_all: bool) -> typ.Iterable[typ.Tuple[str, str]]:
     choices = []
 
     if add_all:
@@ -26,6 +26,15 @@ def _init_choices(add_all: bool) -> typ.Iterable[typ.Tuple[str, str]]:
         return k
 
     return sorted(choices, key=sort)
+
+
+def _init_language_choices() -> typ.Iterable[typ.Tuple[str, str]]:
+    choices = []
+
+    for code, language in settings.i18n.get_languages().items():
+        choices.append((code, f'{code} - {language.name}'))
+
+    return sorted(choices)
 
 
 class WikiPyForm(dj_forms.Form):
@@ -127,7 +136,7 @@ class ContributionsForm(WikiPyForm):
         validators=[api.log_in_username_validator]
     )
     namespace = dj_forms.ChoiceField(
-        choices=_init_choices(add_all=True),
+        choices=_init_namespace_choices(add_all=True),
         label='namespace',
         required=False
     )
@@ -160,6 +169,17 @@ class ContributionsForm(WikiPyForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__('contribs', *args, **kwargs)
+
+
+class PreferencesForm(WikiPyForm):
+    prefered_language = dj_forms.ChoiceField(
+        choices=_init_language_choices(),
+        label='prefered_language',
+        required=True
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__('prefs', *args, **kwargs)
 
 
 class EditPageForm(WikiPyForm):
@@ -203,7 +223,7 @@ class SearchPageForm(WikiPyForm):
     )
     namespaces = dj_forms.MultipleChoiceField(
         label='namespaces',
-        choices=_init_choices(add_all=False)
+        choices=_init_namespace_choices(add_all=False)
     )
 
     def __init__(self, *args, **kwargs):

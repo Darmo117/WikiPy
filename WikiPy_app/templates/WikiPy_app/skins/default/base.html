@@ -108,19 +108,21 @@
   </nav>
 
   <div id="center-col" class="col">
-  <ul id="wpy-article-nav-bar" class="nav nav-tabs justify-content-center sticky-top">
-    {% wpy_skin_render 'menu.page.items' links_class='nav-link' as page_items %}
-    {% for page_item in page_items %}
-      <li class="nav-item">{{ page_item }}</li>
-    {% endfor %}
-  </ul>
+  {% if wpy_context.mode != 'special' and wpy_context.mode != 'setup' %}
+    <ul id="wpy-article-nav-bar" class="nav nav-tabs justify-content-center sticky-top">
+      {% wpy_skin_render 'menu.page.items' links_class='nav-link' as page_items %}
+      {% for page_item in page_items %}
+        <li class="nav-item">{{ page_item }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
 {% endblock pre-content %}
 
 {% block post-content %}
   </div>
   {# TODO collapse on mobile #}
   <nav id="nav-bar-right" class="col">
-    {% if wpy_context.mode != 'special' %}
+    {% if wpy_context.mode != 'special' and wpy_context.mode != 'setup' %}
       <div id="wpy-nav-bar-page-tools" class="card bg-light mb-3">
         <div class="card-header">{% wpy_skin_render 'menu.side.page_tools.title' %}</div>
         <div class="card-body">

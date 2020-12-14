@@ -57,11 +57,11 @@ a.wpy-redlink {
   margin-bottom: 10px;
 }
 
-#wpy-revision-tags-legend-box .card-header .fa {
+#wpy-revision-tags-legend-box .card-header .mdi {
   transition: .3s transform ease-in-out;
 }
 
-#wpy-revision-tags-legend-box .card-header .collapsed .fa {
+#wpy-revision-tags-legend-box .card-header .collapsed .mdi {
   transform: rotate(90deg);
 }
 

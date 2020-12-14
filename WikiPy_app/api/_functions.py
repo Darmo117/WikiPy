@@ -76,7 +76,8 @@ def create_user(username: str, is_male: bool = None, email: str = None, password
     dj_user = dj_auth.get_user_model().objects.create_user(username, email=email, password=password)
     dj_user.save()
 
-    talk_text = settings.i18n.get_language(settings.DEFAULT_LANGUAGE_CODE).translate('link.talk')
+    language = settings.i18n.get_language(settings.DEFAULT_LANGUAGE_CODE)
+    talk_text = language.translate('link.talk')
     user_ns = settings.USER_NS.get_name(local=True)
     user_talk_ns = settings.USER_TALK_NS.get_name(local=True)
     kwargs = {
@@ -84,7 +85,6 @@ def create_user(username: str, is_male: bool = None, email: str = None, password
         'is_male': is_male,
         'ip_address': ip if anonymous else None,
         'timezone': settings.TIME_ZONE,
-        'datetime_format_id': 0,
         'signature': f'[[{user_ns}:{username}|{username}]] ([[{user_talk_ns}:{username}|{talk_text}]])',
     }
     data = models.UserData(**kwargs)
@@ -294,9 +294,9 @@ def get_special_page_sub_title(title: str) -> str:
 
 def get_page_content_type(content_model: str) -> str:
     return {
-        'wiki_page': 'text/plain',
-        'css': 'text/css',
-        'js': 'application/javascript',
+        settings.PAGE_TYPE_WIKI: 'text/plain',
+        settings.PAGE_TYPE_STYLESHEET: 'text/css',
+        settings.PAGE_TYPE_JAVASCRIPT: 'application/javascript',
     }.get(content_model, 'text/plain')
 
 
@@ -480,9 +480,21 @@ def get_redirect(wikicode: str) -> typ.Optional[typ.Tuple[str, typ.Optional[str]
     return parser.WikicodeParser.get_redirect(wikicode)
 
 
-def format_datetime(datetime: dt.datetime, current_user: models.User):
-    # TODO traduire le nom des mois
-    return datetime.strftime(current_user.datetime_format)
+def format_datetime(datetime: dt.datetime, current_user: models.User, language: settings.i18n.Language) -> str:
+    weekday = datetime.weekday() + 1  # Monday is 0
+    month = datetime.month  # January is 1
+
+    # Translate week day and month tags using current display language and not Python locale
+    format_ = current_user.get_datetime_format(default=language.default_datetime_format_id) \
+        .replace('%a', language.get_day_abbreviation(weekday).replace('%', '%%')) \
+        .replace('%A', language.get_day_name(weekday).replace('%', '%%')) \
+        .replace('%b', language.get_month_abbreviation(month).replace('%', '%%')) \
+        .replace('%B', language.get_month_name(month).replace('%', '%%'))
+    # Disabled tags
+    for tag_name in 'cxX':
+        format_ = format_.replace('%' + tag_name, '%%' + tag_name)
+
+    return datetime.strftime(format_)
 
 
 _MEDIA_BACKEND = media_backends.get_backend(settings.MEDIA_BACKEND_ID)

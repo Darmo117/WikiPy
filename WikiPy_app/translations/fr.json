@@ -4,27 +4,27 @@
   "writing_direction": "ltr",
   "main_namespace_name": "Principal",
   "month_names": [
-    ["Janvier", "Jan"],
-    ["Février", "Fév"],
-    ["Mars", "Mar"],
-    ["Avril", "Avr"],
-    ["Mai", "Mai"],
-    ["Juin", "Jui"],
-    ["Juillet", "Juil"],
-    ["Aout", "Aou"],
-    ["Septembre", "Sep"],
-    ["Octobre", "Oct"],
-    ["Novembre", "Nov"],
-    ["Décembre", "Déc"]
+    ["janvier", "janv."],
+    ["février", "févr."],
+    ["mars", "mars"],
+    ["avril", "avr."],
+    ["mai", "mai"],
+    ["juin", "juin"],
+    ["juillet", "juill."],
+    ["aout", "aout"],
+    ["septembre", "sept."],
+    ["octobre", "oct."],
+    ["novembre", "nov."],
+    ["décembre", "déc."]
   ],
   "day_names": [
-    "Lundi",
-    "Mardi",
-    "Mercredi",
-    "Jeudi",
-    "Vendredi",
-    "Samedi",
-    "Dimanche"
+    ["lundi", "lun."],
+    ["mardi", "mar."],
+    ["mercredi", "mer."],
+    ["jeudi", "jeu."],
+    ["vendredi", "ven."],
+    ["samedi", "sam."],
+    ["dimanche", "dim."]
   ],
   "datetime_formats": [
     "%B %d, %Y à %H:%M",
@@ -32,6 +32,7 @@
     "%Y %B %d à %H:%M",
     "%Y-%m-%dT%H:%M:%S"
   ],
+  "default_datetime_format": 1,
   "mappings": {
     "group": {
       "all": "Tous",
@@ -62,8 +63,8 @@
       }
     },
     "footer": {
-      "last_edit": "Dernière modification le $date",
-      "license": "Les textes sont disponibles sous licence $license_link ; d’autres termes peuvent s’appliquer. Voyez les $tou_link pour plus de détails et la $policy_link."
+      "last_edit": "Dernière modification le $date.",
+      "license": "Les textes sont disponibles sous <a href=\"https://creativecommons.org/licenses/by-sa/3.0/deed.fr\">licence Creative Commons attribution partage à l’identique</a> si non précisé. D’autres licences peuvent s’appliquer aux contenus multimédias (cliquer sur chaque fichier)."
     },
     "title": {
       "edit": "Modification de «\u00a0$page_title\u00a0»",
@@ -431,6 +432,18 @@
           },
           "submit": {
             "label": "Rechercher"
+          }
+        }
+      },
+      "preferences": {
+        "display_title": "Préférences",
+        "tooltip": "Vos préférences",
+        "form": {
+          "prefered_language": {
+            "label": "Langue préférée"
+          },
+          "submit": {
+            "label": "Sauvegarder les changements"
           }
         }
       },

@@ -16,7 +16,7 @@ EDIT = 'edit'
 SUBMIT = 'submit'
 HISTORY = 'history'
 SPECIAL = 'special'
-_SETUP = 'setup'
+SETUP = 'setup'
 
 
 def get_main_page_title() -> str:
@@ -27,7 +27,7 @@ def get_setup_page_context(user: models.User, language: settings.i18n.Language) 
     page, _ = api.get_page(settings.SPECIAL_NS.id, 'Setup')
     return _get_base_page_context(
         page=page,
-        mode=_SETUP,
+        mode=SETUP,
         user=user,
         language=language,
         content_language=language,
@@ -492,7 +492,7 @@ def _get_base_page_context(
         page=page,
         mode=mode,
         noindex=noindex,
-        show_title=not is_main_page or not settings.HIDE_TITLE_ON_MAIN_PAGE or not page_exists,
+        show_title=not is_main_page or not settings.HIDE_TITLE_ON_MAIN_PAGE or not page_exists or mode != READ,
         user=user,
         skin=skins.get_skin(user.data.skin),  # TODO add url param use_skin=<skin_name>
         language=language,

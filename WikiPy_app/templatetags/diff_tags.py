@@ -36,7 +36,7 @@ def diff_header(context: page_context.TemplateContext, revision: models.PageRevi
     else:
         page_link += ' ({})'.format(history_link)
 
-    revision_date = api.format_datetime(revision.date, current_user)
+    revision_date = api.format_datetime(revision.date, current_user, language)
     revision_link = skin.format_internal_link(language, current_title, page_title, revision_date, page_title,
                                               revision_id=revision.id)
     revision_link += ' ({})'.format(wpy_tags.wpy_edit_link(context, revision, ignore_revision_id=False))

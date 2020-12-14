@@ -12,7 +12,7 @@ import django.urls as dj_urls
 import django.utils.safestring as dj_safe
 from django.conf import settings as dj_settings
 
-from .. import api, apps, settings, special_pages
+from .. import api, apps, settings, special_pages, page_context
 
 
 @dataclasses.dataclass(frozen=True)
@@ -26,6 +26,7 @@ class MenuItem:
     add_return_to: bool = False
     requires_page_exists: bool = False
     requires_user_page: bool = False
+    requires_not_special_page: bool = False
     requires_logged_in: bool = False
     requires_logged_out: bool = False
     requires_user_can_read: bool = False
@@ -54,6 +55,7 @@ class PageTemplate:
                         'add_user_name': bool(item.get('add_user_name', False)),
                         'add_return_to': bool(item.get('add_return_to', False)),
                         'requires_page_exists': bool(item.get('requires_page_exists', False)),
+                        'requires_not_special_page': bool(item.get('requires_not_special_page', False)),
                         'requires_user_page': bool(item.get('requires_user_page', False)),
                         'requires_logged_in': bool(item.get('requires_logged_in', False)),
                         'requires_logged_out': bool(item.get('requires_logged_out', False)),
@@ -83,12 +85,12 @@ class PageTemplate:
 
         def f(item: MenuItem) -> bool:
             return ((not item.requires_page_exists or context.page_exists) and
+                    (not item.requires_not_special_page or context.page.namespace.id != settings.SPECIAL_NS.id) and
                     (not item.requires_user_page or context.page.namespace.id in [settings.USER_NS.id,
                                                                                   settings.USER_TALK_NS.id]) and
                     (not item.requires_logged_in or context.user.is_logged_in) and
                     (not item.requires_logged_out or not context.user.is_logged_in) and
-                    (not item.requires_user_can_read or context.user_can_read) and
-                    (menu_id != 'page' or context.page.namespace_id != -1 and context.mode != 'setup'))
+                    (not item.requires_user_can_read or context.user_can_read))
 
         return list(filter(f, self.__menus_links.get(menu_id, [])))
 
@@ -126,7 +128,7 @@ class Skin(abc.ABC):
         :return: The list of items for the given menu ID.
         """
         rendered_items = []
-        c = context['wpy_context']
+        c: page_context.PageContext = context['wpy_context']
 
         for item in _PAGE_TEMPLATE.get_menu_items(menu_id, c):
             args = {}
@@ -134,10 +136,10 @@ class Skin(abc.ABC):
             if item.is_special:
                 page = special_pages.get_special_page_for_id(item.item_id)
                 ns_id = settings.SPECIAL_NS.id
-                title = page.title
+                title = page.get_title()
                 icon = page.icon
                 access_key = page.access_key
-                text = page.get_title()
+                text = page.display_title(c.language)
                 tooltip = c.language.translate(f'special.{page.id}.tooltip', none_if_undefined=True) or text
 
             else:

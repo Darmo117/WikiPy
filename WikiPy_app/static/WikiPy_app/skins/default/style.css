@@ -71,13 +71,13 @@ a.wpy-redlink {
 #wpy-main-title {
   text-align: center;
   border-bottom: gray solid 4px;
+  margin-top: 10px;
 }
 
 #wpy-article {
   padding: 0 15px;
 }
 
-#wpy-main-title,
 #wpy-content {
   margin-top: 30px;
 }
