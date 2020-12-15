@@ -25,12 +25,12 @@ class Namespace:
         return self.__name
 
     @property
-    def feminine_name(self):
-        return self.__feminine_name if self.__feminine_name else self.__name
+    def feminine_name(self) -> typ.Optional[str]:
+        return self.__feminine_name
 
     @property
-    def masculine_name(self):
-        return self.__masculine_name if self.__masculine_name else self.__name
+    def masculine_name(self) -> typ.Optional[str]:
+        return self.__masculine_name
 
     @property
     def alias(self) -> typ.Optional[str]:
@@ -41,15 +41,17 @@ class Namespace:
         return self.__is_talk
 
     def get_name(self, local: bool, gender: bool = None, as_url: bool = False) -> str:
-        name = self.__canonical_name
+        name = None
 
         if local:
             if gender:
-                name = self.feminine_name
+                name = self.__feminine_name or self.__name
             elif gender is not None:
-                name = self.masculine_name
+                name = self.__masculine_name or self.__name
             elif self.__name is not None:
                 name = self.__name
+        if name is None:
+            name = self.__canonical_name
 
         if as_url:
             from .. import api

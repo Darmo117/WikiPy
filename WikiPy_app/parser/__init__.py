@@ -346,7 +346,7 @@ class WikicodeParser:
         if tag:
             buffer = tag.open_delimiter + buffer
         new_paragraph(buffer)
-        print(nodes)  # DEBUG
+        print('Parser nodes:', nodes)  # DEBUG
 
         return nodes
 
