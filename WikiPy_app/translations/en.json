@@ -4,27 +4,84 @@
   "writing_direction": "ltr",
   "main_namespace_name": "Main",
   "month_names": [
-    ["January", "Jan."],
-    ["February", "Feb."],
-    ["March", "Mar."],
-    ["April", "Apr."],
-    ["May", "May"],
-    ["June", "Jun."],
-    ["July", "Jul."],
-    ["August", "Aug."],
-    ["September", "Sep."],
-    ["October", "Oct."],
-    ["November", "Nov."],
-    ["December", "Dec."]
+    [
+      "January",
+      "Jan."
+    ],
+    [
+      "February",
+      "Feb."
+    ],
+    [
+      "March",
+      "Mar."
+    ],
+    [
+      "April",
+      "Apr."
+    ],
+    [
+      "May",
+      "May"
+    ],
+    [
+      "June",
+      "Jun."
+    ],
+    [
+      "July",
+      "Jul."
+    ],
+    [
+      "August",
+      "Aug."
+    ],
+    [
+      "September",
+      "Sep."
+    ],
+    [
+      "October",
+      "Oct."
+    ],
+    [
+      "November",
+      "Nov."
+    ],
+    [
+      "December",
+      "Dec."
+    ]
   ],
   "day_names": [
-    ["Monday", "Mon"],
-    ["Tuesday", "Tue"],
-    ["Wednesday", "Wed"],
-    ["Thursday", "Thu"],
-    ["Friday", "Fri"],
-    ["Saturday", "Sat"],
-    ["Sunday", "Sun"]
+    [
+      "Monday",
+      "Mon"
+    ],
+    [
+      "Tuesday",
+      "Tue"
+    ],
+    [
+      "Wednesday",
+      "Wed"
+    ],
+    [
+      "Thursday",
+      "Thu"
+    ],
+    [
+      "Friday",
+      "Fri"
+    ],
+    [
+      "Saturday",
+      "Sat"
+    ],
+    [
+      "Sunday",
+      "Sun"
+    ]
   ],
   "datetime_formats": [
     "%B %d, %Y at %H:%M",
@@ -440,11 +497,33 @@
         }
       },
       "preferences": {
-        "display_title": "Preferences",
+        "display_title": "User preferences",
         "tooltip": "Your preferences",
         "form": {
+          "section": {
+            "general_info": "General information",
+            "language_info": "Language information"
+          },
+          "username": {
+            "label": "Username"
+          },
+          "groups": {
+            "label": "Belongs to group(s)"
+          },
+          "creation_date": {
+            "label": "Sign up date"
+          },
+          "edits_count": {
+            "label": "Number of edits"
+          },
           "prefered_language": {
             "label": "Prefered language"
+          },
+          "gender": {
+            "label": "How do you wish to be described as?",
+            "neutral": "They (When mentioning you, the software will use gender neutral words whenever possible)",
+            "feminine": "She",
+            "masculine": "He"
           },
           "submit": {
             "label": "Save changes"

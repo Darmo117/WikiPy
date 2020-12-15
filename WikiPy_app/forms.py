@@ -44,7 +44,8 @@ class WikiPyForm(dj_forms.Form):
         self.__name = name
 
         for visible in self.visible_fields():
-            if isinstance(visible.field.widget, dj_forms.CheckboxInput):
+            if isinstance(visible.field.widget, dj_forms.CheckboxInput) or \
+                    isinstance(visible.field.widget, dj_forms.RadioSelect):
                 visible.field.widget.attrs['class'] = 'form-check-input'
             else:
                 visible.field.widget.attrs['class'] = 'form-control'
@@ -176,6 +177,11 @@ class PreferencesForm(WikiPyForm):
         choices=_init_language_choices(),
         label='prefered_language',
         required=True
+    )
+    gender = dj_forms.ChoiceField(
+        required=True,
+        choices=(('n', 'neutral'), ('m', 'masculine'), ('f', 'feminine')),
+        widget=dj_forms.RadioSelect
     )
 
     def __init__(self, *args, **kwargs):

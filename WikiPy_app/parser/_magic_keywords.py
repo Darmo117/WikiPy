@@ -284,7 +284,7 @@ class NamespaceNameKeyword(MagicKeyword):
         super().__init__('namespace_name')
 
     def get_value(self, context):
-        return context.page.namespace.get_name(local=True)
+        return context.page.namespace.get_name(local=True, gender=context.page_namespace_gender)
 
 
 class NamespaceIdKeyword(MagicKeyword):

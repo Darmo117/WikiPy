@@ -44,7 +44,7 @@ def email_validator(value):
     dj_valid.EmailValidator()(value)
 
 
-def create_user(username: str, is_male: bool = None, email: str = None, password: str = None, ip: str = None,
+def create_user(username: str, email: str = None, password: str = None, ip: str = None,
                 ignore_email: bool = False) -> models.User:
     anonymous = ip is not None
 
@@ -59,7 +59,6 @@ def create_user(username: str, is_male: bool = None, email: str = None, password
     if anonymous:
         email = None
         password = None
-        is_male = None
     else:
         try:
             password_validator(password)
@@ -82,7 +81,6 @@ def create_user(username: str, is_male: bool = None, email: str = None, password
     user_talk_ns = settings.USER_TALK_NS.get_name(local=True)
     kwargs = {
         'user': dj_user,
-        'is_male': is_male,
         'ip_address': ip if anonymous else None,
         'timezone': settings.TIME_ZONE,
         'signature': f'[[{user_ns}:{username}|{username}]] ([[{user_talk_ns}:{username}|{talk_text}]])',
@@ -96,6 +94,13 @@ def create_user(username: str, is_male: bool = None, email: str = None, password
     logging.info(f'Created user {username}')
 
     return user
+
+
+def update_user_data(user: models.User, **kwargs):
+    user_data = models.UserData.objects.get(user__username=user.username)
+    for k, v in kwargs.items():
+        setattr(user_data, k, v)
+    user_data.save()
 
 
 def log_in(request, username: str, password: str) -> bool:
@@ -135,6 +140,10 @@ def get_user_from_name(username: str) -> typ.Optional[models.User]:
         return None
 
 
+def get_user_from_user_page(title: str) -> typ.Optional[models.User]:
+    return get_user_from_name(title.split('/')[0])
+
+
 def user_exists(username: str) -> bool:
     return dj_auth.get_user_model().objects.filter(username__iexact=username).count() != 0
 
@@ -145,6 +154,7 @@ def ip_exists(ip: str) -> bool:
 
 def block_user(user: models.User, duration: int, reason: str, *, pages: typ.Iterable[str] = None,
                namespaces: typ.Iterable[int] = None):
+    # TODO check rights
     for title in pages:
         models.UserBlock(user=user.data, duration=duration, reason=reason, pages=f'page:{title}').save()
     for ns_id in namespaces:
@@ -212,8 +222,8 @@ def group_exists(group_id: str) -> bool:
 ##########
 
 
-def extract_namespace_name(full_title: str, local_name=True) -> str:
-    return extract_namespace_and_title(full_title, local_name=local_name)[0]
+def extract_namespace_name(full_title: str, local_name=True, gender: bool = None) -> str:
+    return extract_namespace_and_title(full_title, local_name=local_name, gender=gender)[0]
 
 
 def extract_namespace_id(full_title: str) -> int:
@@ -224,7 +234,7 @@ def extract_title(full_title: str) -> str:
     return extract_namespace_and_title(full_title)[1]
 
 
-def extract_namespace_and_title(full_title: str, ns_as_id=False, local_name=True) \
+def extract_namespace_and_title(full_title: str, ns_as_id=False, local_name=True, gender: bool = None) \
         -> typ.Tuple[typ.Union[str, int], str]:
     main_ns = settings.MAIN_NS.id if ns_as_id else settings.MAIN_NS.get_name(local=local_name)
 
@@ -241,20 +251,20 @@ def extract_namespace_and_title(full_title: str, ns_as_id=False, local_name=True
             ns_id = main_ns
             title = split[0] + ':' + title
 
-    return (get_namespace_name(ns_id, local_name=local_name), title) if not ns_as_id else (ns_id, title)
+    return (get_namespace_name(ns_id, local_name=local_name, gender=gender), title) if not ns_as_id else (ns_id, title)
 
 
-def get_full_page_title(namespace_id: int, title: str, local_name: bool = True) -> str:
-    ns_name = get_namespace_name(namespace_id, local_name=local_name)
+def get_full_page_title(namespace_id: int, title: str, local_name: bool = True, gender: bool = None) -> str:
+    ns_name = get_namespace_name(namespace_id, local_name=local_name, gender=gender)
     if ns_name != '':
         return f'{ns_name}:{title}'
     return title
 
 
-def get_namespace_name(namespace_id: int, local_name=True) -> typ.Optional[str]:
+def get_namespace_name(namespace_id: int, local_name: bool = True, gender: bool = None) -> typ.Optional[str]:
     if namespace_id in settings.NAMESPACES:
         ns = settings.NAMESPACES[namespace_id]
-        return ns.get_name(local=local_name)
+        return ns.get_name(local=local_name, gender=gender)
     return None
 
 
@@ -280,7 +290,12 @@ def get_actual_page_title(raw_title: str) -> str:
     elif not settings.CASE_SENSITIVE_TITLE and namespace_id not in (settings.USER_NS.id, settings.USER_TALK_NS.id):
         title = title[0].upper() + title[1:]
 
-    return get_full_page_title(namespace_id, title)
+    gender = None
+    if namespace_id in (settings.USER_NS.id, settings.USER_TALK_NS.id):
+        page_user = get_user_from_user_page(title)
+        gender = page_user.data.gender if page_user else None
+
+    return get_full_page_title(namespace_id, title, gender=gender)
 
 
 def get_special_page_title(title: str) -> str:
@@ -538,10 +553,11 @@ def submit_page_content(namespace_id: int, title: str, current_user: models.User
         page = _get_page(namespace_id, title)
     else:
         content_model = settings.PAGE_TYPE_WIKI
-        is_user_or_wpy_ns = namespace_id in [settings.USER_NS.id, settings.WIKIPY_NS.id] and '/' in title
-        if is_user_or_wpy_ns and title.endswith('.css'):
+        allow_js_css = (namespace_id in [settings.WIKIPY_NS.id, settings.GADGET_NS.id] or
+                        namespace_id == settings.USER_NS.id and '/' in title)
+        if allow_js_css and title.endswith('.css'):
             content_model = settings.PAGE_TYPE_STYLESHEET
-        elif is_user_or_wpy_ns and title.endswith('.js'):
+        elif allow_js_css and title.endswith('.js'):
             content_model = settings.PAGE_TYPE_JAVASCRIPT
         elif namespace_id == settings.MODULE_NS.id:
             content_model = settings.PAGE_TYPE_MODULE

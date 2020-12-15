@@ -4,27 +4,84 @@
   "writing_direction": "ltr",
   "main_namespace_name": "Principal",
   "month_names": [
-    ["janvier", "janv."],
-    ["février", "févr."],
-    ["mars", "mars"],
-    ["avril", "avr."],
-    ["mai", "mai"],
-    ["juin", "juin"],
-    ["juillet", "juill."],
-    ["aout", "aout"],
-    ["septembre", "sept."],
-    ["octobre", "oct."],
-    ["novembre", "nov."],
-    ["décembre", "déc."]
+    [
+      "janvier",
+      "janv."
+    ],
+    [
+      "février",
+      "févr."
+    ],
+    [
+      "mars",
+      "mars"
+    ],
+    [
+      "avril",
+      "avr."
+    ],
+    [
+      "mai",
+      "mai"
+    ],
+    [
+      "juin",
+      "juin"
+    ],
+    [
+      "juillet",
+      "juill."
+    ],
+    [
+      "aout",
+      "aout"
+    ],
+    [
+      "septembre",
+      "sept."
+    ],
+    [
+      "octobre",
+      "oct."
+    ],
+    [
+      "novembre",
+      "nov."
+    ],
+    [
+      "décembre",
+      "déc."
+    ]
   ],
   "day_names": [
-    ["lundi", "lun."],
-    ["mardi", "mar."],
-    ["mercredi", "mer."],
-    ["jeudi", "jeu."],
-    ["vendredi", "ven."],
-    ["samedi", "sam."],
-    ["dimanche", "dim."]
+    [
+      "lundi",
+      "lun."
+    ],
+    [
+      "mardi",
+      "mar."
+    ],
+    [
+      "mercredi",
+      "mer."
+    ],
+    [
+      "jeudi",
+      "jeu."
+    ],
+    [
+      "vendredi",
+      "ven."
+    ],
+    [
+      "samedi",
+      "sam."
+    ],
+    [
+      "dimanche",
+      "dim."
+    ]
   ],
   "datetime_formats": [
     "%B %d, %Y à %H:%M",
@@ -436,11 +493,37 @@
         }
       },
       "preferences": {
-        "display_title": "Préférences",
+        "display_title": {
+          "neutral": "Préférences de l’utilisateurice",
+          "masculine": "Préférences de l’utilisateur",
+          "feminine": "Préférences de l’utilisatrice"
+        },
         "tooltip": "Vos préférences",
         "form": {
+          "section": {
+            "general_info": "Informations générales",
+            "language_info": "Informations relatives à la langue"
+          },
+          "username": {
+            "label": "Nom d’utilisateur"
+          },
+          "groups": {
+            "label": "Membre du/des groupe(s)"
+          },
+          "creation_date": {
+            "label": "Date d’inscription"
+          },
+          "edits_count": {
+            "label": "Nombre de modifications"
+          },
           "prefered_language": {
             "label": "Langue préférée"
+          },
+          "gender": {
+            "label": "Comment voulez-vous être décrit·e\u00a0?",
+            "neutral": "Il/elle (Le logiciel utilisera quand c’est possible des mots de genre neutre pour vous mentionner)",
+            "feminine": "Elle",
+            "masculine": "Il"
           },
           "submit": {
             "label": "Sauvegarder les changements"

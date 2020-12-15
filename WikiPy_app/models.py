@@ -87,7 +87,12 @@ class Page(LockableModel, dj_models.Model):
     @property
     def full_title(self) -> str:
         from . import api
-        return api.get_full_page_title(self.namespace_id, self.title)
+        gender = None
+        if self.namespace_id in [settings.USER_NS.id, settings.USER_TALK_NS.id]:
+            user = api.get_user_from_name(self.title)
+            if user:
+                gender = user.data.gender
+        return api.get_full_page_title(self.namespace_id, self.title, gender=gender)
 
     @property
     def url_full_title(self) -> str:
@@ -171,12 +176,25 @@ class PageRevision(LockableModel, dj_models.Model):
 class UserData(LockableModel, dj_models.Model):
     user = dj_models.OneToOneField(dj_auth.get_user_model(), on_delete=dj_models.CASCADE)
     ip_address = dj_models.CharField(max_length=50, null=True, default=None)
-    is_male = dj_models.BooleanField(null=True, default=None)
+    # True = female, False = Male, None = Undefined
+    gender = dj_models.BooleanField(null=True, default=None)
     skin = dj_models.CharField(max_length=50, default='default')
     lang_code = dj_models.CharField(max_length=10, default=settings.DEFAULT_LANGUAGE_CODE)
     timezone = dj_models.CharField(max_length=50)
     datetime_format_id = dj_models.IntegerField(null=True, default=None)
     signature = dj_models.CharField(max_length=100)
+
+    @property
+    def is_female(self):
+        return self.gender
+
+    @property
+    def is_male(self):
+        return not self.gender and self.gender is not None
+
+    @property
+    def is_genderless(self):
+        return self.gender is None
 
     @property
     def groups(self):
@@ -205,7 +223,7 @@ class UserData(LockableModel, dj_models.Model):
         return repr(self)
 
     def __repr__(self):
-        return f'UserData(user={self.user},ip_address={self.ip_address},is_male={self.is_male},skin={self.skin})'
+        return f'UserData(user={self.user},ip_address={self.ip_address},gender={self.gender},skin={self.skin})'
 
 
 class UserGroupRel(LockableModel, dj_models.Model):

@@ -292,18 +292,36 @@ def wpy_diff_link(context: page_context.TemplateContext, revision: models.PageRe
 
 
 @register.simple_tag(takes_context=True)
-def wpy_inner_link(context: page_context.TemplateContext, namespace_id: int, page_title: str, text: str = None,
-                   tooltip: str = None, no_red_link: bool = False, css_classes: str = None,
-                   ignore_current_title: bool = False, only_url: bool = False, **url_params):
+def wpy_inner_link(
+        context: page_context.TemplateContext,
+        namespace_id: int,
+        page_title: str,
+        special_page_subtitle: str = None,
+        text: str = None,
+        tooltip: str = None,
+        no_red_link: bool = False,
+        css_classes: str = None,
+        ignore_current_title: bool = False,
+        only_url: bool = False,
+        **url_params
+):
     wpy_context: page_context.PageContext = context.get('wpy_context')
     language = wpy_context.language
     current_title = wpy_context.page.full_title if not ignore_current_title else ''
     skin = wpy_context.skin
+
+    if text is not None:
+        text = str(text)
+    if tooltip is not None:
+        tooltip = str(tooltip)
+
     if namespace_id == settings.SPECIAL_NS.id:
         sp = special_pages.get_special_page_for_id(page_title)
         page_title = sp.get_title()
-        text = sp.display_title(language)
-        tooltip = text
+        if special_page_subtitle:
+            page_title += '/' + special_page_subtitle
+        if text is None:
+            text = sp.display_title(language)
     full_title = api.get_full_page_title(namespace_id, page_title)
     if tooltip is None:
         tooltip = full_title

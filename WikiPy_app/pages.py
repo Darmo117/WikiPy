@@ -481,6 +481,11 @@ def _get_base_page_context(
     main_page_full_title = api.get_full_page_title(settings.MAIN_PAGE_NAMESPACE_ID, settings.MAIN_PAGE_TITLE)
     languages = list(sorted(settings.i18n.get_languages().values(), key=lambda l: l.name))
     is_main_page = page.full_title == main_page_full_title
+    if page.namespace_id in (settings.USER_NS.id, settings.USER_TALK_NS.id):
+        page_user = api.get_user_from_user_page(page.title)
+        page_ns_gender = page_user.data.gender if page_user else None
+    else:
+        page_ns_gender = None
 
     return page_context.PageContext(
         project_name=settings.PROJECT_NAME,
@@ -490,6 +495,7 @@ def _get_base_page_context(
         main_page_full_title=main_page_full_title,
         main_page_full_title_url=api.as_url_title(main_page_full_title, escape=True),
         page=page,
+        page_namespace_gender=page_ns_gender,
         mode=mode,
         noindex=noindex,
         show_title=not is_main_page or not settings.HIDE_TITLE_ON_MAIN_PAGE or not page_exists or mode != READ,

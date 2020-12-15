@@ -20,7 +20,7 @@
     {% include 'WikiPy_app/tags/revision-link.html' %}
   </td>
   <td>
-    {% wpy_inner_link revision.page.namespace_id revision.page.title %}
+    {% wpy_inner_link namespace_id=revision.page.namespace_id page_title=revision.page.title %}
   </td>
   <td>
     {% wpy_diff_size_tag revision.diff_size revision.size %}

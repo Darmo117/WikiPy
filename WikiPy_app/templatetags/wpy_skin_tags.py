@@ -19,7 +19,7 @@ def wpy_skin_render(context: page_context.TemplateContext, key: str, **kwargs: t
     res = key
 
     if key == 'project_logo':
-        main_page_link = dj_scut.reverse('wikipy:page', kwargs={'raw_page_title': wpy_context.main_page_full_title})
+        main_page_link = dj_scut.reverse('wikipy:page', kwargs={'raw_page_title': wpy_context.main_page_full_title_url})
         link_class = kwargs.get('link_class', '')
         image_class = kwargs.get('image_class', '')
         tooltip = language.translate('link.main_page.tooltip')

@@ -5,7 +5,7 @@
 {% block pre-content %}
   <nav id="wpy-header" class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">{# FIXME sticky-top #}
     <div class="container-fluid">
-      {% wpy_inner_link wpy_context.main_page_namespace wpy_context.main_page_title text=wpy_context.project_name tooltip='' ignore_current_title=True css_classes='navbar-brand' %}
+      {% wpy_inner_link namespace_id=wpy_context.main_page_namespace page_title=wpy_context.main_page_title text=wpy_context.project_name tooltip='' ignore_current_title=True css_classes='navbar-brand' %}
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#wpy-navbar-content"
               aria-controls="wpy-navbar-content" aria-expanded="false">
         <span class="navbar-toggler-icon"></span>

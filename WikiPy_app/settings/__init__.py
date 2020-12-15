@@ -161,6 +161,12 @@ def init(base_dir: str):
     def get_ns_alias(ident: int) -> str:
         return ns_names.get(str(ident), {}).get('alias')
 
+    def get_ns_feminine_name(ident: int):
+        return ns_names.get(str(ident), {}).get('feminine_name')
+
+    def get_ns_masculine_name(ident: int):
+        return ns_names.get(str(ident), {}).get('masculine_name')
+
     WIKI_NS = Namespace(-3, 'WikiNamespace', False, name=get_ns_name(-3), alias=get_ns_alias(-3))
     NAMESPACES[WIKI_NS.id] = WIKI_NS
     WIKI_TALK_NS = Namespace(-2, 'WikiNamespace Talk', True, name=get_ns_name(-2), alias=get_ns_alias(-2))
@@ -179,9 +185,11 @@ def init(base_dir: str):
     NAMESPACES[WIKIPY_NS.id] = WIKIPY_NS
     WIKIPY_TALK_NS = Namespace(5, 'WikiPy Talk', True, name=get_ns_name(5), alias=get_ns_alias(5))
     NAMESPACES[WIKIPY_TALK_NS.id] = WIKIPY_TALK_NS
-    USER_NS = Namespace(6, 'User', False, name=get_ns_name(6), alias=get_ns_alias(6))
+    USER_NS = Namespace(6, 'User', False, name=get_ns_name(6), alias=get_ns_alias(6),
+                        feminine_name=get_ns_feminine_name(6), masculine_name=get_ns_masculine_name(6))
     NAMESPACES[USER_NS.id] = USER_NS
-    USER_TALK_NS = Namespace(7, 'User Talk', True, name=get_ns_name(7), alias=get_ns_alias(7))
+    USER_TALK_NS = Namespace(7, 'User Talk', True, name=get_ns_name(7), alias=get_ns_alias(7),
+                             feminine_name=get_ns_feminine_name(7), masculine_name=get_ns_masculine_name(7))
     NAMESPACES[USER_TALK_NS.id] = USER_TALK_NS
     TEMPLATE_NS = Namespace(8, 'Template', False, name=get_ns_name(8), alias=get_ns_alias(8))
     NAMESPACES[TEMPLATE_NS.id] = TEMPLATE_NS

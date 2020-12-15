@@ -3,8 +3,10 @@ import dataclasses
 import importlib
 import os
 import typing as typ
+import urllib.parse
 
 import django.core.handlers.wsgi as dj_wsgi
+import django.shortcuts as dj_scuts
 from django.conf import settings as dj_settings
 
 from .. import apps, page_context, settings, forms, util
@@ -82,7 +84,7 @@ class ReturnToPageContext(page_context.PageContext):
 class SpecialPage(abc.ABC):
     def __init__(self, page_id: str, title: str, category: str = None, has_js: bool = False, has_css: bool = False,
                  has_form: bool = False, icon: str = None, access_key: str = None,
-                 requires_rights: typ.Sequence[str] = None):
+                 requires_rights: typ.Sequence[str] = None, requires_logged_in: bool = False):
         self.__id = page_id
         self.__title = title
         self.__local_title = settings.SPECIAL_PAGES_LOCAL_NAMES.get(self.__id)
@@ -95,6 +97,7 @@ class SpecialPage(abc.ABC):
         self.__icon = icon
         self.__access_key = access_key
         self.__requires_rights = tuple(requires_rights) if requires_rights else ()
+        self.__requires_logged_in = requires_logged_in or len(self.__requires_rights) != 0
 
     @property
     def id(self) -> str:
@@ -107,10 +110,6 @@ class SpecialPage(abc.ABC):
     @property
     def local_title(self) -> str:
         return self.__local_title or self.__title
-
-    def display_title(self, language: settings.i18n.Language) -> str:
-        return language.translate(f'special.{self.__id}.display_title', none_if_undefined=True) \
-               or self.local_title
 
     @property
     def category(self) -> typ.Optional[str]:
@@ -146,6 +145,9 @@ class SpecialPage(abc.ABC):
         else:
             return self.__title
 
+    def display_title(self, language: settings.i18n.Language) -> str:
+        return language.translate(f'special.{self.__id}.display_title', none_if_undefined=True) or self.local_title
+
     def matches_title(self, title: str) -> bool:
         title = title.lower()
         return self.__title.lower() == title or self.__local_title is not None and self.__local_title.lower() == title
@@ -168,6 +170,16 @@ class SpecialPage(abc.ABC):
         sub_title_values = sub_title.split('/')
         if sub_title_values == ['']:
             sub_title_values = []
+
+        # Redirect to login page if login required and not logged in
+        if self.__requires_logged_in and not base_context.user.is_logged_in:
+            login_url = dj_scuts.reverse('wikipy:page', kwargs={
+                'raw_page_title': api.as_url_title(api.get_full_page_title(
+                    settings.SPECIAL_NS.id,
+                    get_special_page_for_id('login').get_title()
+                ))
+            }) + '?' + urllib.parse.urlencode({'return_to': request.get_full_path()})
+            return page_context.RedirectPageContext(base_context, to=login_url, is_path=True)
 
         special_context = SpecialPageContext(
             base_context,

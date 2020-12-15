@@ -1,0 +1,12 @@
+#wpy-prefs-form .form-group.row {
+  margin-bottom: 0;
+}
+
+#wpy-prefs-form-submit {
+  margin-top: 15px;
+}
+
+#wpy-prefs-form .wpy-prefs-form-section-title {
+  font-size: 130%;
+  margin-bottom: 10px;
+}

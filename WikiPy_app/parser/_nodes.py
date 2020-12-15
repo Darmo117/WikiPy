@@ -148,8 +148,13 @@ class InternalLinkNode(TextNode):
         return self.__anchor
 
     def render(self, skin, context):
-        return skin.format_internal_link(context.language, context.page.full_title, page_title=self.page_title,
-                                         text=self.text, anchor=self.anchor)
+        return skin.format_internal_link(
+            context.language,
+            current_page_title=context.page.full_title,
+            page_title=self.page_title,
+            text=self.text,
+            anchor=self.anchor
+        )
 
     def __repr__(self):
         return f'InternalLinkNode[page_title={repr(self.page_title)},anchor={repr(self.anchor)},text={repr(self.text)}]'

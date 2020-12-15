@@ -21,6 +21,7 @@ class PageContext:
     main_page_full_title: str
     main_page_full_title_url: str
     page: models.Page
+    page_namespace_gender: typ.Optional[bool]
     mode: str
     noindex: bool
     show_title: bool

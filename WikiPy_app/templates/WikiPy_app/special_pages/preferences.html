@@ -8,6 +8,54 @@
 {% endif %}
 <form id="wpy-prefs-form" method="post">
   {% with form=wpy_context.prefs_form trans_prefix='special.preferences.form.' %}
+    <span class="wpy-prefs-form-section-title row">{% wpy_translate trans_prefix|add:'section.general_info' %}</span>
+
+    <div class="form-group row">
+      <label for="wpy-prefs-form-username" class="col-sm-2 col-form-label">
+        {% wpy_translate trans_prefix|add:'username.label' %}
+      </label>
+      <div class="col-sm-5">
+        <span id="wpy-prefs-form-username" class="form-control-plaintext">{{ wpy_context.user.username }}</span>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label for="wpy-prefs-form-groups" class="col-sm-2 col-form-label">
+        {% wpy_translate trans_prefix|add:'groups.label' %}
+      </label>
+      <div class="col-sm-5">
+        <span id="wpy-prefs-form-groups" class="form-control-plaintext">
+          {% for group in wpy_context.user.groups %}
+            {{ group.name }}{% if not forloop.last %}, {% endif %}{# TODO localiser, trier selon le nom localisé #}
+          {% endfor %}
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label for="wpy-prefs-form-creation-date" class="col-sm-2 col-form-label">
+        {% wpy_translate trans_prefix|add:'creation_date.label' %}
+      </label>
+      <div class="col-sm-5">
+        <span id="wpy-prefs-form-creation-date" class="form-control-plaintext">
+          {% wpy_format_date wpy_context.user.django_user.date_joined %}
+        </span>
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label for="wpy-prefs-form-edits-count" class="col-sm-2 col-form-label">
+        {% wpy_translate trans_prefix|add:'edits_count.label' %}
+      </label>
+      <div class="col-sm-5">
+        <span id="wpy-prefs-form-edits-count" class="form-control-plaintext">
+          {% wpy_inner_link namespace_id=-1 page_title='contributions' special_page_subtitle=wpy_context.user.username text=wpy_context.prefs_edits_count %}
+        </span>
+      </div>
+    </div>
+
+    <span class="wpy-prefs-form-section-title row">{% wpy_translate trans_prefix|add:'section.language_info' %}</span>
+
     <div class="form-group row">
       <label for="{{ form.prefered_language.id_for_label }}" class="col-sm-2 col-form-label">
         {% wpy_translate trans_prefix|add:'prefered_language.label' %}
@@ -18,6 +66,27 @@
           <div class="invalid-feedback" style="display: block">
             {% for error in form.prefered_language.errors.as_data %}
               {% wpy_translate trans_prefix|add:'prefered_language.error.'|add:error.code %}
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="form-group row">
+      <label class="col-sm-2 col-form-label">
+        {% wpy_translate trans_prefix|add:'gender.label' %}
+      </label>
+      <div class="col-sm-5">
+        <ul class="list-unstyled">
+          {% for g in form.gender %}
+            <li><label for="{{ form.gender.id_for_label|slice:':-2' }}_{{ forloop.counter0 }}">{{ g.tag }}
+              {% wpy_translate trans_prefix|add:'gender.'|add:g.choice_label %}</label></li>
+          {% endfor %}
+        </ul>
+        {% if form.gender.errors %}
+          <div class="invalid-feedback" style="display: block">
+            {% for error in form.gender.errors.as_data %}
+              {% wpy_translate trans_prefix|add:'gender.error.'|add:error.code %}
             {% endfor %}
           </div>
         {% endif %}

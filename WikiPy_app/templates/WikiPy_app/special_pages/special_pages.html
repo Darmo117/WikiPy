@@ -10,7 +10,7 @@
       <ul>
         {% for page in pages %}
           <li>
-            {% wpy_inner_link -1 page.id %}
+            {% wpy_inner_link namespace_id=-1 page_title=page.id %}
             {% if page.requires_rights %}
               <span class="mdi mdi-account-alert"
                     title="{% wpy_translate 'special.special_pages.requires_rights.tooltip' %}"></span>
