@@ -23,7 +23,7 @@
 {% else %}
   {% with cm=wpy_context.page.content_model %}
     {% spaceless %}
-      <pre style="border: gray solid 1px; border-radius: 3px;">
+      <pre>
         <code class="wpy-code-highlight {% if cm == 'module' %}python{% else %}{{ cm }}{% endif %}"><!--
           -->{{ wpy_context.rendered_page_content }}<!--
         --></code>

@@ -122,11 +122,30 @@ wpy_settings.init(BASE_DIR)
 LANGUAGE_CODE = wpy_settings.DEFAULT_LANGUAGE_CODE
 TIME_ZONE = wpy_settings.TIME_ZONE
 ALLOWED_HOSTS = wpy_settings.ALLOWED_HOSTS
-EMAIL_HOST_USER = wpy_settings.EMAIL_HOST_USER
-EMAIL_HOST_PASSWORD = wpy_settings.EMAIL_HOST_PASSWORD
+DEFAULT_FROM_EMAIL = wpy_settings.FROM_EMAIL
+EMAIL_SUBJECT_PREFIX = f'[{wpy_settings.PROJECT_NAME}] '
+if wpy_settings.EMAIL_HOST:
+    EMAIL_HOST = wpy_settings.EMAIL_HOST
+if wpy_settings.EMAIL_PORT:
+    EMAIL_PORT = wpy_settings.EMAIL_PORT
+if wpy_settings.EMAIL_HOST_USER:
+    EMAIL_HOST_USER = wpy_settings.EMAIL_HOST_USER
+if wpy_settings.EMAIL_HOST_PASSWORD:
+    EMAIL_HOST_PASSWORD = wpy_settings.EMAIL_HOST_PASSWORD
+EMAIL_USE_TLS = wpy_settings.EMAIL_USE_TLS
+EMAIL_USE_SSL = wpy_settings.EMAIL_USE_SSL
+if wpy_settings.EMAIL_SSL_KEYFILE is not None:
+    EMAIL_SSL_KEYFILE = wpy_settings.EMAIL_SSL_KEYFILE
+if wpy_settings.EMAIL_SSL_CERTFILE is not None:
+    EMAIL_SSL_CERTFILE = wpy_settings.EMAIL_SSL_CERTFILE
+if wpy_settings.EMAIL_TIMEOUT is not None:
+    EMAIL_TIMEOUT = wpy_settings.EMAIL_TIMEOUT
 
-if DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+if not wpy_settings.EMAIL_HOST:
+    if DEBUG:
+        EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    else:  # Not in debug and no defined host, resort to dummy backend
+        EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/

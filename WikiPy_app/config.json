@@ -12,11 +12,26 @@
   "main_page_title": "Main Page",
   "hide_title_on_main_page": true,
   "case_sensitive_titles": false,
-  "random_page_namespaces": [0, 100],
+  "random_page_namespaces": [
+    0,
+    100
+  ],
   "rights": {},
   "additional_groups": {},
   "skins": [
     "default"
   ],
-  "media_backend": "wikimedia_commons"
+  "media_backend": "wikimedia_commons",
+  "email_server": {
+    "host": "",
+    "port": 25,
+    "user": "",
+    "password": "",
+    "use_tls": false,
+    "use_ssl": false,
+    "ssl_keyfile": null,
+    "ssl_certfile": null,
+    "timeout": null,
+    "from": "noreply@example.com"
+  }
 }

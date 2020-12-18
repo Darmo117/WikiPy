@@ -1,14 +1,11 @@
-import importlib
 import logging
 import os
-import secrets
-import string
 
+import django.conf as dj_conf
 import django.contrib.auth as dj_auth
+import django.utils.crypto as dj_crypto
 
 from . import api, settings, apps
-
-project_settings = importlib.import_module(settings.APP_NAME + '.settings')
 
 WIKI_USER_NAME = 'WikiPy'
 _COMMENT = 'Wiki setup.'
@@ -20,16 +17,14 @@ INVALID_SECRET_KEY = 'invalid_secret_key'
 SUCCESS = 'ok'
 
 
-def are_pages_setup():
-    return dj_auth.get_user_model().objects.filter(username=WIKI_USER_NAME).count()
+def are_pages_setup() -> bool:
+    return dj_auth.get_user_model().objects.filter(username=WIKI_USER_NAME).count() == 1
 
 
 def generate_secret_key_file() -> bool:
-    # noinspection PyUnresolvedReferences
-    path = os.path.join(project_settings.BASE_DIR, apps.WikiPyAppConfig.name, 'SETUP_SECRET_KEY')
+    path = os.path.join(dj_conf.settings.BASE_DIR, apps.WikiPyAppConfig.name, 'SETUP_SECRET_KEY')
     if not os.path.exists(path):
-        chars = string.ascii_letters + string.digits
-        secret_key = ''.join(secrets.choice(chars) for _ in range(20))
+        secret_key = dj_crypto.get_random_string(length=20)
         with open(path, mode='w', encoding='UTF-8') as f:
             f.write(secret_key)
             f.flush()

@@ -1,0 +1,80 @@
+{% load wpy_tags %}
+
+<span class="wpy-prefs-form-section-title row" id="wpy-prefs-form-skin-section">
+  {% wpy_translate trans_prefix|add:'section.skin' %}
+</span>
+
+{% wpy_translate trans_prefix|add:'skin.preview' as preview_str %}
+{% wpy_translate trans_prefix|add:'skin.custom_css' as custom_css_str %}
+{% wpy_translate trans_prefix|add:'skin.custom_js' as custom_js_str %}
+<div class="form-group row">
+  <label class="col-sm-2">
+    {% wpy_translate trans_prefix|add:'skin.label' %}
+  </label>
+  <div class="col-sm-8">
+    <ul class="list-unstyled">
+      {% for s in form.skin %}
+        <li>
+          <label for="{{ form.skin.id_for_label|slice:':-2' }}_{{ forloop.counter0 }}">
+            {{ s.tag }} {{ s.choice_label }}
+            ({% wpy_inner_link wpy_context.main_page_namespace.id wpy_context.main_page_title text=preview_str tooltip='' new_tab=True use_skin=s.data.value %}
+            | {% wpy_inner_link 6 wpy_context.user.username|add:'/'|add:s.data.value|add:'.css' text=custom_css_str %}
+            | {% wpy_inner_link 6 wpy_context.user.username|add:'/'|add:s.data.value|add:'.js' text=custom_js_str %})
+          </label>
+        </li>
+      {% endfor %}
+    </ul>
+    {% if form.skin.errors %}
+      <div class="invalid-feedback" style="display: block">
+        {% for error in form.skin.errors.as_data %}
+          {% wpy_translate trans_prefix|add:'skin.error.'|add:error.code %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="form-group row">
+  <label class="col-sm-2">
+    {% wpy_translate trans_prefix|add:'custom_style.label' %}
+  </label>
+  <div class="col-sm-8">
+    <ul class="list-unstyled" style="padding-left: 0">
+      <li>{% wpy_inner_link 6 wpy_context.user.username|add:'/common.css' text=custom_css_str %}</li>
+      <li>{% wpy_inner_link 6 wpy_context.user.username|add:'/common.js' text=custom_js_str %}</li>
+    </ul>
+  </div>
+</div>
+
+<span class="wpy-prefs-form-section-title row" id="wpy-prefs-form-date-info-section">
+  {% wpy_translate trans_prefix|add:'section.date_info' %}
+</span>
+
+<div class="form-group row">
+  <label class="col-sm-2">
+    {% wpy_translate trans_prefix|add:'datetime_format.label' %}
+  </label>
+  <div class="col-sm-8">
+    <ul class="list-unstyled">
+      {% for f in form.datetime_format %}
+        <li>
+          <label for="{{ form.datetime_format.id_for_label|slice:':-2' }}_{{ forloop.counter0 }}">
+            {{ f.tag }}
+            {% if forloop.counter0 == 0 %}
+              {% wpy_translate trans_prefix|add:'datetime_format.'|add:f.choice_label %}
+            {% else %}
+              {% wpy_format_date wpy_context.local_date_time f.choice_label %}
+            {% endif %}
+          </label>
+        </li>
+      {% endfor %}
+    </ul>
+    {% if form.datetime_format.errors %}
+      <div class="invalid-feedback" style="display: block">
+        {% for error in form.datetime_format.errors.as_data %}
+          {% wpy_translate trans_prefix|add:'datetime_format.error.'|add:error.code %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>

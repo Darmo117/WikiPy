@@ -1,19 +1,108 @@
 import dataclasses
-import datetime as dt
+import datetime
 import logging
 import random
 import typing as typ
+import urllib.parse as url_parse
 
 import django.contrib.auth as dj_auth
 import django.core.exceptions as dj_exc
+import django.core.mail as dj_mail
+import django.core.mail.backends.dummy as dj_mail_dummy
 import django.core.paginator as dj_page
 import django.core.validators as dj_valid
 import django.db.models as dj_db
+import django.shortcuts as dj_scut
+import django.utils.crypto as dj_crypto
+import django.utils.timezone as dj_tz
 
 from . import _errors, _diff
 from .. import models, settings, special_pages, parser, media_backends, util
 
 DiffType = _diff.DiffType
+
+##########
+# Emails #
+##########
+
+_EMAIL_CONNECTION = None
+
+
+def open_email_connection():
+    global _EMAIL_CONNECTION
+    _EMAIL_CONNECTION = dj_mail.get_connection()
+
+
+def is_email_connection_available() -> bool:
+    return not isinstance(_EMAIL_CONNECTION, dj_mail_dummy.EmailBackend)
+
+
+def generate_email_confirmation_code() -> str:
+    return dj_crypto.get_random_string(length=30)
+
+
+def send_email_change_confirmation_email(user: models.User, pending_email: str):
+    user = update_user_data(
+        user,
+        email_pending_confirmation=pending_email
+    )
+    confirmation_code = generate_email_confirmation_code()
+    update_user_data(user, email_confirmation_code=confirmation_code)
+    link = get_page_url(settings.SPECIAL_NS.id, special_pages.get_special_page_for_id('change_email').get_title(),
+                        confirm_code=confirmation_code, user=user.username)
+    send_email(
+        user.data.email_pending_confirmation,
+        subject=user.prefered_language.translate('email.confirm_email.subject'),
+        message=user.prefered_language.translate(
+            'email.confirm_email.message',
+            username=user.username,
+            link=link
+        )
+    )
+
+
+def send_email(to: typ.Union[str, models.User], subject: str, message: str):
+    if hasattr(to, 'django_user'):
+        recipient = to.django_user.email
+    else:
+        recipient = to
+    dj_mail.send_mail(subject, message, from_email=None, recipient_list=[recipient])
+
+
+def send_mass_email(recipients: typ.List[models.User], subject: str, message: str):
+    datatuple = tuple(
+        (subject, message, None, [to.django_user.email]) for to in recipients)
+    dj_mail.send_mass_mail(datatuple)
+
+
+#################
+# Date and time #
+#################
+
+
+def now(timezone: datetime.tzinfo = None) -> datetime.datetime:
+    if timezone:
+        return dj_tz.make_naive(dj_tz.now(), timezone)
+    return dj_tz.now()
+
+
+def format_datetime(date_time: datetime.datetime, current_user: models.User, language: settings.i18n.Language,
+                    custom_format: str = None) -> str:
+    weekday = date_time.weekday() + 1  # Monday is 0
+    month = date_time.month  # January is 1
+
+    # Translate week day and month tags using current display language and not Python locale
+    format_ = (custom_format or current_user.get_datetime_format(language)) \
+        .replace('%a', language.get_day_abbreviation(weekday).replace('%', '%%')) \
+        .replace('%A', language.get_day_name(weekday).replace('%', '%%')) \
+        .replace('%b', language.get_month_abbreviation(month).replace('%', '%%')) \
+        .replace('%B', language.get_month_name(month).replace('%', '%%'))
+    # Disabled tags
+    for tag_name in 'cxX':  # TODO raise exception
+        format_ = format_.replace('%' + tag_name, '%%' + tag_name)
+    print(format_)
+
+    return date_time.strftime(format_)
 
 
 #########
@@ -91,16 +180,52 @@ def create_user(username: str, email: str = None, password: str = None, ip: str 
     add_user_to_group(user, settings.GROUP_ALL, auto=True)
     if not anonymous:
         add_user_to_group(user, settings.GROUP_USERS, auto=True)
-    logging.info(f'Created user {username}')
+    logging.info(f'Successfully created user "{username}".')
+    send_email_change_confirmation_email(user, user.django_user.email)
+    logging.info(f'Confirmation email sent.')
 
     return user
 
 
-def update_user_data(user: models.User, **kwargs):
+def update_user_data(user: models.User, **kwargs) -> models.User:
+    allowed_fields = (
+        'skin',
+        'lang_code',
+        'timezone',
+        'datetime_format_id',
+        'signature',
+        'gender',
+        'email_pending_confirmation',
+        'email_confirmation_date',
+        'email_confirmation_code',
+        'users_can_send_emails',
+        'send_copy_of_sent_emails',
+        'send_watchlist_emails',
+        'send_minor_watchlist_emails',
+        'datetime_format_id',
+        'django_email',
+    )
+    django_user = dj_auth.get_user_model().objects.get(username=user.username)
     user_data = models.UserData.objects.get(user__username=user.username)
+    dj_changed = False
+    data_changed = False
+
     for k, v in kwargs.items():
-        setattr(user_data, k, v)
-    user_data.save()
+        if k not in allowed_fields:
+            raise ValueError(f'attempted to set disallowed field for user "{user.username}"')
+        if k.startswith('django_'):
+            setattr(django_user, k[7:], v)
+            dj_changed = True
+        else:
+            setattr(user_data, k, v)
+            data_changed = True
+
+    if dj_changed:
+        django_user.save()
+    if data_changed:
+        user_data.save()
+
+    return get_user_from_name(user.username)
 
 
 def log_in(request, username: str, password: str) -> bool:
@@ -140,8 +265,11 @@ def get_user_from_name(username: str) -> typ.Optional[models.User]:
         return None
 
 
-def get_user_from_user_page(title: str) -> typ.Optional[models.User]:
-    return get_user_from_name(title.split('/')[0])
+def get_user_gender_from_page(namespace_id: int, title: str) -> typ.Optional[models.Gender]:
+    if namespace_id in (settings.USER_NS.id, settings.USER_TALK_NS.id):
+        page_user = get_user_from_name(title.split('/')[0])
+        return page_user.data.gender if page_user else None
+    return None
 
 
 def user_exists(username: str) -> bool:
@@ -171,8 +299,8 @@ def can_edit_page(current_user: models.User, namespace_id: int, title: str) -> b
 
 def get_user_contributions(current_user: models.User, username: str, namespace: int = None,
                            only_hidden_revisions: bool = False, only_last_edits: bool = False,
-                           only_page_creations: bool = False, hide_minor: bool = False, from_date: dt.date = None,
-                           to_date: dt.date = None) \
+                           only_page_creations: bool = False, hide_minor: bool = False,
+                           from_date: datetime.date = None, to_date: datetime.date = None) \
         -> typ.Sequence[models.PageRevision]:
     if user_exists(username):
         kwargs = {
@@ -185,7 +313,8 @@ def get_user_contributions(current_user: models.User, username: str, namespace: 
         if from_date:
             kwargs['date__gte'] = from_date
         if to_date:
-            kwargs['date__lte'] = dt.datetime(to_date.year, to_date.month, to_date.day, hour=23, minute=59, second=59)
+            kwargs['date__lte'] = datetime.datetime(to_date.year, to_date.month, to_date.day, hour=23, minute=59,
+                                                    second=59)
         query = dj_db.Q(**kwargs)
         if only_hidden_revisions:
             query = query & (dj_db.Q(text_hidden=True) | dj_db.Q(author_hidden=True) | dj_db.Q(comment_hidden=True))
@@ -209,7 +338,6 @@ def add_user_to_group(user: models.User, group_id: str, performer: models.User =
     if group_exists(group_id) and ((performer and performer.has_right(settings.RIGHT_EDIT_USERS_GROUPS)) or auto):
         models.UserGroupRel(user=user.django_user, group_id=group_id).save()
         return True
-
     return False
 
 
@@ -222,8 +350,16 @@ def group_exists(group_id: str) -> bool:
 ##########
 
 
-def extract_namespace_name(full_title: str, local_name=True, gender: bool = None) -> str:
-    return extract_namespace_and_title(full_title, local_name=local_name, gender=gender)[0]
+def get_page_url(namespace_id: int, title: str, **kwargs) -> str:
+    full_title = as_url_title(get_full_page_title(namespace_id, title))
+    url = dj_scut.reverse('wikipy:page', kwargs={'raw_page_title': full_title})
+    params = url_parse.urlencode({k: (v if not isinstance(v, list) else v[0]) for k, v in kwargs.items()})
+    full_url = url + (('?' + params) if params else '')
+    return full_url
+
+
+def extract_namespace_name(full_title: str, local_name=True) -> str:
+    return extract_namespace_and_title(full_title, local_name=local_name)[0]
 
 
 def extract_namespace_id(full_title: str) -> int:
@@ -234,7 +370,7 @@ def extract_title(full_title: str) -> str:
     return extract_namespace_and_title(full_title)[1]
 
 
-def extract_namespace_and_title(full_title: str, ns_as_id=False, local_name=True, gender: bool = None) \
+def extract_namespace_and_title(full_title: str, ns_as_id=False, local_name=True) \
         -> typ.Tuple[typ.Union[str, int], str]:
     main_ns = settings.MAIN_NS.id if ns_as_id else settings.MAIN_NS.get_name(local=local_name)
 
@@ -251,17 +387,21 @@ def extract_namespace_and_title(full_title: str, ns_as_id=False, local_name=True
             ns_id = main_ns
             title = split[0] + ':' + title
 
-    return (get_namespace_name(ns_id, local_name=local_name, gender=gender), title) if not ns_as_id else (ns_id, title)
+    if not ns_as_id:
+        return get_namespace_name(ns_id, local_name=local_name, gender=get_user_gender_from_page(ns_id, title)), title
+    else:
+        return ns_id, title
 
 
-def get_full_page_title(namespace_id: int, title: str, local_name: bool = True, gender: bool = None) -> str:
-    ns_name = get_namespace_name(namespace_id, local_name=local_name, gender=gender)
+def get_full_page_title(namespace_id: int, title: str, local_name: bool = True) -> str:
+    ns_name = get_namespace_name(namespace_id, local_name=local_name,
+                                 gender=get_user_gender_from_page(namespace_id, title))
     if ns_name != '':
         return f'{ns_name}:{title}'
     return title
 
 
-def get_namespace_name(namespace_id: int, local_name: bool = True, gender: bool = None) -> typ.Optional[str]:
+def get_namespace_name(namespace_id: int, local_name: bool = True, gender: models.Gender = None) -> typ.Optional[str]:
     if namespace_id in settings.NAMESPACES:
         ns = settings.NAMESPACES[namespace_id]
         return ns.get_name(local=local_name, gender=gender)
@@ -290,12 +430,7 @@ def get_actual_page_title(raw_title: str) -> str:
     elif not settings.CASE_SENSITIVE_TITLE and namespace_id not in (settings.USER_NS.id, settings.USER_TALK_NS.id):
         title = title[0].upper() + title[1:]
 
-    gender = None
-    if namespace_id in (settings.USER_NS.id, settings.USER_TALK_NS.id):
-        page_user = get_user_from_user_page(title)
-        gender = page_user.data.gender if page_user else None
-
-    return get_full_page_title(namespace_id, title, gender=gender)
+    return get_full_page_title(namespace_id, title)
 
 
 def get_special_page_title(title: str) -> str:
@@ -393,7 +528,7 @@ def paginate(values: typ.Iterable[typ.Any], url_params: typ.Dict[str, str]) -> t
 class SearchResult:
     namespace_id: int
     title: str
-    date: dt.datetime
+    date: datetime.datetime
     snapshot: str
 
 
@@ -413,7 +548,7 @@ def search(query: str, current_user: models.User, namespaces: typ.Iterable[int])
 
 
 def _perform_search(query: str, current_user: models.User, namespaces: typ.Iterable[int]) \
-        -> typ.List[typ.Tuple[int, str, dt.datetime, str]]:
+        -> typ.List[typ.Tuple[int, str, datetime.datetime, str]]:
     ns_id, title = extract_namespace_and_title(query, ns_as_id=True)
     if ns_id:
         ns_list = [ns_id]
@@ -493,23 +628,6 @@ def get_random_page(namespaces: typ.Iterable[int] = None) -> typ.Optional[models
 
 def get_redirect(wikicode: str) -> typ.Optional[typ.Tuple[str, typ.Optional[str]]]:
     return parser.WikicodeParser.get_redirect(wikicode)
-
-
-def format_datetime(datetime: dt.datetime, current_user: models.User, language: settings.i18n.Language) -> str:
-    weekday = datetime.weekday() + 1  # Monday is 0
-    month = datetime.month  # January is 1
-
-    # Translate week day and month tags using current display language and not Python locale
-    format_ = current_user.get_datetime_format(default=language.default_datetime_format_id) \
-        .replace('%a', language.get_day_abbreviation(weekday).replace('%', '%%')) \
-        .replace('%A', language.get_day_name(weekday).replace('%', '%%')) \
-        .replace('%b', language.get_month_abbreviation(month).replace('%', '%%')) \
-        .replace('%B', language.get_month_name(month).replace('%', '%%'))
-    # Disabled tags
-    for tag_name in 'cxX':
-        format_ = format_.replace('%' + tag_name, '%%' + tag_name)
-
-    return datetime.strftime(format_)
 
 
 _MEDIA_BACKEND = media_backends.get_backend(settings.MEDIA_BACKEND_ID)

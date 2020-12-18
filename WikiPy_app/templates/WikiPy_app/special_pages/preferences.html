@@ -8,88 +8,85 @@
 {% endif %}
 <form id="wpy-prefs-form" method="post">
   {% with form=wpy_context.prefs_form trans_prefix='special.preferences.form.' %}
-    <span class="wpy-prefs-form-section-title row">{% wpy_translate trans_prefix|add:'section.general_info' %}</span>
-
-    <div class="form-group row">
-      <label for="wpy-prefs-form-username" class="col-sm-2 col-form-label">
-        {% wpy_translate trans_prefix|add:'username.label' %}
-      </label>
-      <div class="col-sm-5">
-        <span id="wpy-prefs-form-username" class="form-control-plaintext">{{ wpy_context.user.username }}</span>
-      </div>
-    </div>
-
-    <div class="form-group row">
-      <label for="wpy-prefs-form-groups" class="col-sm-2 col-form-label">
-        {% wpy_translate trans_prefix|add:'groups.label' %}
-      </label>
-      <div class="col-sm-5">
-        <span id="wpy-prefs-form-groups" class="form-control-plaintext">
-          {% for group in wpy_context.user.groups %}
-            {{ group.name }}{% if not forloop.last %}, {% endif %}{# TODO localiser, trier selon le nom localisé #}
-          {% endfor %}
-        </span>
-      </div>
-    </div>
-
-    <div class="form-group row">
-      <label for="wpy-prefs-form-creation-date" class="col-sm-2 col-form-label">
-        {% wpy_translate trans_prefix|add:'creation_date.label' %}
-      </label>
-      <div class="col-sm-5">
-        <span id="wpy-prefs-form-creation-date" class="form-control-plaintext">
-          {% wpy_format_date wpy_context.user.django_user.date_joined %}
-        </span>
-      </div>
-    </div>
-
-    <div class="form-group row">
-      <label for="wpy-prefs-form-edits-count" class="col-sm-2 col-form-label">
-        {% wpy_translate trans_prefix|add:'edits_count.label' %}
-      </label>
-      <div class="col-sm-5">
-        <span id="wpy-prefs-form-edits-count" class="form-control-plaintext">
-          {% wpy_inner_link namespace_id=-1 page_title='contributions' special_page_subtitle=wpy_context.user.username text=wpy_context.prefs_edits_count %}
-        </span>
-      </div>
-    </div>
-
-    <span class="wpy-prefs-form-section-title row">{% wpy_translate trans_prefix|add:'section.language_info' %}</span>
-
-    <div class="form-group row">
-      <label for="{{ form.prefered_language.id_for_label }}" class="col-sm-2 col-form-label">
-        {% wpy_translate trans_prefix|add:'prefered_language.label' %}
-      </label>
-      <div class="col-sm-5">
-        {{ form.prefered_language }}
-        {% if form.prefered_language.errors %}
-          <div class="invalid-feedback" style="display: block">
-            {% for error in form.prefered_language.errors.as_data %}
-              {% wpy_translate trans_prefix|add:'prefered_language.error.'|add:error.code %}
-            {% endfor %}
-          </div>
-        {% endif %}
-      </div>
-    </div>
-
-    <div class="form-group row">
-      <label class="col-sm-2 col-form-label">
-        {% wpy_translate trans_prefix|add:'gender.label' %}
-      </label>
-      <div class="col-sm-5">
-        <ul class="list-unstyled">
-          {% for g in form.gender %}
-            <li><label for="{{ form.gender.id_for_label|slice:':-2' }}_{{ forloop.counter0 }}">{{ g.tag }}
-              {% wpy_translate trans_prefix|add:'gender.'|add:g.choice_label %}</label></li>
-          {% endfor %}
+    <div class="card">
+      <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <a class="nav-link active" href="#wpy-prefs-form-personal-info-tab-content"
+               id="wpy-prefs-form-personal-info-tab" data-toggle="tab"
+               aria-controls="wpy-prefs-form-personal-info-tab-content" aria-selected="true">
+              {% wpy_translate trans_prefix|add:'tab.personal_information' %}
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" href="#wpy-prefs-form-appearance-tab-content" id="wpy-prefs-form-appearance-tab"
+               data-toggle="tab" aria-controls="wpy-prefs-form-appearance-tab-content" aria-selected="false">
+              {% wpy_translate trans_prefix|add:'tab.appearance' %}
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" href="#wpy-prefs-form-editing-tab-content" id="wpy-prefs-form-editing-tab"
+               data-toggle="tab" aria-controls="wpy-prefs-form-editing-tab-content" aria-selected="false">
+              {% wpy_translate trans_prefix|add:'tab.editing' %}
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" href="#wpy-prefs-form-recent-changes-tab-content" id="wpy-prefs-form-recent-changes-tab"
+               data-toggle="tab" aria-controls="wpy-prefs-form-recent-changes-tab-content" aria-selected="false">
+              {% wpy_translate trans_prefix|add:'tab.recent_changes' %}
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" href="#wpy-prefs-form-watchlist-tab-content" id="wpy-prefs-form-watchlist-tab"
+               data-toggle="tab" aria-controls="wpy-prefs-form-watchlist-tab-content" aria-selected="false">
+              {% wpy_translate trans_prefix|add:'tab.watchlist' %}
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" href="#wpy-prefs-form-gadgets-tab-content" id="wpy-prefs-form-gadgets-tab"
+               data-toggle="tab" aria-controls="wpy-prefs-form-gadgets-tab-content" aria-selected="false">
+              {% wpy_translate trans_prefix|add:'tab.gadgets' %}
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" href="#wpy-prefs-form-notifications-tab-content" id="wpy-prefs-form-notifications-tab"
+               data-toggle="tab" aria-controls="wpy-prefs-form-notifications-tab-content" aria-selected="false">
+              {% wpy_translate trans_prefix|add:'tab.notifications' %}
+            </a>
+          </li>
         </ul>
-        {% if form.gender.errors %}
-          <div class="invalid-feedback" style="display: block">
-            {% for error in form.gender.errors.as_data %}
-              {% wpy_translate trans_prefix|add:'gender.error.'|add:error.code %}
-            {% endfor %}
-          </div>
-        {% endif %}
+      </div>
+
+      <div class="tab-content">
+        <div id="wpy-prefs-form-personal-info-tab-content" class="card-body tab-pane show active"
+             aria-labelledby="wpy-prefs-form-personal-info-tab" role="tabpanel">
+          {% include 'WikiPy_app/special_pages/include/preferences-personal-info.html' %}
+        </div>
+
+        <div id="wpy-prefs-form-appearance-tab-content" class="card-body tab-pane"
+             aria-labelledby="wpy-prefs-form-appearance-tab" role="tabpanel">
+          {% include 'WikiPy_app/special_pages/include/preferences-appearance.html' %}
+        </div>
+
+        <div id="wpy-prefs-form-editing-tab-content" class="card-body tab-pane"
+             aria-labelledby="wpy-prefs-form-editing-tab" role="tabpanel">
+        </div>
+
+        <div id="wpy-prefs-form-recent-changes-tab-content" class="card-body tab-pane"
+             aria-labelledby="wpy-prefs-form-recent-changes-tab" role="tabpanel">
+        </div>
+
+        <div id="wpy-prefs-form-watchlist-tab-content" class="card-body tab-pane"
+             aria-labelledby="wpy-prefs-form-watchlist-tab" role="tabpanel">
+        </div>
+
+        <div id="wpy-prefs-form-gadgets-tab-content" class="card-body tab-pane"
+             aria-labelledby="wpy-prefs-form-gadgets-tab" role="tabpanel">
+        </div>
+
+        <div id="wpy-prefs-form-notifications-tab-content" class="card-body tab-pane"
+             aria-labelledby="wpy-prefs-form-notifications-tab" role="tabpanel">
+        </div>
       </div>
     </div>
 

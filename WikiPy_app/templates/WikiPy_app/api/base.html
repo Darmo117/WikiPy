@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="{{ language }}" dir="{{ wpy_context.language.writing_direction }}">
+<html lang="{{ language.code }}" dir="{{ language.writing_direction }}">
 <head>
   <meta charset="UTF-8">
   <title>{% block page_title %}{% endblock %} &mdash; {{ project_name }}</title>
+  {% block head %}{% endblock %}
 </head>
 <body>
   <h1>{% block main_title %}{% endblock %}</h1>

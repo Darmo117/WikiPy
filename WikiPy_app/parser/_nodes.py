@@ -128,6 +128,8 @@ class InternalLinkNode(TextNode):
     def __init__(self, page_title: str, anchor: str = None, text: str = None):
         from .. import api
 
+        page_title = api.get_actual_page_title(page_title)
+
         if not text:
             if text is None:
                 text = page_title

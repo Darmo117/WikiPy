@@ -2,8 +2,8 @@ import typing as typ
 
 
 class Namespace:
-    def __init__(self, ident: int, canonical_name: str, is_talk: bool, name: str = None, alias: str = None,
-                 feminine_name: str = None, masculine_name: str = None):
+    def __init__(self, ident: int, canonical_name: str, is_talk: bool, can_be_main: bool, name: str = None,
+                 alias: str = None, feminine_name: str = None, masculine_name: str = None):
         self.__id = ident
         self.__canonical_name = canonical_name
         self.__name = name
@@ -11,6 +11,7 @@ class Namespace:
         self.__feminine_name = feminine_name
         self.__masculine_name = masculine_name
         self.__is_talk = is_talk
+        self.__can_be_main = can_be_main
 
     @property
     def id(self) -> int:
@@ -37,19 +38,34 @@ class Namespace:
         return self.__alias
 
     @property
-    def is_talk(self):
+    def is_talk(self) -> bool:
+        """Tells whether this namespace is a talk namespace."""
         return self.__is_talk
 
-    def get_name(self, local: bool, gender: bool = None, as_url: bool = False) -> str:
+    @property
+    def can_be_main(self) -> bool:
+        """Tells whether this namespace can be used as the main page’s namespace."""
+        return self.__can_be_main and not self.__is_talk
+
+    def get_name(self, local: bool, gender=None, as_url: bool = False) -> str:
+        """
+        Returns the name of this namespace.
+
+        :param local: If true, local name is returned instead of canonical.
+        :param gender: Gender of the user page. Only used if namespace is User: or User Talk:.
+        :type gender: WikiPy_app.models.Gender
+        :param as_url: If true, returns a URL-compatible name.
+        :return: The name.
+        """
         name = None
 
         if local:
+            name = self.__name
             if gender:
-                name = self.__feminine_name or self.__name
-            elif gender is not None:
-                name = self.__masculine_name or self.__name
-            elif self.__name is not None:
-                name = self.__name
+                if gender.code == 'female' and self.__feminine_name:
+                    name = self.__feminine_name
+                elif gender.code == 'male' and self.__masculine_name:
+                    name = self.__masculine_name
         if name is None:
             name = self.__canonical_name
 
@@ -60,6 +76,13 @@ class Namespace:
         return name
 
     def matches_name(self, name: str) -> bool:
+        """
+        Tells whether the given name matches any of the following properties (case insensitive):
+        canonical name, local name, alias, feminine name, masculine name.
+
+        :param name: Name to test this namespace against.
+        :return: True if and only if the name matches any of the above properties; False otherwise.
+        """
         name = name.lower()
         return (self.__canonical_name.lower() == name
                 or self.__name is not None and self.__name.lower() == name

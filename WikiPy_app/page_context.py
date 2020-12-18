@@ -15,13 +15,13 @@ TemplateContext = dj_context.RequestContext
 @dataclasses.dataclass
 class PageContext:
     project_name: str
-    main_page_namespace: str
+    main_page_namespace: settings.Namespace
     main_page_title: str
     main_page_title_url: str
     main_page_full_title: str
     main_page_full_title_url: str
     page: models.Page
-    page_namespace_gender: typ.Optional[bool]
+    page_namespace_gender: typ.Optional[models.Gender]
     mode: str
     noindex: bool
     show_title: bool

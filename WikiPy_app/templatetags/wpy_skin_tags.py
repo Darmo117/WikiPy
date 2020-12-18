@@ -1,6 +1,5 @@
 import typing as typ
 
-import django.shortcuts as dj_scut
 import django.template as dj_template
 import django.templatetags.static as dj_static
 import django.utils.safestring as dj_safe
@@ -19,7 +18,7 @@ def wpy_skin_render(context: page_context.TemplateContext, key: str, **kwargs: t
     res = key
 
     if key == 'project_logo':
-        main_page_link = dj_scut.reverse('wikipy:page', kwargs={'raw_page_title': wpy_context.main_page_full_title_url})
+        main_page_link = api.get_page_url(wpy_context.main_page_namespace.id, wpy_context.main_page_title)
         link_class = kwargs.get('link_class', '')
         image_class = kwargs.get('image_class', '')
         tooltip = language.translate('link.main_page.tooltip')

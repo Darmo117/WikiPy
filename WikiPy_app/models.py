@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import re
 import typing as typ
 
@@ -87,12 +88,7 @@ class Page(LockableModel, dj_models.Model):
     @property
     def full_title(self) -> str:
         from . import api
-        gender = None
-        if self.namespace_id in [settings.USER_NS.id, settings.USER_TALK_NS.id]:
-            user = api.get_user_from_name(self.title)
-            if user:
-                gender = user.data.gender
-        return api.get_full_page_title(self.namespace_id, self.title, gender=gender)
+        return api.get_full_page_title(self.namespace_id, self.title)
 
     @property
     def url_full_title(self) -> str:
@@ -173,28 +169,67 @@ class PageRevision(LockableModel, dj_models.Model):
         return UserData.objects.get(user=self.author).is_in_group(settings.GROUP_BOTS)
 
 
+@dataclasses.dataclass(frozen=True)
+class Gender:
+    code: str
+    i18n_code: str
+
+
+NEUTRAL_GENDER = Gender(code='neutral', i18n_code='neutral')
+FEMALE_GENDER = Gender(code='female', i18n_code='feminine')
+MALE_GENDER = Gender(code='male', i18n_code='masculine')
+GENDERS = {gender.code: gender for gender in (NEUTRAL_GENDER, FEMALE_GENDER, MALE_GENDER)}
+
+
 class UserData(LockableModel, dj_models.Model):
     user = dj_models.OneToOneField(dj_auth.get_user_model(), on_delete=dj_models.CASCADE)
     ip_address = dj_models.CharField(max_length=50, null=True, default=None)
     # True = female, False = Male, None = Undefined
-    gender = dj_models.BooleanField(null=True, default=None)
+    _gender = dj_models.BooleanField(null=True, default=None)
     skin = dj_models.CharField(max_length=50, default='default')
     lang_code = dj_models.CharField(max_length=10, default=settings.DEFAULT_LANGUAGE_CODE)
     timezone = dj_models.CharField(max_length=50)
     datetime_format_id = dj_models.IntegerField(null=True, default=None)
     signature = dj_models.CharField(max_length=100)
+    email_confirmation_date = dj_models.DateTimeField(null=True, default=None)
+    email_confirmation_code = dj_models.CharField(max_length=50, null=True, default=None)
+    email_pending_confirmation = dj_models.CharField(max_length=100, null=True, default=None)
+    users_can_send_emails = dj_models.BooleanField(default=True)
+    send_copy_of_sent_emails = dj_models.BooleanField(default=False)
+    send_watchlist_emails = dj_models.BooleanField(default=False)
+    send_minor_watchlist_emails = dj_models.BooleanField(default=False)
 
     @property
-    def is_female(self):
-        return self.gender
+    def is_female(self) -> bool:
+        return self.gender == FEMALE_GENDER
 
     @property
-    def is_male(self):
-        return not self.gender and self.gender is not None
+    def is_male(self) -> bool:
+        return self.gender == MALE_GENDER
 
     @property
-    def is_genderless(self):
-        return self.gender is None
+    def is_genderless(self) -> bool:
+        return self.gender == NEUTRAL_GENDER
+
+    @property
+    def gender(self) -> Gender:
+        if self._gender:
+            return FEMALE_GENDER
+        elif self._gender is not None:
+            return MALE_GENDER
+        return NEUTRAL_GENDER
+
+    @gender.setter
+    def gender(self, value: Gender):
+        self._gender = {
+            FEMALE_GENDER: True,
+            MALE_GENDER: False,
+            NEUTRAL_GENDER: None,
+        }.get(value)
+
+    @property
+    def email_confirmed(self) -> bool:
+        return self.email_confirmation_date is not None
 
     @property
     def groups(self):
@@ -214,16 +249,19 @@ class UserData(LockableModel, dj_models.Model):
     def prefered_language(self) -> settings.i18n.Language:
         return settings.i18n.get_language(self.lang_code)
 
-    def get_datetime_format(self, default: int) -> str:
-        formats = self.prefered_language.datetime_formats
-        format_id = self.datetime_format_id if self.datetime_format_id is not None else default
+    def get_datetime_format(self, language: settings.i18n.Language = None) -> str:
+        formats = language.datetime_formats if language else self.prefered_language.datetime_formats
+        if self.datetime_format_id is not None:
+            format_id = self.datetime_format_id
+        else:
+            format_id = language.default_datetime_format_id
         return formats[format_id % len(formats)]
 
     def __str__(self):
         return repr(self)
 
     def __repr__(self):
-        return f'UserData(user={self.user},ip_address={self.ip_address},gender={self.gender},skin={self.skin})'
+        return f'UserData(user={self.user},ip_address={self.ip_address},gender={self._gender},skin={self.skin})'
 
 
 class UserGroupRel(LockableModel, dj_models.Model):
@@ -298,8 +336,8 @@ class User:
     def is_logged_in(self) -> bool:
         return self.__django_user.is_authenticated and not self.is_anonymous
 
-    def get_datetime_format(self, default: int) -> str:
-        return self.data.get_datetime_format(default)
+    def get_datetime_format(self, language: settings.i18n.Language = None) -> str:
+        return self.data.get_datetime_format(language)
 
     def is_in_group(self, group_id: str) -> bool:
         return self.__data.is_in_group(group_id)

@@ -8,7 +8,6 @@ import time
 import typing as typ
 import urllib.parse
 
-import django.urls as dj_urls
 import django.utils.safestring as dj_safe
 from django.conf import settings as dj_settings
 
@@ -213,10 +212,10 @@ class Skin(abc.ABC):
     def format_internal_link(self, language, current_page_title: str, page_title: str,
                              text: str = None, tooltip: str = None, anchor: str = None, no_red_link: bool = False,
                              css_classes: typ.Sequence[str] = None, access_key: str = None, only_url: bool = False,
-                             **url_params) -> str:
+                             new_tab: bool = False, **url_params) -> str:
         ns_id, title = api.extract_namespace_and_title(page_title, ns_as_id=True)
         page_exists = no_red_link or api.page_exists(ns_id, title)
-        url = dj_urls.reverse('wikipy:page', kwargs={'raw_page_title': api.as_url_title(page_title)})
+        url = api.get_page_url(ns_id, title)
         link_text = text or page_title
         if tooltip is not None:
             link_tooltip = tooltip
@@ -239,7 +238,8 @@ class Skin(abc.ABC):
             link_tooltip += f' ({paren})'
 
         if not only_url:
-            return self._format_link(url, link_text, link_tooltip, page_exists, css_classes or [], access_key)
+            return self._format_link(url, link_text, link_tooltip, page_exists, css_classes or [], access_key,
+                                     external=new_tab)
         else:
             return url
 
@@ -296,13 +296,13 @@ def get_skin(name: str) -> Skin:
     return _LOADED_SKINS['default']
 
 
-def get_loaded_skins_names() -> typ.List[str]:
-    return sorted(_LOADED_SKINS.keys())
+def get_loaded_skins() -> typ.List[Skin]:
+    return sorted(_LOADED_SKINS.values(), key=lambda s: s.label)
 
 
 __all__ = [
     'Skin',
     'load_skin',
     'get_skin',
-    'get_loaded_skins_names',
+    'get_loaded_skins',
 ]

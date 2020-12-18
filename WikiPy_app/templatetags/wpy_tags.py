@@ -1,7 +1,7 @@
+import datetime
 import typing as typ
 
 import django.core.paginator as dj_page
-import django.shortcuts as dj_scut
 import django.template as dj_template
 import django.utils.safestring as dj_safe
 
@@ -29,7 +29,7 @@ def wpy_translate(context: page_context.TemplateContext, key: str, **kwargs):
 def wpy_static(namespace_id: int, page_title: str):
     if api.page_exists(namespace_id, page_title):
         full_title = api.get_full_page_title(namespace_id, page_title)
-        url = dj_scut.reverse('wikipy:page', args=[full_title]) + '?action=raw'
+        url = api.get_page_url(namespace_id, page_title, action='raw')
 
         if full_title.endswith('.css'):
             return dj_safe.mark_safe(f'<link href="{url}" rel="stylesheet"/>')
@@ -45,9 +45,13 @@ def wpy_render(context: page_context.TemplateContext, wikicode: str):
 
 
 @register.simple_tag(takes_context=True)
-def wpy_format_date(context: page_context.TemplateContext, date):
-    return dj_safe.mark_safe(
-        api.format_datetime(date, context.get('wpy_context').user, context['wpy_context'].language))
+def wpy_format_date(context: page_context.TemplateContext, date: datetime.datetime, custom_format: str = None):
+    return dj_safe.mark_safe(api.format_datetime(
+        date,
+        context['wpy_context'].user,
+        context['wpy_context'].language,
+        custom_format=custom_format
+    ))
 
 
 @register.simple_tag(takes_context=True)
@@ -72,7 +76,8 @@ def wpy_user_link(context: page_context.TemplateContext, username: str, ignore_t
             res = user_link
         else:
             talk_page_title = api.get_full_page_title(settings.USER_TALK_NS.id, username)
-            contribs_page_title = api.get_full_page_title(settings.SPECIAL_NS.id, 'Contributions/' + username)
+            contribs_page = special_pages.get_special_page_for_id('contributions').get_title()
+            contribs_page_title = api.get_full_page_title(settings.SPECIAL_NS.id, contribs_page + '/' + username)
             links = [
                 skin.format_internal_link(
                     language,
@@ -273,7 +278,8 @@ def wpy_diff_link(context: page_context.TemplateContext, revision: models.PageRe
         revision_id2 = target_revision.id
 
     if target_revision and revision_id1 != revision_id2:
-        title = api.get_full_page_title(-1, special_pages.get_special_page_for_id('page_differences').get_title())
+        title = api.get_full_page_title(settings.SPECIAL_NS.id,
+                                        special_pages.get_special_page_for_id('page_differences').get_title())
         title += f'/{revision_id1}/{revision_id2}'
         link = skin.format_internal_link(language, current_title, title, text, tooltip, no_red_link=True)
     else:
@@ -303,6 +309,7 @@ def wpy_inner_link(
         css_classes: str = None,
         ignore_current_title: bool = False,
         only_url: bool = False,
+        new_tab: bool = False,
         **url_params
 ):
     wpy_context: page_context.PageContext = context.get('wpy_context')
@@ -327,7 +334,7 @@ def wpy_inner_link(
         tooltip = full_title
     classes = css_classes.split() if css_classes else []
     link = skin.format_internal_link(language, current_title, full_title, text, tooltip, no_red_link=no_red_link,
-                                     css_classes=classes, only_url=only_url, **url_params)
+                                     css_classes=classes, only_url=only_url, new_tab=new_tab, **url_params)
     return dj_safe.mark_safe(link)
 
 

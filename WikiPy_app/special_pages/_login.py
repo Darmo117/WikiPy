@@ -39,13 +39,13 @@ class LoginPage(SpecialPage):
         if request.method == 'POST':
             context = self.__login(context, request, login_notice)
         else:
-            context = self.__get_form(context, request, login_notice)
+            context = self.__get_default_context(context, request, login_notice)
 
         return context, [], None
 
-    @staticmethod
-    def __get_form(base_context: page_context.PageContext, request: dj_wsgi.WSGIRequest, login_notice: str) \
-            -> page_context.PageContext:
+    # noinspection PyMethodMayBeStatic
+    def __get_default_context(self, base_context: page_context.PageContext, request: dj_wsgi.WSGIRequest,
+                              login_notice: str) -> page_context.PageContext:
         user = api.get_user_from_request(request)
 
         if user.is_logged_in:

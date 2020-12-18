@@ -36,3 +36,10 @@ contribs
 (show/hide) date (diff | hist) minor/new .. (diff size) .. page (comment) (current) [revoke]
 history
 (actu | diff) radio radio chk date author (talk | contribs | block) minor/new .. (size) (diff size) .. (comment) (current) (revoke | cancel | thank)
+
+email change confirmation
+  Special:Change_email
+    submit form -> Special:Change_email (POST) -> generate code, new email pending, send email -> Special:Change_email (GET, success)
+    resend clicked (JS) -> Special:Change_email (GET, resend) -> generate code, send email
+  Mail
+    linked clicked -> Special:Change_email (GET, confirm_code & user) -> validate email -> Special:Change_email (GET, confirm_success)

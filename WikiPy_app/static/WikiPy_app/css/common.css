@@ -14,15 +14,15 @@ a.wpy-redlink {
  * Formatting *
  **************/
 
-.text-bold {
+.text-bold, strong, b {
   font-weight: bold;
 }
 
-.text-italic {
+.text-italic, em, i {
   font-style: italic;
 }
 
-.text-underlined {
+.text-underlined, u {
   text-decoration: underline;
 }
 
@@ -30,7 +30,7 @@ a.wpy-redlink {
   text-decoration: overline;
 }
 
-.text-stroke {
+.text-stroke, s {
   text-decoration: line-through;
 }
 
@@ -91,4 +91,8 @@ figure > figcaption > a[role="button"] {
 
 .pull-right {
   float: right;
+}
+
+code, #wpy-edit-form-content {
+  font-family: "Bitstream Vera Sans Mono", Monaco, "Courier New", Courier, monospace;
 }

@@ -481,15 +481,11 @@ def _get_base_page_context(
     main_page_full_title = api.get_full_page_title(settings.MAIN_PAGE_NAMESPACE_ID, settings.MAIN_PAGE_TITLE)
     languages = list(sorted(settings.i18n.get_languages().values(), key=lambda l: l.name))
     is_main_page = page.full_title == main_page_full_title
-    if page.namespace_id in (settings.USER_NS.id, settings.USER_TALK_NS.id):
-        page_user = api.get_user_from_user_page(page.title)
-        page_ns_gender = page_user.data.gender if page_user else None
-    else:
-        page_ns_gender = None
+    page_ns_gender = api.get_user_gender_from_page(page.namespace_id, page.title)
 
     return page_context.PageContext(
         project_name=settings.PROJECT_NAME,
-        main_page_namespace=settings.MAIN_PAGE_NAMESPACE_ID,
+        main_page_namespace=settings.NAMESPACES[settings.MAIN_PAGE_NAMESPACE_ID],
         main_page_title=settings.MAIN_PAGE_TITLE,
         main_page_title_url=api.as_url_title(settings.MAIN_PAGE_TITLE, escape=True),
         main_page_full_title=main_page_full_title,
@@ -509,6 +505,6 @@ def _get_base_page_context(
         user_can_read=can_read,
         user_can_edit=can_edit,
         user_can_hide=user.has_right(settings.RIGHT_HIDE_REVISIONS),
-        date_time=dj_tz.make_naive(dj_tz.now(), dj_tz.utc),
-        local_date_time=dj_tz.now()
+        date_time=api.now(dj_tz.utc),
+        local_date_time=api.now()
     )

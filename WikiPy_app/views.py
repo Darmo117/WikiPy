@@ -42,7 +42,8 @@ def setup_page(request: dj_wsgi.WSGIRequest) -> dj_http.HttpResponse:
 def _setup(request: dj_wsgi.WSGIRequest, language: settings.i18n.Language, form: forms.SetupPageForm,
            errors: typ.List[str] = None) -> dj_http.HttpResponse:
     user = api.get_user_from_request(request)
-    context = page_context.SetupPageContext(pages.get_setup_page_context(user, language), form=form, global_errors=errors)
+    context = page_context.SetupPageContext(pages.get_setup_page_context(user, language), form=form,
+                                            global_errors=errors)
     return _render(request, context, pages.FOUND, user)
 
 
@@ -147,14 +148,12 @@ def _render(request: dj_wsgi.WSGIRequest, wpy_context: page_context.PageContext,
     return dj_scut.render(request, template_file, context=context, status=status)
 
 
-# TODO
 def api_handler(request: dj_wsgi.WSGIRequest):
-    # TODO enabled API deactivation
     user = api.get_user_from_request(request)
     context, page_type = web_api.handle_api(user, request.GET)
 
     if page_type == web_api.RAW_RESULT:
-        return dj_http.HttpResponse(content=context['result'], content_type=context['content_type'])
+        return dj_http.HttpResponse(content=context['content'], content_type=context['content_type'])
     else:
         return dj_scut.render(request, f'{apps.WikiPyAppConfig.name}/api/{page_type}.html', context=context)
 
@@ -209,6 +208,7 @@ def _generate_js(context: page_context.PageContext) -> str:
             talk_namespaces.append(ns_id)
 
     url_path = dj_scut.reverse('wikipy:page', args=[''])
+    api_url_path = dj_scut.reverse('wikipy_api:index')
     groups = {g.name: g.label(context.language) for g in settings.GROUPS.values()}
 
     return slimit.minify(f"""
@@ -243,5 +243,6 @@ window.WPY_CONF = {{
     wpyTalkNamespaces: {talk_namespaces},
     wpyGroups: {groups},
     wpyUrlPath: "{url_path}",
+    wpyApiUrlPath: "{api_url_path}",
 }};
 """)

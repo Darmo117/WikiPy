@@ -35,11 +35,11 @@ class UserGroup:
     def name(self) -> str:
         return self.__name
 
-    def label(self, language: Language):
+    def label(self, language: Language) -> str:
         return language.translate(f'group.{self.__name}')
 
     @property
-    def editable(self):
+    def editable(self) -> bool:
         return self.__editable
 
     @property
@@ -47,7 +47,7 @@ class UserGroup:
         return self.__hide_rc
 
     @property
-    def needs_validation(self):
+    def needs_validation(self) -> bool:
         return self.__needs_validation
 
     @property
@@ -64,7 +64,7 @@ class UserGroup:
     def has_right_on_pages_in_namespace(self, right: str, namespace_id: int) -> bool:
         return self.has_right(right) and self.can_edit_pages_in_namespace(namespace_id)
 
-    def can_read_pages_in_namespace(self, namespace_id: int):
+    def can_read_pages_in_namespace(self, namespace_id: int) -> bool:
         """
         Tells whether this group can read pages in the given namespace.
         :param namespace_id: Namespace ID to check.
@@ -72,7 +72,7 @@ class UserGroup:
         """
         return RIGHT_READ_PAGES in self.__namespace_edit_rights[namespace_id]
 
-    def can_edit_pages_in_namespace(self, namespace_id: int):
+    def can_edit_pages_in_namespace(self, namespace_id: int) -> bool:
         """
         Tells whether this group can edit pages in the given namespace.
         :param namespace_id: Namespace ID to check.

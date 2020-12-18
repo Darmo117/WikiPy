@@ -28,17 +28,17 @@
               {% wpy_translate trans_field_prefix|add:'label' %}
             </label>
             {{ field }}
-            {% if field.help_text %}
-              <small class="form-text text-muted">
-                {% wpy_translate trans_field_prefix|add:'help' %}
-              </small>
-            {% endif %}
             {% if field.errors %}
               <div class="invalid-feedback" style="display: block">
                 {% for error in field.errors.as_data %}
                   {% wpy_translate trans_field_prefix|add:'error.'|add:error.code %}
                 {% endfor %}
               </div>
+            {% endif %}
+            {% if field.help_text %}
+              <small class="form-text text-muted">
+                {% wpy_translate trans_field_prefix|add:'help' %}
+              </small>
             {% endif %}
           </div>
         {% endif %}

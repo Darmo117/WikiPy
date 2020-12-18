@@ -28,15 +28,6 @@ def _init_namespace_choices(add_all: bool) -> typ.Iterable[typ.Tuple[str, str]]:
     return sorted(choices, key=sort)
 
 
-def _init_language_choices() -> typ.Iterable[typ.Tuple[str, str]]:
-    choices = []
-
-    for code, language in settings.i18n.get_languages().items():
-        choices.append((code, f'{code} - {language.name}'))
-
-    return sorted(choices)
-
-
 class WikiPyForm(dj_forms.Form):
     def __init__(self, name: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -94,7 +85,6 @@ class SignUpForm(SupportsReturnTo, ConfirmPasswordForm):
     # noinspection PyProtectedMember
     username = dj_forms.CharField(
         label='username',
-        min_length=1,
         max_length=dj_auth.get_user_model()._meta.get_field('username').max_length,
         help_text=True,
         validators=[api.username_validator],
@@ -172,20 +162,16 @@ class ContributionsForm(WikiPyForm):
         super().__init__('contribs', *args, **kwargs)
 
 
-class PreferencesForm(WikiPyForm):
-    prefered_language = dj_forms.ChoiceField(
-        choices=_init_language_choices(),
-        label='prefered_language',
-        required=True
-    )
-    gender = dj_forms.ChoiceField(
+class ChangeEmailForm(WikiPyForm):
+    email = dj_forms.CharField(
+        label='email',
         required=True,
-        choices=(('n', 'neutral'), ('m', 'masculine'), ('f', 'feminine')),
-        widget=dj_forms.RadioSelect
+        widget=dj_forms.EmailInput,
+        validators=[api.email_validator]
     )
 
     def __init__(self, *args, **kwargs):
-        super().__init__('prefs', *args, **kwargs)
+        super().__init__('change_email', *args, **kwargs)
 
 
 class EditPageForm(WikiPyForm):

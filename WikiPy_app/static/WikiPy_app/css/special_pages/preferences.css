@@ -1,3 +1,8 @@
+#wpy-prefs-form .card-body {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
 #wpy-prefs-form .form-group.row {
   margin-bottom: 0;
 }
@@ -9,4 +14,12 @@
 #wpy-prefs-form .wpy-prefs-form-section-title {
   font-size: 130%;
   margin-bottom: 10px;
+}
+
+#wpy-prefs-form-signature {
+  font-family: "Bitstream Vera Sans Mono", Monaco, "Courier New", Courier, monospace;
+}
+
+.form-group ul.list-unstyled {
+  padding-left: 20px;
 }

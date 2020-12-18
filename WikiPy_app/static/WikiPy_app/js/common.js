@@ -145,6 +145,35 @@
         return WPY_CONF["wpyUserGroups"];
       },
     },
+    toast: {
+      /**
+       *
+       * @param title {string} Toast’s title.
+       * @param message {string} Toast’s message.
+       * @param autoHide {boolean} True to hide automatically after the specified delay.
+       * @param hideDelay {number?} If autoHide is true, the delay in seconds (integer) until the toat disappears.
+       */
+      show: function (title, message, autoHide, hideDelay) {
+        autoHide = !!autoHide;
+        hideDelay = Math.floor(hideDelay || 0);
+        let $toast = $(`
+<div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="${hideDelay * 1000}" data-autohide="${autoHide}">
+  <div class="toast-header">
+    <strong class="mr-auto">${title}</strong>
+    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  <div class="toast-body">${message}</div>
+</div>`);
+        $("#wpy-toasts-area").append($toast);
+        $toast.toast('show');
+        // Delete toats once it is completely hidden.
+        $toast.on('hidden.bs.toast', function () {
+          $toast.remove();
+        })
+      }
+    },
   };
 
   /* Add keystroke in tooltips of elements with accesskey attribute. */
@@ -196,4 +225,21 @@
       });
     }
   }
+
+  $("#wpy-change-email-resend").click(function () {
+    $.get(
+        wpy.config.get("wpyApiUrlPath"),
+        {
+          "action": "send_confirmation_email",
+          "format": "json",
+        },
+        function (data) {
+          if (data["sent"]) {
+            // TODO translate
+            wpy.toast.show("Email sent", "The confirmation email has been sent again.", true, 5)
+          }
+        }
+    );
+    return false;
+  });
 })();

@@ -99,6 +99,22 @@ a.wpy-redlink {
   text-align: justify;
 }
 
+/**********
+ * Toasts *
+ **********/
+
+#wpy-toasts-area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 20px;
+  z-index: 9999;
+}
+
+.toast {
+  background-color: white;
+}
+
 /****************************
  * Fix search bar centering *
  ****************************/
@@ -178,4 +194,9 @@ li:first-child .wpy-search-result {
 
 #wpy-redirect-info {
   font-size: 80%;
+}
+
+.wpy-code-highlight {
+  border: gray solid 1px;
+  border-radius: 3px;
 }

@@ -16,8 +16,16 @@ ALLOWED_HOSTS = []
 
 APP_NAME = ''
 
+FROM_EMAIL = ''
+EMAIL_HOST = ''
+EMAIL_PORT = 0
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = False
+EMAIL_SSL_KEYFILE: _typ.Optional[str] = None
+EMAIL_SSL_CERTFILE: _typ.Optional[str] = None
+EMAIL_TIMEOUT: _typ.Optional[int] = None
 
 PROJECT_NAME = ''
 
@@ -74,10 +82,12 @@ _skin_names = ''
 def init(base_dir: str):
     global ALLOWED_HOSTS, APP_NAME, PROJECT_NAME, DEFAULT_LANGUAGE_CODE, MAIN_PAGE_NAMESPACE_ID, MAIN_PAGE_TITLE, \
         HIDE_TITLE_ON_MAIN_PAGE, CASE_SENSITIVE_TITLE, INVALID_TITLE_REGEX, TIME_ZONE, NAMESPACES, \
-        GROUPS, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, SPECIAL_PAGES_LOCAL_NAMES, RANDOM_PAGE_NAMESPACES, \
-        MEDIA_BACKEND_ID, WIKI_NS, WIKI_TALK_NS, SPECIAL_NS, MAIN_NS, MAIN_TALK_NS, CATEGORY_NS, CATEGORY_TALK_NS, \
-        WIKIPY_NS, WIKIPY_TALK_NS, USER_NS, USER_TALK_NS, TEMPLATE_NS, TEMPLATE_TALK_NS, MODULE_NS, MODULE_TALK_NS, \
-        HELP_NS, HELP_TALK_NS, FILE_NS, FILE_TALK_NS, GADGET_NS, GADGET_TALK_NS, _skin_names
+        GROUPS, FROM_EMAIL, EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_USE_TLS, \
+        EMAIL_USE_SSL, EMAIL_TIMEOUT, EMAIL_SSL_KEYFILE, EMAIL_SSL_CERTFILE, SPECIAL_PAGES_LOCAL_NAMES, \
+        RANDOM_PAGE_NAMESPACES, MEDIA_BACKEND_ID, WIKI_NS, WIKI_TALK_NS, SPECIAL_NS, MAIN_NS, MAIN_TALK_NS, \
+        CATEGORY_NS, CATEGORY_TALK_NS, WIKIPY_NS, WIKIPY_TALK_NS, USER_NS, USER_TALK_NS, TEMPLATE_NS, \
+        TEMPLATE_TALK_NS, MODULE_NS, MODULE_TALK_NS, HELP_NS, HELP_TALK_NS, FILE_NS, FILE_TALK_NS, GADGET_NS, \
+        GADGET_TALK_NS, _skin_names
 
     _logging.basicConfig(format='%(levelname)s:%(message)s', level=_logging.DEBUG)
 
@@ -89,8 +99,20 @@ def init(base_dir: str):
 
         APP_NAME = str(json_config['app_name'])
 
-        EMAIL_HOST_USER = str(json_config.get('email_host_user', ''))
-        EMAIL_HOST_PASSWORD = str(json_config.get('email_host_password', ''))
+        mail_obj = json_config.get('email_server')
+        if mail_obj:
+            FROM_EMAIL = str(mail_obj.get('from', ''))
+            EMAIL_HOST = str(mail_obj.get('host', ''))
+            if EMAIL_HOST:
+                EMAIL_PORT = int(mail_obj['port'])
+                EMAIL_HOST_USER = str(mail_obj['user'])
+                EMAIL_HOST_PASSWORD = str(mail_obj['password'])
+                EMAIL_USE_TLS = bool(mail_obj['use_tls'])
+                EMAIL_USE_SSL = bool(mail_obj['use_ssl'])
+                if EMAIL_USE_TLS or EMAIL_USE_SSL:
+                    EMAIL_SSL_KEYFILE = str(mail_obj.get('ssl_keyfile'))
+                    EMAIL_SSL_CERTFILE = str(mail_obj.get('ssl_certfile'))
+                EMAIL_TIMEOUT = mail_obj.get('timeout')
 
         PROJECT_NAME = str(json_config['project_name'])
 
@@ -147,8 +169,9 @@ def init(base_dir: str):
                     if ns.matches_name(talk_ns_name) or talk_ns_alias and ns.matches_name(talk_ns_alias):
                         raise ValueError(f'duplicate namespace name for IDs "{talk_ns_id}" and "{ns.id}"')
 
-                NAMESPACES[_ns_id] = Namespace(_ns_id, ns_name, False, alias=ns_alias)
-                NAMESPACES[talk_ns_id] = Namespace(talk_ns_id, talk_ns_name, True, alias=talk_ns_alias)
+                NAMESPACES[_ns_id] = Namespace(_ns_id, ns_name, False, alias=ns_alias, can_be_main=True)
+                NAMESPACES[talk_ns_id] = Namespace(talk_ns_id, talk_ns_name, True, alias=talk_ns_alias,
+                                                   can_be_main=False)
 
     NAMESPACES = {}
     with open(_os.path.join(base_dir, _apps.WikiPyAppConfig.name, 'namespaces_names.json'), mode='r',
@@ -167,52 +190,203 @@ def init(base_dir: str):
     def get_ns_masculine_name(ident: int):
         return ns_names.get(str(ident), {}).get('masculine_name')
 
-    WIKI_NS = Namespace(-3, 'WikiNamespace', False, name=get_ns_name(-3), alias=get_ns_alias(-3))
+    WIKI_NS = Namespace(
+        -3, 'WikiNamespace',
+        is_talk=False,
+        name=get_ns_name(-3),
+        alias=get_ns_alias(-3),
+        can_be_main=True
+    )
     NAMESPACES[WIKI_NS.id] = WIKI_NS
-    WIKI_TALK_NS = Namespace(-2, 'WikiNamespace Talk', True, name=get_ns_name(-2), alias=get_ns_alias(-2))
+    WIKI_TALK_NS = Namespace(
+        -2, 'WikiNamespace Talk',
+        is_talk=True,
+        name=get_ns_name(-2),
+        alias=get_ns_alias(-2),
+        can_be_main=False
+    )
     NAMESPACES[WIKI_TALK_NS.id] = WIKI_TALK_NS
-    SPECIAL_NS = Namespace(-1, 'Special', False, name=get_ns_name(-1), alias=get_ns_alias(-1))
+    SPECIAL_NS = Namespace(
+        -1, 'Special',
+        is_talk=False,
+        name=get_ns_name(-1),
+        alias=get_ns_alias(-1),
+        can_be_main=False
+    )
     NAMESPACES[SPECIAL_NS.id] = SPECIAL_NS
-    MAIN_NS = Namespace(0, '', False, name=get_ns_name(0), alias=get_ns_alias(0))
+    MAIN_NS = Namespace(
+        0, '',
+        is_talk=False,
+        name=get_ns_name(0),
+        alias=get_ns_alias(0),
+        can_be_main=True
+    )
     NAMESPACES[MAIN_NS.id] = MAIN_NS
-    MAIN_TALK_NS = Namespace(1, 'Talk', True, name=get_ns_name(1), alias=get_ns_alias(1))
+    MAIN_TALK_NS = Namespace(
+        1,
+        'Talk',
+        is_talk=True,
+        name=get_ns_name(1),
+        alias=get_ns_alias(1),
+        can_be_main=False
+    )
     NAMESPACES[MAIN_TALK_NS.id] = MAIN_TALK_NS
-    CATEGORY_NS = Namespace(2, 'Category', False, name=get_ns_name(2), alias=get_ns_alias(2))
+    CATEGORY_NS = Namespace(
+        2,
+        'Category',
+        is_talk=False,
+        name=get_ns_name(2),
+        alias=get_ns_alias(2),
+        can_be_main=False
+    )
     NAMESPACES[CATEGORY_NS.id] = CATEGORY_NS
-    CATEGORY_TALK_NS = Namespace(3, 'Category Talk', True, name=get_ns_name(3), alias=get_ns_alias(3))
+    CATEGORY_TALK_NS = Namespace(
+        3,
+        'Category Talk',
+        is_talk=True,
+        name=get_ns_name(3),
+        alias=get_ns_alias(3),
+        can_be_main=False
+    )
     NAMESPACES[CATEGORY_TALK_NS.id] = CATEGORY_TALK_NS
-    WIKIPY_NS = Namespace(4, 'WikiPy', False, name=get_ns_name(4), alias=get_ns_alias(4))
+    WIKIPY_NS = Namespace(
+        4,
+        'WikiPy',
+        is_talk=False,
+        name=get_ns_name(4),
+        alias=get_ns_alias(4),
+        can_be_main=False
+    )
     NAMESPACES[WIKIPY_NS.id] = WIKIPY_NS
-    WIKIPY_TALK_NS = Namespace(5, 'WikiPy Talk', True, name=get_ns_name(5), alias=get_ns_alias(5))
+    WIKIPY_TALK_NS = Namespace(
+        5,
+        'WikiPy Talk',
+        is_talk=True,
+        name=get_ns_name(5),
+        alias=get_ns_alias(5),
+        can_be_main=False
+    )
     NAMESPACES[WIKIPY_TALK_NS.id] = WIKIPY_TALK_NS
-    USER_NS = Namespace(6, 'User', False, name=get_ns_name(6), alias=get_ns_alias(6),
-                        feminine_name=get_ns_feminine_name(6), masculine_name=get_ns_masculine_name(6))
+    USER_NS = Namespace(
+        6,
+        'User',
+        is_talk=False,
+        name=get_ns_name(6),
+        alias=get_ns_alias(6),
+        feminine_name=get_ns_feminine_name(6),
+        masculine_name=get_ns_masculine_name(6),
+        can_be_main=False
+    )
     NAMESPACES[USER_NS.id] = USER_NS
-    USER_TALK_NS = Namespace(7, 'User Talk', True, name=get_ns_name(7), alias=get_ns_alias(7),
-                             feminine_name=get_ns_feminine_name(7), masculine_name=get_ns_masculine_name(7))
+    USER_TALK_NS = Namespace(
+        7,
+        'User Talk',
+        is_talk=True,
+        name=get_ns_name(7),
+        alias=get_ns_alias(7),
+        feminine_name=get_ns_feminine_name(7),
+        masculine_name=get_ns_masculine_name(7),
+        can_be_main=False
+    )
     NAMESPACES[USER_TALK_NS.id] = USER_TALK_NS
-    TEMPLATE_NS = Namespace(8, 'Template', False, name=get_ns_name(8), alias=get_ns_alias(8))
+    TEMPLATE_NS = Namespace(
+        8,
+        'Template',
+        is_talk=False,
+        name=get_ns_name(8),
+        alias=get_ns_alias(8),
+        can_be_main=False
+    )
     NAMESPACES[TEMPLATE_NS.id] = TEMPLATE_NS
-    TEMPLATE_TALK_NS = Namespace(9, 'Template Talk', True, name=get_ns_name(9), alias=get_ns_alias(9))
+    TEMPLATE_TALK_NS = Namespace(
+        9,
+        'Template Talk',
+        is_talk=True,
+        name=get_ns_name(9),
+        alias=get_ns_alias(9),
+        can_be_main=False
+    )
     NAMESPACES[TEMPLATE_TALK_NS.id] = TEMPLATE_TALK_NS
-    MODULE_NS = Namespace(10, 'Module', False, name=get_ns_name(10), alias=get_ns_alias(10))
+    MODULE_NS = Namespace(
+        10,
+        'Module',
+        False,
+        name=get_ns_name(10),
+        alias=get_ns_alias(10),
+        can_be_main=False
+    )
     NAMESPACES[MODULE_NS.id] = MODULE_NS
-    MODULE_TALK_NS = Namespace(11, 'Module Talk', True, name=get_ns_name(11), alias=get_ns_alias(11))
+    MODULE_TALK_NS = Namespace(
+        11,
+        'Module Talk',
+        True,
+        name=get_ns_name(11),
+        alias=get_ns_alias(11),
+        can_be_main=False
+    )
     NAMESPACES[MODULE_TALK_NS.id] = MODULE_TALK_NS
-    HELP_NS = Namespace(12, 'Help', False, name=get_ns_name(12), alias=get_ns_alias(12))
+    HELP_NS = Namespace(
+        12,
+        'Help',
+        is_talk=False,
+        name=get_ns_name(12),
+        alias=get_ns_alias(12),
+        can_be_main=False
+    )
     NAMESPACES[HELP_NS.id] = HELP_NS
-    HELP_TALK_NS = Namespace(13, 'Help Talk', True, name=get_ns_name(13), alias=get_ns_alias(13))
+    HELP_TALK_NS = Namespace(
+        13,
+        'Help Talk',
+        is_talk=True,
+        name=get_ns_name(13),
+        alias=get_ns_alias(13),
+        can_be_main=False
+    )
     NAMESPACES[HELP_TALK_NS.id] = HELP_TALK_NS
-    FILE_NS = Namespace(14, 'File', False, name=get_ns_name(14), alias=get_ns_alias(14))
+    FILE_NS = Namespace(
+        14,
+        'File',
+        is_talk=False,
+        name=get_ns_name(14),
+        alias=get_ns_alias(14),
+        can_be_main=False
+    )
     NAMESPACES[FILE_NS.id] = FILE_NS
-    FILE_TALK_NS = Namespace(15, 'File Talk', True, name=get_ns_name(15), alias=get_ns_alias(15))
+    FILE_TALK_NS = Namespace(
+        15,
+        'File Talk',
+        is_talk=True,
+        name=get_ns_name(15),
+        alias=get_ns_alias(15),
+        can_be_main=False
+    )
     NAMESPACES[FILE_TALK_NS.id] = FILE_TALK_NS
-    GADGET_NS = Namespace(16, 'Gadget', False, name=get_ns_name(16), alias=get_ns_alias(16))
+    GADGET_NS = Namespace(
+        16,
+        'Gadget',
+        is_talk=False,
+        name=get_ns_name(16),
+        alias=get_ns_alias(16),
+        can_be_main=False
+    )
     NAMESPACES[GADGET_NS.id] = GADGET_NS
-    GADGET_TALK_NS = Namespace(17, 'Gadget Talk', True, name=get_ns_name(17), alias=get_ns_alias(17))
+    GADGET_TALK_NS = Namespace(
+        17,
+        'Gadget Talk',
+        is_talk=True,
+        name=get_ns_name(17),
+        alias=get_ns_alias(17),
+        can_be_main=False
+    )
     NAMESPACES[GADGET_TALK_NS.id] = GADGET_TALK_NS
 
     load_ns_file('additional_namespaces')
+
+    if not NAMESPACES[MAIN_PAGE_NAMESPACE_ID].can_be_main:
+        raise ValueError(f'invalid main page namespace ID')
+
+    if not all(map(lambda i: i in NAMESPACES, RANDOM_PAGE_NAMESPACES)):
+        raise ValueError('invalid namespace ID in random page namespaces')
 
     with open(_os.path.join(base_dir, _apps.WikiPyAppConfig.name, 'special_pages_names.json'), mode='r',
               encoding='UTF-8') as f:
@@ -338,8 +512,9 @@ def init(base_dir: str):
 
 def post_load():
     # Avoid circular imports
-    from .. import special_pages, skins
+    from .. import special_pages, api, skins
 
-    special_pages.load_special_pages()
     for skin_name in _skin_names:
         skins.load_skin(skin_name)
+    special_pages.load_special_pages()
+    api.open_email_connection()

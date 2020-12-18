@@ -91,6 +91,12 @@
   ],
   "default_datetime_format": 1,
   "mappings": {
+    "email": {
+      "confirm_email": {
+        "subject": "Confirmation de changement d’adresse mail",
+        "message": "<p>Bonjour, $username\u00a0!</p><p>Une demande de changement de votre adresse mail a été effectuée. Veuillez cliquer sur le lien ci-dessous pour confirmer l’action.</p><p>$link</p><p>Si vous avez reçu ce mail par erreur, merci de ne pas cliquer sur le lien et de supprimer ce mail immédiatement.</p>"
+      }
+    },
     "group": {
       "all": "Tous",
       "users": "Utilisateurs/Utilisatrices",
@@ -351,27 +357,39 @@
             "help": "Requis. Caractères non autorisés\u00a0: <em>/</em>, <em>&lt;</em>, <em>></em>, <em>_</em>, <em>#</em>, <em>|</em>, <em>{</em>, <em>}</em>, <em>[</em> et <em>]</em>. Ne peut pas commencer par <em>Anonymous-</em>",
             "error": {
               "invalid": "Le nom d’utilisateur renseigné est invalide.",
-              "duplicate": "Le nom d’utilisateur renseigné existe déjà ou ressemble trop à un autre déjà existant."
+              "duplicate": "Le nom d’utilisateur renseigné existe déjà ou ressemble trop à un autre déjà existant.",
+              "required": "Veuillez renseigner un nom d’utilisateur."
             }
           },
           "email": {
             "label": "Adresse mail",
             "help": "Requise.",
-            "error": "Adresse mail invalide."
+            "error": {
+              "invalid": "Adresse mail invalide.",
+              "required": "Veuillez renseigner une adresse mail."
+            }
           },
           "password": {
             "label": "Mot de passe",
             "help": "Requis.",
-            "error": "Mot de passe invalide."
+            "error": {
+              "invalid": "Mot de passe invalide.",
+              "required": "Veuillez renseigner un mot de passe."
+            }
           },
           "password_confirm": {
             "label": "Confirmer le mot de passe",
             "help": "Requis.",
-            "error": "Les mots de passe ne correspondent pas."
+            "error": {
+              "required": "Veuillez confirmer le mot de passe."
+            }
           },
           "secret_key": {
             "label": "Clé secrète",
-            "help": "Requise. Située dans le fichier «\u00a0SETUP_SECRET_KEY\u00a0»."
+            "help": "Requise. Située dans le fichier «\u00a0SETUP_SECRET_KEY\u00a0».",
+            "error": {
+              "required": "Veuillez renseigner la clé secrète."
+            }
           },
           "submit": {
             "label": "Configurer"
@@ -395,17 +413,25 @@
           "email": {
             "label": "Adresse mail",
             "help": "Requise.",
-            "error": "Adresse mail invalide."
+            "error": {
+              "invalid": "Adresse mail invalide.",
+              "required": "Veuillez renseigner une adresse mail."
+            }
           },
           "password": {
             "label": "Mot de passe",
             "help": "Requis.",
-            "error": "Mot de passe invalide."
+            "error": {
+              "invalid": "Mot de passe invalide.",
+              "required": "Veuillez renseigner un mot de passe."
+            }
           },
           "password_confirm": {
             "label": "Confirmer le mot de passe",
             "help": "Requis.",
-            "error": "Les mots de passe ne correspondent pas."
+            "error": {
+              "required": "Veuillez confirmer le mot de passe."
+            }
           },
           "submit": {
             "label": "Créer le compte"
@@ -493,16 +519,25 @@
         }
       },
       "preferences": {
-        "display_title": {
-          "neutral": "Préférences de l’utilisateurice",
-          "masculine": "Préférences de l’utilisateur",
-          "feminine": "Préférences de l’utilisatrice"
-        },
+        "display_title": "Vos préférences",
         "tooltip": "Vos préférences",
         "form": {
+          "tab": {
+            "personal_information": "Informations personnelles",
+            "appearance": "Apparance",
+            "editing": "Modification",
+            "recent_changes": "Modifications récentes",
+            "watchlist": "Liste de suivi",
+            "gadgets": "Gadgets",
+            "notifications": "Notifications"
+          },
           "section": {
             "general_info": "Informations générales",
-            "language_info": "Informations relatives à la langue"
+            "language_info": "Informations relatives à la langue",
+            "signature": "Signature",
+            "email": "Options des mails",
+            "skin": "Habillage et style personnalisé",
+            "date_info": "Informations relatives aux dates"
           },
           "username": {
             "label": "Nom d’utilisateur"
@@ -517,16 +552,111 @@
             "label": "Nombre de modifications"
           },
           "prefered_language": {
-            "label": "Langue préférée"
+            "label": "Langue préférée",
+            "error": {
+              "invalid_choice": "Veuillez sélectionner une langue valide.",
+              "required": "Veuillez sélectionner une langue."
+            }
           },
           "gender": {
             "label": "Comment voulez-vous être décrit·e\u00a0?",
             "neutral": "Il/elle (Le logiciel utilisera quand c’est possible des mots de genre neutre pour vous mentionner)",
             "feminine": "Elle",
-            "masculine": "Il"
+            "masculine": "Il",
+            "help": "Le logiciel utilise ce paramètre pour s’adresser à vous ou pour faire mention de vous aux autres en utilisant le bon genre grammatical. <strong>Cette information est publique.</strong>",
+            "error": {
+              "invalid_choice": "Veuillez sélectionner un genre valide.",
+              "required": "Veuillez sélectionner un genre."
+            }
+          },
+          "signature_preview": {
+            "label": "Votre signature actuelle"
+          },
+          "signature": {
+            "label": "Nouvelle signature",
+            "help": "Les commentaires sur les pages de discussion doivent être signés avec «\u00a0~~~~\u00a0», qui sera remplacé par votre signature et un horodatage.",
+            "error": {
+              "required": "La signature ne peut pas être vide.",
+              "max_length": "La signature doit comporter au plus 100 caractères."
+            }
+          },
+          "current_email": {
+            "label": "Adresse mail actuelle",
+            "change": {
+              "label": "Changer l’adresse mail"
+            },
+            "help": "Vous pouvez choisir de laisser les autres vous contacter par mail via un lien sur votre page de discussion ou page utilisateur. Votre adresse mail <em>n’est pas</em> révélée quand les autres utilisateurs/utilisatrices vous contactent."
+          },
+          "email_confirmation_date": {
+            "label": "Date de confirmation de l’adresse",
+            "not_confirmed": "Vous n’avez pas encore confirmé votre adresse mail."
+          },
+          "users_can_send_emails": {
+            "label": "Permettre aux autres utilisateurs et utilisatrices de m’envoyer des mails"
+          },
+          "send_copy_of_sent_emails": {
+            "label": "M’envoyer une copie des mails que j’envoie aux autres utilisateurs et utilisatrices"
+          },
+          "send_watchlist_emails": {
+            "label": "M’envoyer un mail lorsqu’une page de ma liste de suivi est modifiée"
+          },
+          "send_minor_watchlist_emails": {
+            "label": "M’envoyer un mail même pour les modifications mineures"
+          },
+          "users_email_blacklist": {
+            "label": "Empêcher ces utilisateurs de m’envoyer des mails",
+            "error": {
+              "invalid": "Un ou plusieurs noms d’utilisateur sont invalides."
+            }
+          },
+          "skin": {
+            "label": "Habillage",
+            "preview": "Prévisualiser",
+            "custom_css": "CSS personnalisé",
+            "custom_js": "JavaScript personnalisé",
+            "error": {
+              "invalid_choice": "Nom d’habillage invalide.",
+              "required": "Veuillez sélectionner un habillage."
+            }
+          },
+          "custom_style": {
+            "label": "CSS et JavaScript personnalisés"
+          },
+          "datetime_format": {
+            "label": "Format de date",
+            "auto": "Pas de préférence",
+            "error": {
+              "invalid_choice": "Format invalide.",
+              "required": "Veuillez sélectionner un format."
+            }
           },
           "submit": {
             "label": "Sauvegarder les changements"
+          }
+        }
+      },
+      "change_email": {
+        "display_title": "Changer votre adresse mail",
+        "confirm_title": "Confirmation de votre adresse mail",
+        "notice": "Complétez ce formulaire pour modifier votre adresse mail. Un mail vous sera envoyé à cette adresse pour confirmer sa validité.",
+        "success": "Un mail de confirmation avec un lien cliquable a été envoyé à cette adresse. Si vous n’avez rien reçu au bout de quelques minutes, cliquez sur le bouton ci-dessous pour en renvoyer un.",
+        "confirm_success": "Adresse mail changée avec succès\u00a0!",
+        "resend": "Renvoyer le mail",
+        "form": {
+          "error": {
+            "invalid_code": "Code de confirmation invalide."
+          },
+          "current_email": {
+            "label": "Adresse mail actuelle"
+          },
+          "email": {
+            "label": "Nouvelle adresse mail",
+            "error": {
+              "invalid": "Adresse invalide"
+            }
+          },
+          "submit": {
+            "label": "Changer l’adresse"
           }
         }
       },

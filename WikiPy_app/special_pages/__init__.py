@@ -3,10 +3,8 @@ import dataclasses
 import importlib
 import os
 import typing as typ
-import urllib.parse
 
 import django.core.handlers.wsgi as dj_wsgi
-import django.shortcuts as dj_scuts
 from django.conf import settings as dj_settings
 
 from .. import apps, page_context, settings, forms, util
@@ -173,12 +171,8 @@ class SpecialPage(abc.ABC):
 
         # Redirect to login page if login required and not logged in
         if self.__requires_logged_in and not base_context.user.is_logged_in:
-            login_url = dj_scuts.reverse('wikipy:page', kwargs={
-                'raw_page_title': api.as_url_title(api.get_full_page_title(
-                    settings.SPECIAL_NS.id,
-                    get_special_page_for_id('login').get_title()
-                ))
-            }) + '?' + urllib.parse.urlencode({'return_to': request.get_full_path()})
+            login_url = api.get_page_url(settings.SPECIAL_NS.id, get_special_page_for_id('login').get_title(),
+                                         return_to=request.get_full_path())
             return page_context.RedirectPageContext(base_context, to=login_url, is_path=True)
 
         special_context = SpecialPageContext(

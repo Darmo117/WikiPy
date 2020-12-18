@@ -95,6 +95,12 @@
   ],
   "default_datetime_format": 0,
   "mappings": {
+    "email": {
+      "confirm_email": {
+        "subject": "Email address change confirmation",
+        "message": "<p>Hello, $username!</p><p>A request has been made to change your email address. Please click the following link to confirm the action.</p><p>$link</p><p>If you received this email by mistake, please do not click the link and delete it immediatly.</p>"
+      }
+    },
     "group": {
       "all": "All",
       "users": "Users",
@@ -355,27 +361,39 @@
             "help": "Required. Unauthorized characters: <em>/</em>, <em>&lt;</em>, <em>></em>, <em>_</em>, <em>#</em>, <em>|</em>, <em>{</em>, <em>}</em>, <em>[</em> and <em>]</em>. Cannot start with <em>Anonymous-</em>",
             "error": {
               "invalid": "The provided username is invalid.",
-              "duplicate": "The provided username already exists or is too similar to an existing one."
+              "duplicate": "The provided username already exists or is too similar to an existing one.",
+              "required": "Please provide a username."
             }
           },
           "email": {
             "label": "Email address",
             "help": "Required.",
-            "error": "Invalid email address."
+            "error": {
+              "invalid": "Invalid email address.",
+              "required": "Please provide an email address."
+            }
           },
           "password": {
             "label": "Password",
             "help": "Required.",
-            "error": "Invalid password."
+            "error": {
+              "invalid": "Invalid password.",
+              "required": "Please provide a password."
+            }
           },
           "password_confirm": {
             "label": "Confirm password",
             "help": "Required.",
-            "error": "Passwords do not match."
+            "error": {
+              "required": "Please confirm the password."
+            }
           },
           "secret_key": {
             "label": "Secret key",
-            "help": "Required. It is located in the “SETUP_SECRET_KEY” file."
+            "help": "Required. It is located in the “SETUP_SECRET_KEY” file.",
+            "error": {
+              "required": "Please enter the secret key."
+            }
           },
           "submit": {
             "label": "Setup"
@@ -399,17 +417,25 @@
           "email": {
             "label": "Email address",
             "help": "Required.",
-            "error": "Invalid email address."
+            "error": {
+              "invalid": "Invalid email address.",
+              "required": "Please provide an email address."
+            }
           },
           "password": {
             "label": "Password",
             "help": "Required.",
-            "error": "Invalid password."
+            "error": {
+              "invalid": "Invalid password.",
+              "required": "Please provide a password."
+            }
           },
           "password_confirm": {
             "label": "Confirm password",
             "help": "Required.",
-            "error": "Passwords do not match."
+            "error": {
+              "required": "Please confirm the password."
+            }
           },
           "submit": {
             "label": "Create account"
@@ -497,12 +523,25 @@
         }
       },
       "preferences": {
-        "display_title": "User preferences",
+        "display_title": "Your preferences",
         "tooltip": "Your preferences",
         "form": {
+          "tab": {
+            "personal_information": "Personal information",
+            "appearance": "Appearance",
+            "editing": "Editing",
+            "recent_changes": "Recent changes",
+            "watchlist": "Watchlist",
+            "gadgets": "Gadgets",
+            "notifications": "Notifications"
+          },
           "section": {
             "general_info": "General information",
-            "language_info": "Language information"
+            "language_info": "Language information",
+            "signature": "Signature",
+            "email": "Email settings",
+            "skin": "Skin and custom style",
+            "date_info": "Date information"
           },
           "username": {
             "label": "Username"
@@ -517,16 +556,111 @@
             "label": "Number of edits"
           },
           "prefered_language": {
-            "label": "Prefered language"
+            "label": "Prefered language",
+            "error": {
+              "invalid_choice": "Please select a valid language.",
+              "required": "Please select a language."
+            }
           },
           "gender": {
-            "label": "How do you wish to be described as?",
+            "label": "How do you prefer to be described as?",
             "neutral": "They (When mentioning you, the software will use gender neutral words whenever possible)",
             "feminine": "She",
-            "masculine": "He"
+            "masculine": "He",
+            "help": "The software uses this setting to address you and to mention you to others using the appropriate grammatical gender. <strong>This information is public.</strong>",
+            "error": {
+              "invalid_choice": "Please select a valid gender.",
+              "required": "Please select a gender."
+            }
+          },
+          "signature_preview": {
+            "label": "Your current signature"
+          },
+          "signature": {
+            "label": "New signature",
+            "help": "Comments on talk pages should be signed with “~~~~”, which will be converted into your signature and a timestamp.",
+            "error": {
+              "required": "Signature cannot be empty.",
+              "max_length": "Signature cannot have more than 100 characters."
+            }
+          },
+          "current_email": {
+            "label": "Current email address",
+            "change": {
+              "label": "Change email address"
+            },
+            "help": "You can choose to let others contact you by email through a link on your user or talk page. Your email address is <em>not</em> revealed when other users contact you."
+          },
+          "email_confirmation_date": {
+            "label": "Email confirmation date",
+            "not_confirmed": "You have not yet confirmed your email address."
+          },
+          "users_can_send_emails": {
+            "label": "Let other users send me emails"
+          },
+          "send_copy_of_sent_emails": {
+            "label": "Send me a copy of emails I send to others"
+          },
+          "send_watchlist_emails": {
+            "label": "Send me an email whenever a page from my watchlist is edited"
+          },
+          "send_minor_watchlist_emails": {
+            "label": "Send me an email even if the edit is minor"
+          },
+          "users_email_blacklist": {
+            "label": "Prevent these users from sending me emails",
+            "error": {
+              "invalid": "One or more usernames are invalid."
+            }
+          },
+          "skin": {
+            "label": "Skin",
+            "preview": "Preview",
+            "custom_css": "Custom CSS",
+            "custom_js": "Custom JavaScript",
+            "error": {
+              "invalid_choice": "Invalid skin name.",
+              "required": "Please select a skin."
+            }
+          },
+          "custom_style": {
+            "label": "Custom CSS and JavaScript"
+          },
+          "datetime_format": {
+            "label": "Date format",
+            "auto": "No preference",
+            "error": {
+              "invalid_choice": "Invalid format.",
+              "required": "Please select format."
+            }
           },
           "submit": {
             "label": "Save changes"
+          }
+        }
+      },
+      "change_email": {
+        "display_title": "Change your email address",
+        "confirm_title": "Confirm your email address",
+        "notice": "Fill in this form to change your email address. You will receive an email on the new address to confirm it is valid.",
+        "success": "A confirmation email with a clickable link has been sent at this address. If you haven’t received anything within some minutes, click the button below to send a new one.",
+        "confirm_success": "Email address successfully changed!",
+        "resend": "Resend email",
+        "form": {
+          "error": {
+            "invalid_code": "Invalid confirmation code."
+          },
+          "current_email": {
+            "label": "Current email address"
+          },
+          "email": {
+            "label": "New email address",
+            "error": {
+              "invalid": "Invalid address"
+            }
+          },
+          "submit": {
+            "label": "Change address"
           }
         }
       },

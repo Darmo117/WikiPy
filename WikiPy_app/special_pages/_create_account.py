@@ -4,8 +4,8 @@ import typing as typ
 import django.core.handlers.wsgi as dj_wsgi
 import django.utils.safestring as dj_safe
 
-from . import SpecialPage, ReturnToPageContext, CONNECTION_CAT
-from .. import page_context, api, forms, settings, util
+from . import SpecialPage, CONNECTION_CAT
+from .. import page_context, api, forms, settings
 
 
 @dataclasses.dataclass(init=False)
@@ -37,12 +37,12 @@ class CreateAccountPage(SpecialPage):
         if request.method == 'POST':
             context = self.__create_account(context, request, notice)
         else:
-            context = self.__get_form(context, request, notice)
+            context = self.__get_default_context(context, request, notice)
 
         return context, [], None
 
-    @staticmethod
-    def __get_form(base_context: page_context.PageContext, request: dj_wsgi.WSGIRequest, notice: str) \
+    # noinspection PyMethodMayBeStatic
+    def __get_default_context(self, base_context: page_context.PageContext, request: dj_wsgi.WSGIRequest, notice: str) \
             -> page_context.PageContext:
         return CreateAccountPageContext(base_context, create_account_notice=notice,
                                         form=forms.SignUpForm(initial=request.GET))
@@ -64,7 +64,7 @@ class CreateAccountPage(SpecialPage):
                 else:
                     main_page_title = api.get_full_page_title(settings.MAIN_PAGE_NAMESPACE_ID, settings.MAIN_PAGE_TITLE)
                     return_to = self._get_return_to_path(form, main_page_title)
-                    context = page_context.RedirectPageContext(context, to=return_to, is_path=True)
+                    context = page_context.RedirectPageContext(context, to=return_to)
             else:
                 errors.append('passwords_mismatch')
 
