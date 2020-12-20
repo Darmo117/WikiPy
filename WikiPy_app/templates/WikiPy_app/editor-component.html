@@ -33,24 +33,24 @@
         </div>
 
         <div class="form-group text-center">
-          <div class="form-check form-check-inline">
+          <div class="custom-control custom-checkbox custom-control-inline">
             {{ form.minor_edit }}
-            <label for="{{ form.minor_edit.id_for_label }}" class="form-check-label"
+            <label for="{{ form.minor_edit.id_for_label }}" class="custom-control-label"
                    title="{% wpy_translate trans_prefix|add:'minor_edit.tooltip' %}">
               {% wpy_translate trans_prefix|add:'minor_edit.label' %}
             </label>
           </div>
 
-          <div class="form-check form-check-inline">
+          <div class="custom-control custom-checkbox custom-control-inline">
             {{ form.follow_page }}
-            <label for="{{ form.follow_page.id_for_label }}" class="form-check-label"
+            <label for="{{ form.follow_page.id_for_label }}" class="custom-control-label"
                    title="{% wpy_translate trans_prefix|add:'follow_page.tooltip' %}">
               {% wpy_translate trans_prefix|add:'follow_page.label' %}
             </label>
           </div>
         </div>
 
-        <div class="form-group text-center">
+        <div class=" text-center">
           <input id="wpy-edit-form-submit-btn" type="submit" value="{% wpy_translate trans_prefix|add:'submit.label' %}"
                  title="{% wpy_translate trans_prefix|add:'submit.tooltip' %}" class="btn btn-primary"
                  accesskey="s"/>

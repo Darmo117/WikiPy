@@ -70,31 +70,31 @@
 
     <div class="form-group text-center">
       {% if wpy_context.user_can_hide %}
-        <div class="form-check form-check-inline">
+        <div class="custom-control custom-checkbox custom-control-inline">
           {{ form.only_hidden_revisions }}
-          <label for="{{ form.only_hidden_revisions.id_for_label }}" class="form-check-label">
+          <label for="{{ form.only_hidden_revisions.id_for_label }}" class="custom-control-label">
             {% wpy_translate trans_prefix|add:'only_hidden_revisions.label' %}
           </label>
         </div>
       {% endif %}
 
-      <div class="form-check form-check-inline">
+      <div class="custom-control custom-checkbox custom-control-inline">
         {{ form.only_last_edits }}
-        <label for="{{ form.only_last_edits.id_for_label }}" class="form-check-label">
+        <label for="{{ form.only_last_edits.id_for_label }}" class="custom-control-label">
           {% wpy_translate trans_prefix|add:'only_last_edits.label' %}
         </label>
       </div>
 
-      <div class="form-check form-check-inline">
+      <div class="custom-control custom-checkbox custom-control-inline">
         {{ form.only_page_creations }}
-        <label for="{{ form.only_page_creations.id_for_label }}" class="form-check-label">
+        <label for="{{ form.only_page_creations.id_for_label }}" class="custom-control-label">
           {% wpy_translate trans_prefix|add:'only_page_creations.label' %}
         </label>
       </div>
 
-      <div class="form-check form-check-inline">
+      <div class="custom-control custom-checkbox custom-control-inline">
         {{ form.hide_minor }}
-        <label for="{{ form.hide_minor.id_for_label }}" class="form-check-label">
+        <label for="{{ form.hide_minor.id_for_label }}" class="custom-control-label">
           {% wpy_translate trans_prefix|add:'hide_minor.label' %}
         </label>
       </div>

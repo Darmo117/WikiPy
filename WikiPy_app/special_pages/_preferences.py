@@ -4,6 +4,7 @@ import typing as typ
 import django.core.handlers.wsgi as dj_wsgi
 import django.forms as dj_forms
 import django.utils.safestring as dj_safe
+import pytz
 
 from . import SpecialPage, USERS_AND_RIGHTS_CAT
 from .. import page_context, forms, api, settings, models, skins
@@ -28,6 +29,7 @@ def load_special_page() -> SpecialPage:
         )
         gender = dj_forms.ChoiceField(
             choices=((g.code, g.i18n_code) for g in models.GENDERS.values()),
+            label='gender',
             widget=dj_forms.RadioSelect,
             required=True
         )
@@ -58,13 +60,72 @@ def load_special_page() -> SpecialPage:
         )
         skin = dj_forms.ChoiceField(
             choices=((s.name, s.label) for s in skins.get_loaded_skins()),
+            label='skin',
             widget=dj_forms.RadioSelect,
             required=True
         )
         datetime_format = dj_forms.ChoiceField(
             choices=(),
+            label='datetime_format',
             widget=dj_forms.RadioSelect,
             required=True
+        )
+        timezone = dj_forms.ChoiceField(
+            choices=(),
+            label='timezone',
+            required=True
+        )
+        max_image_preview_size = dj_forms.ChoiceField(
+            choices=(),
+            label='max_image_preview_size',
+            required=True
+        )
+        max_image_thumbnail_size = dj_forms.ChoiceField(
+            choices=(),
+            label='max_image_thumbnail_size',
+            required=True
+        )
+        enable_media_viewer = dj_forms.BooleanField(
+            required=False,
+            label='enable_media_viewer'
+        )
+        display_hidden_categories = dj_forms.BooleanField(
+            required=False,
+            label='display_hidden_categories'
+        )
+        numbered_section_titles = dj_forms.BooleanField(
+            required=False,
+            label='numbered_section_titles'
+        )
+        confirm_rollback = dj_forms.BooleanField(
+            required=False,
+            label='confirm_revocation'
+        )
+        default_revisions_list_size = dj_forms.IntegerField(
+            required=True,
+            label='default_revisions_list_size',
+            min_value=settings.REVISIONS_LIST_PAGE_MIN,
+            max_value=settings.REVISIONS_LIST_PAGE_MAX
+        )
+        all_edits_minor = dj_forms.BooleanField(
+            required=False,
+            label='all_edits_minor'
+        )
+        blank_comment_prompt = dj_forms.BooleanField(
+            required=False,
+            label='blank_comment_prompt'
+        )
+        unsaved_changes_warning = dj_forms.BooleanField(
+            required=False,
+            label='unsaved_changes_warning'
+        )
+        show_preview_first_edit = dj_forms.BooleanField(
+            required=False,
+            label='show_preview_first_edit'
+        )
+        preview_above_edit_box = dj_forms.BooleanField(
+            required=False,
+            label='preview_above_edit_box'
         )
 
         def __init__(self, base_context: page_context.PageContext, *args, **kwargs):
@@ -72,6 +133,40 @@ def load_special_page() -> SpecialPage:
             self.fields['datetime_format'].choices = (
                 ('*', 'auto'),
                 *[(i + 1, f) for i, f in enumerate(base_context.language.datetime_formats)]
+            )
+
+            zones = {}
+            current_zone = ''
+            for tz in sorted(pytz.common_timezones):
+                zone, *rest = tz.split('/')
+                rest = '/'.join(rest)
+                is_international = not rest
+                if is_international:
+                    rest = zone
+                    zone = 'International'
+
+                if zone != current_zone:
+                    current_zone = base_context.language.translate('timezone.' + zone + '.label')
+                    if current_zone not in zones:
+                        zones[current_zone] = []
+
+                tz_label = base_context.language.translate('timezone.' + zone + '.timezones.' + rest,
+                                                           none_if_undefined=True) or rest
+                if not is_international:
+                    tz_label = current_zone + '/' + tz_label
+
+                zones[current_zone].append((tz, tz_label))
+
+            choices = [(k, sorted(v, key=lambda e: e[1])) for k, v in zones.items()]
+            choices.sort(key=lambda e: e[0])
+            self.fields['timezone'].choices = choices
+
+            self.fields['max_image_preview_size'].choices = (
+                (s, f'{s}\u00a0px') for s in settings.IMAGE_PREVIEW_SIZES
+            )
+
+            self.fields['max_image_thumbnail_size'].choices = (
+                (s, f'{s}\u00a0px') for s in settings.THUMBNAIL_SIZES
             )
 
     @dataclasses.dataclass(init=False)
@@ -130,6 +225,19 @@ def load_special_page() -> SpecialPage:
                 'send_minor_watchlist_emails': user.data.send_minor_watchlist_emails,
                 'skin': user.data.skin,
                 'datetime_format': datetime_format,
+                'timezone': user.data.timezone,
+                'max_image_preview_size': user.data.max_image_file_preview_size,
+                'max_image_thumbnail_size': user.data.max_image_thumbnail_size,
+                'enable_media_viewer': user.data.enable_media_viewer,
+                'display_hidden_categories': user.data.display_hidden_categories,
+                'numbered_section_titles': user.data.numbered_section_titles,
+                'confirm_rollback': user.data.confirm_rollback,
+                'default_revisions_list_size': user.data.default_revisions_list_size,
+                'all_edits_minor': user.data.all_edits_minor,
+                'blank_comment_prompt': user.data.blank_comment_prompt,
+                'unsaved_changes_warning': user.data.unsaved_changes_warning,
+                'show_preview_first_edit': user.data.show_preview_first_edit,
+                'preview_above_edit_box': user.data.preview_above_edit_box,
             })
 
             return PreferencesPageContext(
@@ -155,7 +263,20 @@ def load_special_page() -> SpecialPage:
                     send_copy_of_sent_emails=form.cleaned_data['send_copy_of_sent_emails'],
                     send_watchlist_emails=form.cleaned_data['send_watchlist_emails'],
                     send_minor_watchlist_emails=form.cleaned_data['send_minor_watchlist_emails'],
-                    datetime_format_id=datetime_format if datetime_format != '*' else None
+                    datetime_format_id=int(datetime_format) if datetime_format != '*' else None,
+                    timezone=form.cleaned_data['timezone'],
+                    max_image_file_preview_size=int(form.cleaned_data['max_image_preview_size']),
+                    max_image_thumbnail_size=int(form.cleaned_data['max_image_thumbnail_size']),
+                    enable_media_viewer=form.cleaned_data['enable_media_viewer'],
+                    display_hidden_categories=form.cleaned_data['display_hidden_categories'],
+                    numbered_section_titles=form.cleaned_data['numbered_section_titles'],
+                    confirm_rollback=form.cleaned_data['confirm_rollback'],
+                    default_revisions_list_size=form.cleaned_data['default_revisions_list_size'],
+                    all_edits_minor=form.cleaned_data['all_edits_minor'],
+                    blank_comment_prompt=form.cleaned_data['blank_comment_prompt'],
+                    unsaved_changes_warning=form.cleaned_data['unsaved_changes_warning'],
+                    show_preview_first_edit=form.cleaned_data['show_preview_first_edit'],
+                    preview_above_edit_box=form.cleaned_data['preview_above_edit_box']
                 )
                 # Reload page
                 return page_context.RedirectPageContext(base_context,

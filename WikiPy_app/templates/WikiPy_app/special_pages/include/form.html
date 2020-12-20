@@ -18,16 +18,44 @@
   {% endwith %}
   <form method="post" id="wpy-{{ form.name }}-form" {% if action %}action="{{ action }}"{% endif %}>
     {% csrf_token %}
+
     {% for field in form %}
       {% with trans_field_prefix=trans_prefix|add:field.label|add:'.' %}
+
         {% if field.is_hidden %}
           {{ field }}
         {% else %}
-          <div class="form-group" id="wpy-{{ form.name }}-form-field-{{ field.label }}">
-            <label for="{{ field.id_for_label }}">
+
+          <div id="wpy-{{ form.name }}-form-field-{{ field.label }}"
+               class="form-group {% if field.field.widget.input_type == 'checkbox' %}custom-control custom-checkbox{% endif %}">
+            {% if field.field.widget.input_type == 'checkbox' %}
+              {{ field }}
+            {% endif %}
+
+            {% if field.field.widget.input_type == 'file' %}
+              <div class="custom-file">
+            {% endif %}
+
+            <label for="{{ field.id_for_label }}"
+                   class="{% if field.field.widget.input_type == 'checkbox' %}custom-control-label{% elif field.field.widget.input_type == 'file' %}custom-file-label{% endif %}">
               {% wpy_translate trans_field_prefix|add:'label' %}
             </label>
-            {{ field }}
+            {% if field.field.choices and field.field.widget.input_type == 'radio' %}
+              <ul class="list-unstyled">
+                {% for item in field %}
+                  <li class="custom-control custom-radio">
+                    {{ item.tag }}
+                    <label class="custom-control-label"
+                           for="{{ field.id_for_label|slice:':-2' }}_{{ forloop.counter0 }}">
+                      {% wpy_translate trans_field_prefix|add:item.choice_label|add:'.label' %}
+                    </label>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% elif field.field.widget.input_type != 'checkbox' %}
+              {{ field }}
+            {% endif %}
+
             {% if field.errors %}
               <div class="invalid-feedback" style="display: block">
                 {% for error in field.errors.as_data %}
@@ -40,8 +68,14 @@
                 {% wpy_translate trans_field_prefix|add:'help' %}
               </small>
             {% endif %}
+
+            {% if field.field.widget.input_type == 'file' %}
+              </div>
+            {% endif %}
           </div>
+
         {% endif %}
+
       {% endwith %}
     {% endfor %}
     <div class="text-center">

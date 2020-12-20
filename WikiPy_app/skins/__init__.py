@@ -286,14 +286,14 @@ def load_skin(name: str):
         # noinspection PyUnresolvedReferences
         skin = module.load_skin()
         _LOADED_SKINS[skin.name] = skin
-    except ModuleNotFoundError:
+    except ModuleNotFoundError:  # Should never happen
         logging.warning(f'unknown skin name "{name}", ignored')
 
 
-def get_skin(name: str) -> Skin:
+def get_skin(name: str) -> typ.Optional[Skin]:
     if name in _LOADED_SKINS:
         return _LOADED_SKINS[name]
-    return _LOADED_SKINS['default']
+    return None
 
 
 def get_loaded_skins() -> typ.List[Skin]:

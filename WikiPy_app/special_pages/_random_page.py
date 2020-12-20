@@ -5,9 +5,10 @@ from .. import page_context, api, settings
 class RandomPage(SpecialPage):
     def __init__(self):
         super().__init__('random_page', 'Random page', category=REDIRECTIONS_CAT, icon='dice-multiple', access_key='x')
+        self.__namespaces = map(lambda ns: ns.id, filter(lambda ns: ns.is_content, settings.NAMESPACES.values()))
 
     def _get_data_impl(self, sub_title, base_context, request, **kwargs):
-        result = api.get_random_page(namespaces=settings.RANDOM_PAGE_NAMESPACES)
+        result = api.get_random_page(namespaces=self.__namespaces)
         if result:
             ns, title = result.namespace_id, result.title
         else:

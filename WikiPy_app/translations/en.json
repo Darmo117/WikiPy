@@ -91,7 +91,7 @@
     "%B %d, %Y at %I:%M %p",
     "%d %B, %Y at %I:%M %p",
     "%Y %B %d at %I:%M %p",
-    "%Y-%m-%dT%H:%I:%S %p"
+    "%Y-%m-%dT%H:%M:%S %p"
   ],
   "default_datetime_format": 0,
   "mappings": {
@@ -541,7 +541,11 @@
             "signature": "Signature",
             "email": "Email settings",
             "skin": "Skin and custom style",
-            "date_info": "Date information"
+            "date_info": "Date information",
+            "files": "Files",
+            "other_options": "Other options",
+            "editor": "Editor",
+            "preview": "Preview"
           },
           "username": {
             "label": "Username"
@@ -631,8 +635,71 @@
             "auto": "No preference",
             "error": {
               "invalid_choice": "Invalid format.",
-              "required": "Please select format."
+              "required": "Please select a format."
             }
+          },
+          "server_time": {
+            "label": "Server time"
+          },
+          "local_time": {
+            "label": "Local time"
+          },
+          "timezone": {
+            "label": "Timezone",
+            "error": {
+              "invalid_choice": "Invalid timezone.",
+              "required": "Please select a timezone."
+            }
+          },
+          "max_image_preview_size": {
+            "label": "Image size limit on file description pages",
+            "error": {
+              "invalid_choice": "Invalid size.",
+              "required": "Please select a size."
+            }
+          },
+          "max_image_thumbnail_size": {
+            "label": "Thumbnails size",
+            "error": {
+              "invalid_choice": "Invalid size.",
+              "required": "Please select a size."
+            }
+          },
+          "enable_media_viewer": {
+            "label": "Enable media viewer"
+          },
+          "display_hidden_categories": {
+            "label": "Display hidden categories"
+          },
+          "numbered_section_titles": {
+            "label": "Number section headings"
+          },
+          "confirm_rollback": {
+            "label": "Ask for confirmation when I click a rollback link"
+          },
+          "default_revisions_list_size": {
+            "label": "Default number of revisions to show per page in history pages and contributions",
+            "help": "Value must be between $min and $max inclusive.",
+            "error": {
+              "min_value": "Value should be greater than or equal to $min.",
+              "max_value": "Value should be less than or equal to $max.",
+              "required": "Please enter a value."
+            }
+          },
+          "all_edits_minor": {
+            "label": "Mark all my edits as minor"
+          },
+          "blank_comment_prompt": {
+            "label": "Prompt me when I publish without an edit comment"
+          },
+          "unsaved_changes_warning": {
+            "label": "Warn me when I exit a page with unsaved changes"
+          },
+          "show_preview_first_edit": {
+            "label": "Show preview on first edit"
+          },
+          "preview_above_edit_box": {
+            "label": "Show preview above edit box"
           },
           "submit": {
             "label": "Save changes"
@@ -766,6 +833,176 @@
           "page_tools": "Page tools",
           "misc": "Other special pages"
         }
+      }
+    },
+    "timezone": {
+      "Africa": {
+        "label": "Africa",
+        "timezones": {
+          "Africa/Addis_Ababa": "Addis Ababa",
+          "Africa/Dar_es_Salaam": "Dar es Salaam",
+          "Africa/El_Aaiun": "El Aaiún",
+          "Lome": "Lomé",
+          "Ndjamena": "N’Djamena",
+          "Sao_Tome": "São Tomé"
+        }
+      },
+      "America": {
+        "label": "America",
+        "timezones": {
+          "Araguaina": "Araguaína",
+          "Argentina/Buenos_Aires": "Argentina/Buenos Aires",
+          "Argentina/Cordoba": "Argentine/Córdoba",
+          "Argentina/La_Rioja": "Argentina/La Rioja",
+          "Argentina/Rio_Gallegos": "Argentina/Río Gallegos",
+          "Argentina/San_Juan": "Argentina/San Juan",
+          "Argentina/San_Luis": "Argentina/San Luis",
+          "Argentina/Tucuman": "Argentine/Tucumán",
+          "Asuncion": "Asunción",
+          "Bahia_Banderas": "Bahía de Banderas",
+          "Belem": "Belém",
+          "Boa_Vista": "Boa Vista",
+          "Bogota": "Bogotá",
+          "Cambridge_Bay": "Cambridge Bay",
+          "Campo_Grande": "Campo Grande",
+          "Cancun": "Cancún",
+          "Cayman": "Cayman Islands",
+          "Costa_Rica": "Costa Rica",
+          "Cuiaba": "Cuiabá",
+          "Curacao": "Curaçao",
+          "Dawson_Creek": "Dawson Creek",
+          "Eirunepe": "Eirunepé",
+          "El_Salvador": "El Salvador",
+          "Fort_Nelson": "Fort Nelson",
+          "Glace_Bay": "Glace Bay",
+          "Goose_Bay": "Goose Bay",
+          "Grand_Turk": "Grand Turk Island",
+          "Indiana/Tell_City": "Indiana/Tell City",
+          "La_Paz": "La Paz",
+          "Los_Angeles": "Los Angeles",
+          "Lower_Princes": "Lower Prince’s Quarter",
+          "Maceio": "Maceió",
+          "Mazatlan": "Mazatlán",
+          "Merida": "Mérida",
+          "Mexico_City": "Mexico City",
+          "New_York": "New York",
+          "North_Dakota/Beulah": "North Dakota/Beulah",
+          "North_Dakota/Center": "North Dakota/Center",
+          "North_Dakota/New_Salem": "North Dakota/New Salem",
+          "Port_of_Spain": "Port of Spain",
+          "Porto_Velho": "Porto Velho",
+          "Puerto_Rico": "Puerto Rico",
+          "Punta_Arenas": "Punta Arenas",
+          "Rainy_River": "Rainy River",
+          "Rankin_Inlet": "Rankin Inlet",
+          "Rio_Branco": "Rio Branco",
+          "Santarem": "Santarém",
+          "Santo_Domingo": "Santo Domingo",
+          "Sao_Paulo": "São Paulo",
+          "Scoresbysund": "Ittoqqortoormiit",
+          "St_Barthelemy": "Saint Barthélemy",
+          "St_Johns": "St. John’s",
+          "St_Kitts": "Saint Kitts",
+          "St_Lucia": "Saint Lucia",
+          "St_Thomas": "Saint Thomas",
+          "St_Vincent": "Saint Vincent",
+          "Swift_Current": "Swift Current",
+          "Thule": "Qaanaaq (Thule)",
+          "Thunder_Bay": "Thunder Bay"
+        }
+      },
+      "Antarctica": {
+        "label": "Antarctica",
+        "timezones": {
+          "DumontDUrville": "Dumont D’Urville"
+        }
+      },
+      "Arctic": {
+        "label": "Arctic",
+        "timezones": {}
+      },
+      "Asia": {
+        "label": "Asia",
+        "timezones": {
+          "Aqtau": "Aktaw",
+          "Aqtobe": "Aktobe",
+          "Ho_Chi_Minh": "Ho Chi Minh",
+          "Hong_Kong": "Hong Kong",
+          "Hovd": "Khovd",
+          "Kuala_Lumpur": "Kuala Lumpur",
+          "Phnom_Penh": "Phnom Penh",
+          "Qostanay": "Kostanay",
+          "Qyzylorda": "Kyzylorda",
+          "Urumqi": "Ürümqi"
+        }
+      },
+      "Atlantic": {
+        "label": "Atlantic Ocean",
+        "timezones": {
+          "Canary": "Canary Islands",
+          "Cape_Verde": "Cape Verde",
+          "Faroe": "Faroe Islands",
+          "Reykjavik": "Reykjavík",
+          "South_Georgia": "South Georgia",
+          "St_Helena": "Saint Helena"
+        }
+      },
+      "Australia": {
+        "label": "Australia",
+        "timezones": {
+          "Broken_Hill": "Broken Hill",
+          "Lord_Howe": "Lord Howe"
+        }
+      },
+      "Canada": {
+        "label": "Canada",
+        "timezones": {}
+      },
+      "Europe": {
+        "label": "Europe",
+        "timezones": {
+          "Busingen": "Büsingen am Hochrhein",
+          "Chisinau": "Chișinău",
+          "Isle_of_Man": "Isle of Man",
+          "San_Marino": "San Marino",
+          "Tirane": "Tirana",
+          "Zurich": "Zürich"
+        }
+      },
+      "Indian": {
+        "label": "Indian Ocean",
+        "timezones": {
+          "Christmas": "Christmas Island",
+          "Cocos": "Cocos Island",
+          "Comoro": "Comoro Islands",
+          "Kerguelen": "Kerguelen Islands",
+          "Mahe": "Mahé",
+          "Reunion": "Réunion"
+        }
+      },
+      "International": {
+        "label": "International",
+        "timezones": {}
+      },
+      "Pacific": {
+        "label": "Pacific Ocean",
+        "timezones": {
+          "Chatham": "Chatham Islands",
+          "Easter": "Easter Island",
+          "Galapagos": "Galápagos",
+          "Marquesas": "Marquesas Islands",
+          "Midway": "Midway Islands",
+          "Norfolk": "Norfolk Island",
+          "Noumea": "Nouméa",
+          "Pago_Pago": "Pago Pago",
+          "Pitcairn": "Pitcairn Islands",
+          "Port_Moresby": "Port Moresby",
+          "Wake": "Wake Island"
+        }
+      },
+      "US": {
+        "label": "United States of America",
+        "timezones": {}
       }
     }
   }

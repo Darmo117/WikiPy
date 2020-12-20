@@ -2,8 +2,8 @@ import typing as typ
 
 
 class Namespace:
-    def __init__(self, ident: int, canonical_name: str, is_talk: bool, can_be_main: bool, name: str = None,
-                 alias: str = None, feminine_name: str = None, masculine_name: str = None):
+    def __init__(self, ident: int, canonical_name: str, is_talk: bool, can_be_main: bool, is_content: bool,
+                 name: str = None, alias: str = None, feminine_name: str = None, masculine_name: str = None):
         self.__id = ident
         self.__canonical_name = canonical_name
         self.__name = name
@@ -12,6 +12,7 @@ class Namespace:
         self.__masculine_name = masculine_name
         self.__is_talk = is_talk
         self.__can_be_main = can_be_main
+        self.__is_content = is_content
 
     @property
     def id(self) -> int:
@@ -46,6 +47,10 @@ class Namespace:
     def can_be_main(self) -> bool:
         """Tells whether this namespace can be used as the main page’s namespace."""
         return self.__can_be_main and not self.__is_talk
+
+    @property
+    def is_content(self) -> bool:
+        return self.__is_content
 
     def get_name(self, local: bool, gender=None, as_url: bool = False) -> str:
         """

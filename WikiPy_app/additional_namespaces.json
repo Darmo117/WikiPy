@@ -3,6 +3,7 @@
     "name": "TestNamespace",
     "talk": {
       "name": "TestNamespace Talk"
-    }
+    },
+    "is_content": true
   }
 }

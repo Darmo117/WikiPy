@@ -196,7 +196,7 @@ class SpecialPage(abc.ABC):
                 special_context.display_title = custom_title
 
             if values:
-                paginator, page = api.paginate(values, request.GET)
+                paginator, page = api.paginate(base_context.user, values, request.GET)
                 context = page_context.ListPageContext(context, paginator=paginator, page=page)
         else:
             context = special_context

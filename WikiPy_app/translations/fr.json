@@ -524,7 +524,7 @@
         "form": {
           "tab": {
             "personal_information": "Informations personnelles",
-            "appearance": "Apparance",
+            "appearance": "Apparence",
             "editing": "Modification",
             "recent_changes": "Modifications récentes",
             "watchlist": "Liste de suivi",
@@ -537,7 +537,11 @@
             "signature": "Signature",
             "email": "Options des mails",
             "skin": "Habillage et style personnalisé",
-            "date_info": "Informations relatives aux dates"
+            "date_info": "Informations relatives aux dates",
+            "files": "Fichiers",
+            "other_options": "Autres options",
+            "editor": "Éditeur",
+            "preview": "Prévisualisation"
           },
           "username": {
             "label": "Nom d’utilisateur"
@@ -629,6 +633,69 @@
               "invalid_choice": "Format invalide.",
               "required": "Veuillez sélectionner un format."
             }
+          },
+          "server_time": {
+            "label": "Heure du serveur"
+          },
+          "local_time": {
+            "label": "Heure locale"
+          },
+          "timezone": {
+            "label": "Fuseau horaire",
+            "error": {
+              "invalid_choice": "Fuseau horaire invalide.",
+              "required": "Veuillez sélectionner un fuseau horaire."
+            }
+          },
+          "max_image_preview_size": {
+            "label": "Taille maximale des images sur les pages de description de fichier",
+            "error": {
+              "invalid_choice": "Taille invalide.",
+              "required": "Veuillez sélectionner une taille."
+            }
+          },
+          "max_image_thumbnail_size": {
+            "label": "Taille des vignettes",
+            "error": {
+              "invalid_choice": "Taille invalide.",
+              "required": "Veuillez sélectionner une taille."
+            }
+          },
+          "enable_media_viewer": {
+            "label": "Activer la visionneuse de médias"
+          },
+          "display_hidden_categories": {
+            "label": "Afficher les catégories cachées"
+          },
+          "numbered_section_titles": {
+            "label": "Numéroter les titres de sections"
+          },
+          "confirm_rollback": {
+            "label": "Demander une confirmation quand je clique sur un lien de révocation"
+          },
+          "default_revisions_list_size": {
+            "label": "Nombre de modifications à afficher par défaut dans les historiques et contributions",
+            "help": "Doit être compris entre $min et $max inclus.",
+            "error": {
+              "min_value": "La valeur doit être supérieure ou égale à $min.",
+              "max_value": "La valeur doit être inférieure ou égale à $max.",
+              "required": "Veuillez entrer une valeur."
+            }
+          },
+          "all_edits_minor": {
+            "label": "Marquer toutes mes modifications comme mineures"
+          },
+          "blank_comment_prompt": {
+            "label": "Me demander confirmation lorsque je publie sans indiquer de commentaire"
+          },
+          "unsaved_changes_warning": {
+            "label": "Me prévenir lorsque je quitte une page avec des modifications non publiées"
+          },
+          "show_preview_first_edit": {
+            "label": "Afficher la prévisualisation à la première modification"
+          },
+          "preview_above_edit_box": {
+            "label": "Afficher la prévisualisation au-dessus de la zone d’édition"
           },
           "submit": {
             "label": "Sauvegarder les changements"
@@ -773,6 +840,272 @@
           "redirections": "Pages redirigeantes",
           "page_tools": "Outils de page",
           "misc": "Autres pages spéciales"
+        }
+      }
+    },
+    "timezone": {
+      "Africa": {
+        "label": "Afrique",
+        "timezones": {
+          "Addis_Ababa": "Addis-Abeba",
+          "Algiers": "Alger",
+          "Cairo": "Le Caire",
+          "Dar_es_Salaam": "Dar es Salam",
+          "El_Aaiun": "Laâyoune",
+          "Johannesburg": "Johannesbourg",
+          "Juba": "Djouba",
+          "Lome": "Lomé",
+          "Mogadishu": "Mogadiscio",
+          "Ndjamena": "N’Djaména",
+          "Sao_Tome": "São Tomé"
+        }
+      },
+      "America": {
+        "label": "Amérique",
+        "timezones": {
+          "Araguaina": "Araguaína",
+          "Argentina/Buenos_Aires": "Argentine/Buenos Aires",
+          "Argentina/Catamarca": "Argentine/Catamarca",
+          "Argentina/Cordoba": "Argentine/Córdoba",
+          "Argentina/La_Rioja": "Argentine/La Rioja",
+          "Argentina/Mendoza": "Argentine/Mendoza",
+          "Argentina/Rio_Gallegos": "Argentine/Río Gallegos",
+          "Argentina/Salta": "Argentine/Salta",
+          "Argentina/San_Juan": "Argentine/San Juan",
+          "Argentina/San_Luis": "Argentine/San Luis",
+          "Argentina/Tucuman": "Argentine/Tucumán",
+          "Argentina/Ushuaia": "Argentine/Ushuaïa",
+          "Asuncion": "Asuncion",
+          "Atikokan": "Atikokan",
+          "Bahia_Banderas": "Bahía de Banderas",
+          "Barbados": "Barbade",
+          "Belem": "Belém",
+          "Boa_Vista": "Boa Vista",
+          "Cambridge_Bay": "Cambridge Bay",
+          "Campo_Grande": "Campo Grande",
+          "Cancun": "Cancún",
+          "Cayman": "Iles Caïmans",
+          "Costa_Rica": "Costa Rica",
+          "Cuiaba": "Cuiabá",
+          "Curacao": "Curaçao",
+          "Dawson_Creek": "Dawson Creek",
+          "Detroit": "Détroit",
+          "Dominica": "Dominique",
+          "Eirunepe": "Eirunepé",
+          "El_Salvador": "Salvador",
+          "Fort_Nelson": "Fort Nelson",
+          "Glace_Bay": "Glace Bay",
+          "Goose_Bay": "Goose Bay",
+          "Grand_Turk": "Grand Turk",
+          "Grenada": "Grenade",
+          "Guadeloupe": "Guadeloupe",
+          "Havana": "La Havane",
+          "Indiana/Tell_City": "Indiana/Tell City",
+          "Jamaica": "Jamaïque",
+          "La_Paz": "La Paz",
+          "Los_Angeles": "Los Angeles",
+          "Lower_Princes": "Lower Prince’s Quarter",
+          "Maceio": "Maceió",
+          "Mazatlan": "Mazatlán",
+          "Merida": "Mérida",
+          "Mexico_City": "Mexico",
+          "New_York": "New York",
+          "North_Dakota/Beulah": "Dakota du Nord/Beulah",
+          "North_Dakota/Center": "Dakota du Nord/Center",
+          "North_Dakota/New_Salem": "Dakota du Nord/New Salem",
+          "Port_of_Spain": "Port d’Espagne",
+          "Porto_Velho": "Porto Velho",
+          "Puerto_Rico": "Porto Rico",
+          "Punta_Arenas": "Punta Arenas",
+          "Rainy_River": "Rainy River",
+          "Rankin_Inlet": "Rankin Inlet",
+          "Rio_Branco": "Rio Branco",
+          "Santarem": "Santarém",
+          "Santo_Domingo": "Saint-Domingue",
+          "Sao_Paulo": "São Paulo",
+          "Scoresbysund": "Ittoqqortoormiit",
+          "St_Barthelemy": "Saint Barthélemy",
+          "St_Johns": "Saint-Jean de Terre-Neuve",
+          "St_Kitts": "Saint-Christophe",
+          "St_Lucia": "Sainte-Lucie",
+          "St_Thomas": "Saint-Thomas",
+          "St_Vincent": "Saint-Vincent",
+          "Swift_Current": "Swift Current",
+          "Thule": "Qaanaaq (Thulé)",
+          "Thunder_Bay": "Thunder Bay"
+        }
+      },
+      "Antarctica": {
+        "label": "Antarctique",
+        "timezones": {
+          "DumontDUrville": "Dumont-d’Urville"
+        }
+      },
+      "Arctic": {
+        "label": "Arctique",
+        "timezones": {}
+      },
+      "Asia": {
+        "label": "Asie",
+        "timezones": {
+          "Aqtau": "Aqtaw",
+          "Aqtobe": "Aktioubé",
+          "Ashgabat": "Achgabat",
+          "Atyrau": "Atyraou",
+          "Baghdad": "Bagdad",
+          "Bahrain": "Bahreïn",
+          "Baku": "Bakou",
+          "Barnaul": "Barnaoul",
+          "Beirut": "Beyrouth",
+          "Bishkek": "Bichkek",
+          "Chita": "Tchita",
+          "Choibalsan": "Choybalsan",
+          "Damascus": "Damas",
+          "Dhaka": "Dacca",
+          "Dubai": "Dubaï",
+          "Dushanbe": "Douchanbé",
+          "Famagusta": "Famagouste",
+          "Hebron": "Hébron",
+          "Ho_Chi_Minh": "Hô Chi Minh",
+          "Hong_Kong": "Hong Kong",
+          "Hovd": "Khovd",
+          "Irkutsk": "Irkoutsk",
+          "Jerusalem": "Jérusalem",
+          "Kabul": "Kaboul",
+          "Kamchatka": "Kamtchatka",
+          "Kathmandu": "Katmandou",
+          "Kolkata": "Calcutta",
+          "Krasnoyarsk": "Krasnoïarsk",
+          "Kuala_Lumpur": "Kuala Lumpur",
+          "Kuwait": "Koweït",
+        "Macau": "Macao",
+          "Manila": "Manille",
+          "Muscat": "Mascate",
+          "Nicosia": "Nicosie",
+          "Novokuznetsk": "Novokouznetsk",
+          "Novosibirsk": "Novossibirsk",
+          "Oral": "Oural",
+          "Phnom_Penh": "Phnom Penh",
+          "Qostanay": "Kostanaï",
+          "Qyzylorda": "Kyzylorda",
+          "Riyadh": "Riyad",
+          "Sakhalin": "Sakhaline",
+          "Samarkand": "Samarcande",
+          "Seoul": "Séoul",
+          "Shanghai": "Shanghai",
+          "Singapore": "Singapour",
+          "Tashkent": "Tachkent",
+          "Tehran": "Téhéran",
+          "Thimphu": "Thimphou",
+          "Ulaanbaatar": "Oulan-Bator",
+          "Urumqi": "Ürümqi",
+          "Ust-Nera": "Oust-Nera",
+          "Yakutsk": "Iakoutsk",
+          "Yangon": "Rangoun",
+          "Yekaterinburg": "Iekaterinbourg",
+          "Yerevan": "Erevan"
+        }
+      },
+      "Atlantic": {
+        "label": "Océan atlantique",
+        "timezones": {
+          "Azores": "Açores",
+          "Bermuda": "Bermudes",
+          "Canary": "Iles Canaries",
+          "Cape_Verde": "Cap-Vert",
+          "Faroe": "Iles Féroé",
+          "Madeira": "Madère",
+          "Reykjavik": "Reykjavik",
+          "South_Georgia": "Géorgie du Sud",
+          "St_Helena": "Saint-Hélène"
+        }
+      },
+      "Australia": {
+        "label": "Australie",
+        "timezones": {
+          "Adelaide": "Adélaïde",
+          "Broken_Hill": "Broken Hill",
+          "Lord_Howe": "Lord Howe"
+        }
+      },
+      "Canada": {
+        "label": "Canada",
+        "timezones": {
+          "Atlantic": "Atlantique",
+          "Central": "Centre",
+          "Eastern": "Est",
+          "Mountain": "Rocheuses",
+          "Newfoundland": "Terre-Neuve-et-Labrador",
+          "Pacific": "Pacifique"
+        }
+      },
+      "Europe": {
+        "label": "Europe",
+        "timezones": {
+          "Andorra": "Andorre",
+          "Athens": "Athènes",
+          "Brussels": "Bruxelles",
+          "Bucharest": "Bucarest",
+          "Busingen": "Büsingen am Hochrhein",
+          "Chisinau": "Chișinău",
+          "Copenhagen": "Copenhague",
+          "Guernsey": "Guernesey",
+          "Isle_of_Man": "Ile de Man",
+          "Lisbon": "Lisbonne",
+          "London": "Londres",
+          "Malta": "Malte",
+          "Moscow": "Moscou",
+          "San_Marino": "Saint-Marin",
+          "Tirane": "Tirana",
+          "Ulyanovsk": "Oulianovsk",
+          "Uzhgorod": "Oujgorod",
+          "Vienna": "Vienne",
+          "Warsaw": "Varsovie",
+          "Zaporozhye": "Zaporijjia"
+        }
+      },
+      "Indian": {
+        "label": "Océan indien",
+        "timezones": {
+          "Christmas": "Ile Christmas",
+          "Cocos": "Iles Cocos",
+          "Comoro": "Comores",
+          "Kerguelen": "Iles Kerguelen",
+          "Mahe": "Mahé",
+          "Mauritius": "Maurice",
+          "Reunion": "La Réunion"
+        }
+      },
+      "International": {
+        "label": "International",
+        "timezones": {}
+      },
+      "Pacific": {
+        "label": "Océan pacifique",
+        "timezones": {
+          "Chatham": "Iles Chatham",
+          "Easter": "Ile de Pâques",
+          "Efate": "Éfaté",
+          "Fiji": "Fidji",
+          "Galapagos": "Galápagos",
+          "Marquesas": "Iles Marquises",
+          "Midway": "Iles Midway",
+          "Norfolk": "Ile Norfolk",
+          "Noumea": "Nouméa",
+          "Pago_Pago": "Pago Pago",
+          "Palau": "Palaos",
+          "Pitcairn": "Iles Pitcairn",
+          "Port_Moresby": "Port Moresby"
+        }
+      },
+      "US": {
+        "label": "États-Unis d’Amérique",
+        "timezones": {
+          "Central": "Centre",
+          "Eastern": "Est",
+          "Hawaii": "Hawaï",
+          "Mountain": "Rocheuses",
+          "Pacific": "Pacifique"
         }
       }
     }

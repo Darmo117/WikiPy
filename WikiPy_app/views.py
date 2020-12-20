@@ -7,12 +7,13 @@ import django.shortcuts as dj_scut
 import django.utils.safestring as dj_safe
 import slimit
 
-from . import pages, api, apps, web_api, setup, settings, page_context, forms, models, util
+from . import pages, api, apps, web_api, setup, settings, page_context, forms, models, util, skins
 
 
 def setup_page(request: dj_wsgi.WSGIRequest) -> dj_http.HttpResponse:
     if not setup.are_pages_setup():
-        language = _get_language(request)
+        user = api.get_user_from_request(request)
+        language = _get_language(user, request)
         if request.method == 'POST':
             form = forms.SetupPageForm(request.POST)
             success = False
@@ -32,19 +33,24 @@ def setup_page(request: dj_wsgi.WSGIRequest) -> dj_http.HttpResponse:
                 else:
                     errors.append('passwords_mismatch')
             if not success:
-                return _setup(request, language, form, errors)
+                return _setup(request, language, 'default', form, errors)
         else:
             setup.generate_secret_key_file()
-            return _setup(request, language, forms.SetupPageForm())
+            return _setup(request, language, 'default', forms.SetupPageForm())
     return _redirect('main_page')
 
 
-def _setup(request: dj_wsgi.WSGIRequest, language: settings.i18n.Language, form: forms.SetupPageForm,
-           errors: typ.List[str] = None) -> dj_http.HttpResponse:
+def _setup(
+        request: dj_wsgi.WSGIRequest,
+        language: settings.i18n.Language,
+        skin: str,
+        form: forms.SetupPageForm,
+        errors: typ.List[str] = None
+) -> dj_http.HttpResponse:
     user = api.get_user_from_request(request)
-    context = page_context.SetupPageContext(pages.get_setup_page_context(user, language), form=form,
+    context = page_context.SetupPageContext(pages.get_setup_page_context(user, language, skin), form=form,
                                             global_errors=errors)
-    return _render(request, context, pages.FOUND, user)
+    return _render(request, context, pages.FOUND, skin)
 
 
 def page(request: dj_wsgi.WSGIRequest, raw_page_title: str = '') -> dj_http.HttpResponse:
@@ -59,13 +65,14 @@ def page(request: dj_wsgi.WSGIRequest, raw_page_title: str = '') -> dj_http.Http
     params = request.GET
 
     user = api.get_user_from_request(request)
-    language = _get_language(request)
+    language = _get_language(user, request)
+    skin = _get_skin(user, request)
 
     # Get "correct" page title
     try:
         formatted_title = api.as_url_title(api.get_actual_page_title(api.title_from_url(raw_page_title)))
     except (api.BadTitleException, api.EmptyPageTitleException) as e:
-        return _render(request, pages.get_bad_title_page(user, language, e, request), 400, user)
+        return _render(request, pages.get_bad_title_page(user, language, skin, e, request), 400, skin)
 
     # Redirect to "correct" page title while keeping GET parameters
     if formatted_title != raw_page_title:
@@ -76,11 +83,17 @@ def page(request: dj_wsgi.WSGIRequest, raw_page_title: str = '') -> dj_http.Http
     # Extract action
     action = util.get_param(params, 'action', default='read')
 
-    return _get_page(request, page_title, action, user, language)
+    return _get_page(request, page_title, action, user, language, skin)
 
 
-def _get_page(request: dj_wsgi.WSGIRequest, page_title: str, action: str, user: models.User,
-              language: settings.i18n.Language) -> dj_http.HttpResponse:
+def _get_page(
+        request: dj_wsgi.WSGIRequest,
+        page_title: str,
+        action: str,
+        user: models.User,
+        language: settings.i18n.Language,
+        skin: str
+) -> dj_http.HttpResponse:
     namespace_id, title = api.extract_namespace_and_title(page_title, ns_as_id=True)
     redirect_enabled = not util.get_param(request.GET, 'no_redirect', expected_type=bool, default=False)
     redirected_from = util.get_param(request.GET, 'r')
@@ -107,11 +120,29 @@ def _get_page(request: dj_wsgi.WSGIRequest, page_title: str, action: str, user: 
             if status == pages.FOUND and redirect:
                 return _redirect('page', api.get_full_page_title(namespace_id, title), no_redirect=1)
         else:
-            context, status = pages.get_page_context(request, namespace_id, title, user, language, action=pages.EDIT,
-                                                     redirect_enabled=redirect_enabled, form=form)
+            context, status = pages.get_page_context(
+                request,
+                namespace_id,
+                title,
+                user,
+                language,
+                skin,
+                action=pages.EDIT,
+                redirect_enabled=redirect_enabled,
+                form=form
+            )
     else:
-        context, status = pages.get_page_context(request, namespace_id, title, user, language, action=action,
-                                                 redirect_enabled=redirect_enabled, redirected_from=redirected_from)
+        context, status = pages.get_page_context(
+            request,
+            namespace_id,
+            title,
+            user,
+            language,
+            skin,
+            action=action,
+            redirect_enabled=redirect_enabled,
+            redirected_from=redirected_from
+        )
 
     # Handle redirection pages
     if hasattr(context, 'redirect'):
@@ -128,7 +159,7 @@ def _get_page(request: dj_wsgi.WSGIRequest, page_title: str, action: str, user: 
     if action == 'raw' and context.page.namespace_id != settings.SPECIAL_NS.id:
         return _get_raw(request, context, status)
 
-    return _render(request, context, status, user)
+    return _render(request, context, status, skin)
 
 
 # TODO cache and minify js and css
@@ -138,13 +169,13 @@ def _get_raw(request: dj_wsgi.WSGIRequest, context: page_context.PageContext, st
     return dj_http.HttpResponse(content, content_type=content_type, status=status)
 
 
-def _render(request: dj_wsgi.WSGIRequest, wpy_context: page_context.PageContext, status: int, user):
+def _render(request: dj_wsgi.WSGIRequest, wpy_context: page_context.PageContext, status: int, skin: str):
     context = {
         'wpy_context': wpy_context,
         'js_data': dj_safe.mark_safe(_generate_js(wpy_context)),
     }
 
-    template_file = f'{apps.WikiPyAppConfig.name}/skins/{user.data.skin}/base.html'
+    template_file = f'{apps.WikiPyAppConfig.name}/skins/{skin}/base.html'
     return dj_scut.render(request, template_file, context=context, status=status)
 
 
@@ -186,11 +217,18 @@ def _redirect(url_name: str, *args, anchor: str = None, **kwargs) -> dj_http.Htt
     return dj_http.HttpResponseRedirect(full_url)
 
 
-def _get_language(request: dj_wsgi.WSGIRequest) -> settings.i18n.Language:
+def _get_language(user: models.User, request: dj_wsgi.WSGIRequest) -> settings.i18n.Language:
     language = settings.i18n.get_language(util.get_param(request.GET, 'use_lang'))
     if not language:
-        language = api.get_user_from_request(request).prefered_language
+        language = user.prefered_language
     return language
+
+
+def _get_skin(user: models.User, request: dj_wsgi.WSGIRequest) -> str:
+    skin_name = util.get_param(request.GET, 'use_skin')
+    if not skin_name or not skins.get_skin(skin_name):
+        skin_name = user.data.skin
+    return skin_name
 
 
 def _generate_js(context: page_context.PageContext) -> str:

@@ -3,7 +3,6 @@ import typing as typ
 
 import django.core.handlers.wsgi as dj_wsgi
 import django.utils.safestring as dj_safe
-import django.utils.timezone as dj_tz
 
 from . import api, settings, models, special_pages, page_context, forms, util, skins
 
@@ -23,7 +22,7 @@ def get_main_page_title() -> str:
     return api.get_full_page_title(settings.MAIN_PAGE_NAMESPACE_ID, settings.MAIN_PAGE_TITLE)
 
 
-def get_setup_page_context(user: models.User, language: settings.i18n.Language) -> page_context.PageContext:
+def get_setup_page_context(user: models.User, language: settings.i18n.Language, skin: str) -> page_context.PageContext:
     page, _ = api.get_page(settings.SPECIAL_NS.id, 'Setup')
     return _get_base_page_context(
         page=page,
@@ -31,6 +30,7 @@ def get_setup_page_context(user: models.User, language: settings.i18n.Language) 
         user=user,
         language=language,
         content_language=language,
+        skin=skin,
         noindex=True,
         page_exists=True,
         can_read=True,
@@ -44,6 +44,7 @@ def get_page_context(
         title: str,
         user: models.User,
         language: settings.i18n.Language,
+        skin: str,
         *,
         action: str = None,
         redirect_enabled: bool = True,
@@ -61,6 +62,7 @@ def get_page_context(
                 page=page,
                 user=user,
                 language=language,
+                skin=skin,
                 page_exists=page_exists,
                 can_read=can_read,
                 can_edit=can_edit,
@@ -72,6 +74,7 @@ def get_page_context(
                 page=page,
                 user=user,
                 language=language,
+                skin=skin,
                 page_exists=page_exists,
                 can_read=can_read,
                 can_edit=can_edit,
@@ -82,6 +85,7 @@ def get_page_context(
                 page=page,
                 user=user,
                 language=language,
+                skin=skin,
                 page_exists=page_exists,
                 can_read=can_read,
                 can_edit=can_edit,
@@ -91,13 +95,14 @@ def get_page_context(
                 raw=action == 'raw'
             )
     else:
-        return _get_special_page_context(title, user, language, request)
+        return _get_special_page_context(title, user, language, skin, request)
 
 
 def _get_special_page_context(
         title: str,
         user: models.User,
         language: settings.i18n.Language,
+        skin: str,
         request: dj_wsgi.WSGIRequest,
         **kwargs
 ) -> typ.Tuple[page_context.PageContext, int]:
@@ -113,6 +118,7 @@ def _get_special_page_context(
             user=user,
             language=language,
             content_language=language,
+            skin=skin,
             noindex=True,
             page_exists=True,
             can_read=True,
@@ -125,6 +131,7 @@ def _get_special_page_context(
         page=page,
         user=user,
         language=language,
+        skin=skin,
         page_exists=False,
         can_read=True,
         can_edit=False,
@@ -132,9 +139,19 @@ def _get_special_page_context(
     )
 
 
-def _get_page(page: models.Page, user: models.User, language: settings.i18n.Language, page_exists: bool,
-              can_read: bool, can_edit: bool, redirect_enabled: bool, redirected_from: str = None,
-              revision_id: int = None, raw: bool = False) -> typ.Tuple[page_context.PageContext, int]:
+def _get_page(
+        page: models.Page,
+        user: models.User,
+        language: settings.i18n.Language,
+        skin: str,
+        page_exists: bool,
+        can_read: bool,
+        can_edit: bool,
+        redirect_enabled: bool,
+        redirected_from: str = None,
+        revision_id: int = None,
+        raw: bool = False
+) -> typ.Tuple[page_context.PageContext, int]:
     redirect = None
     redirect_anchor = None
     display_redirect = False
@@ -172,6 +189,7 @@ def _get_page(page: models.Page, user: models.User, language: settings.i18n.Lang
         user=user,
         language=language,
         content_language=page_lang or language,
+        skin=skin,
         wikicode=wikicode,
         noindex=status != FOUND or revision_id is not None,
         page_exists=status != NOT_FOUND,
@@ -194,6 +212,7 @@ def _get_edit_page(
         page: models.Page,
         user: models.User,
         language: settings.i18n.Language,
+        skin: str,
         page_exists: bool,
         can_read: bool,
         can_edit: bool,
@@ -208,6 +227,7 @@ def _get_edit_page(
                 user=user,
                 language=language,
                 content_language=page_lang or language,
+                skin=skin,
                 wikicode=error_message,
                 noindex=True,
                 page_exists=False,
@@ -242,6 +262,7 @@ def _get_edit_page(
             page=page,
             user=user,
             language=language,
+            skin=skin,
             wikicode=wikicode,
             edit_notice=edit_notice,
             page_exists=page_exists,
@@ -259,6 +280,7 @@ def _get_edit_page(
             user=user,
             language=language,
             content_language=page_lang or language,
+            skin=skin,
             wikicode=wikicode,
             noindex=True,
             page_exists=page_exists,
@@ -271,6 +293,7 @@ def _get_page_history(
         page: models.Page,
         user: models.User,
         language: settings.i18n.Language,
+        skin: str,
         page_exists: bool,
         can_read: bool,
         can_edit: bool,
@@ -279,11 +302,12 @@ def _get_page_history(
     if can_read:
         if page_exists:
             revisions = api.get_page_revisions(page, user)
-            paginator, paginator_page = api.paginate(revisions, url_params)
+            paginator, paginator_page = api.paginate(user, revisions, url_params)
             return (_get_page_history_context(
                 page=page,
                 user=user,
                 language=language,
+                skin=skin,
                 can_read=can_read,
                 can_edit=can_edit,
                 paginator=paginator,
@@ -295,6 +319,7 @@ def _get_page_history(
                 page=page,
                 user=user,
                 language=language,
+                skin=skin,
                 can_read=can_read,
                 can_edit=can_edit,
                 paginator=None,
@@ -308,6 +333,7 @@ def _get_page_history(
             user=user,
             language=language,
             content_language=page_lang or language,
+            skin=skin,
             wikicode=wikicode,
             noindex=True,
             page_exists=page_exists,
@@ -316,26 +342,39 @@ def _get_page_history(
         ), FORBIDDEN)
 
 
-def submit_page_content(request: dj_wsgi.WSGIRequest, namespace_id: int, title: str, user: models.User, wikicode: str,
-                        comment: str, minor: bool, language: settings.i18n.Language, section_id: int = None) \
-        -> typ.Tuple[typ.Tuple[page_context.PageContext, int], bool]:
+def submit_page_content(
+        request: dj_wsgi.WSGIRequest,
+        namespace_id: int,
+        title: str,
+        user: models.User,
+        wikicode: str,
+        comment: str,
+        minor: bool,
+        language: settings.i18n.Language,
+        section_id: int = None
+) -> typ.Tuple[typ.Tuple[page_context.PageContext, int], bool]:
     try:
         api.submit_page_content(namespace_id, title, user, wikicode, comment, minor, section_id=section_id)
     except api.PageEditForbidden:
-        return get_page_context(request, namespace_id, title, user, language, action=EDIT), False
+        return get_page_context(request, namespace_id, title, user, language, user.data.skin, action=EDIT), False
     except api.PageEditConflit:
         pass  # TODO handle conflicts
     else:
-        return get_page_context(request, namespace_id, title, user, language, redirect_enabled=False), True
+        return get_page_context(request, namespace_id, title, user, language, user.data.skin,
+                                redirect_enabled=False), True
 
 
-def get_bad_title_page(user: models.User, language: settings.i18n.Language,
-                       error: typ.Union[api.EmptyPageTitleException, api.BadTitleException],
-                       request: dj_wsgi.WSGIRequest) -> page_context.PageContext:
+def get_bad_title_page(
+        user: models.User,
+        language: settings.i18n.Language,
+        skin: str,
+        error: typ.Union[api.EmptyPageTitleException, api.BadTitleException],
+        request: dj_wsgi.WSGIRequest
+) -> page_context.PageContext:
     if isinstance(error, api.EmptyPageTitleException):
-        return _get_special_page_context('Empty title', user, language, request)[0]
+        return _get_special_page_context('Empty title', user, language, skin, request)[0]
     elif isinstance(error, api.BadTitleException):
-        return _get_special_page_context('Bad title', user, language, request, invalid_char=str(error))[0]
+        return _get_special_page_context('Bad title', user, language, skin, request, invalid_char=str(error))[0]
     else:
         raise ValueError('invalid error type')
 
@@ -349,6 +388,7 @@ def _get_read_page_context(
         user: models.User,
         language: settings.i18n.Language,
         content_language: settings.i18n.Language,
+        skin: str,
         wikicode: str,
         noindex: bool,
         page_exists: bool,
@@ -365,6 +405,7 @@ def _get_read_page_context(
         user=user,
         language=language,
         content_language=content_language,
+        skin=skin,
         noindex=noindex,
         page_exists=page_exists,
         can_read=can_read,
@@ -397,6 +438,7 @@ def _get_edit_page_context(
         page: models.Page,
         user: models.User,
         language: settings.i18n.Language,
+        skin: str,
         wikicode: str,
         edit_notice: str,
         page_exists: bool,
@@ -413,6 +455,7 @@ def _get_edit_page_context(
         user=user,
         language=language,
         content_language=language,
+        skin=skin,
         noindex=True,
         page_exists=page_exists,
         can_read=can_read,
@@ -447,6 +490,7 @@ def _get_page_history_context(
         page: models.Page,
         user: models.User,
         language: settings.i18n.Language,
+        skin: str,
         can_read: bool,
         can_edit: bool,
         paginator,
@@ -459,6 +503,7 @@ def _get_page_history_context(
         user=user,
         language=language,
         content_language=language,
+        skin=skin,
         noindex=True,
         page_exists=page_exists,
         can_read=can_read,
@@ -473,6 +518,7 @@ def _get_base_page_context(
         user: models.User,
         language: settings.i18n.Language,
         content_language: settings.i18n.Language,
+        skin: str,
         noindex: bool,
         page_exists: bool,
         can_read: bool,
@@ -482,6 +528,8 @@ def _get_base_page_context(
     languages = list(sorted(settings.i18n.get_languages().values(), key=lambda l: l.name))
     is_main_page = page.full_title == main_page_full_title
     page_ns_gender = api.get_user_gender_from_page(page.namespace_id, page.title)
+    now = api.now()
+    user_now = api.now(user.data.timezone_info)
 
     return page_context.PageContext(
         project_name=settings.PROJECT_NAME,
@@ -496,7 +544,7 @@ def _get_base_page_context(
         noindex=noindex,
         show_title=not is_main_page or not settings.HIDE_TITLE_ON_MAIN_PAGE or not page_exists or mode != READ,
         user=user,
-        skin=skins.get_skin(user.data.skin),  # TODO add url param use_skin=<skin_name>
+        skin=skins.get_skin(skin),
         language=language,
         content_language=content_language,
         default_language=settings.i18n.get_language(settings.DEFAULT_LANGUAGE_CODE),
@@ -505,6 +553,12 @@ def _get_base_page_context(
         user_can_read=can_read,
         user_can_edit=can_edit,
         user_can_hide=user.has_right(settings.RIGHT_HIDE_REVISIONS),
-        date_time=api.now(dj_tz.utc),
-        local_date_time=api.now()
+        date_time=now,
+        user_date_time=user_now,
+        date=now.date(),
+        user_date=user_now.date(),
+        time=now.time(),
+        user_time=user_now.time(),
+        revisions_list_page_min=settings.REVISIONS_LIST_PAGE_MIN,
+        revisions_list_page_max=settings.REVISIONS_LIST_PAGE_MAX
     )

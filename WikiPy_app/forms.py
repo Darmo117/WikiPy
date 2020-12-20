@@ -36,8 +36,13 @@ class WikiPyForm(dj_forms.Form):
 
         for visible in self.visible_fields():
             if isinstance(visible.field.widget, dj_forms.CheckboxInput) or \
-                    isinstance(visible.field.widget, dj_forms.RadioSelect):
-                visible.field.widget.attrs['class'] = 'form-check-input'
+                    isinstance(visible.field.widget, dj_forms.RadioSelect) or \
+                    isinstance(visible.field.widget, dj_forms.CheckboxSelectMultiple):
+                visible.field.widget.attrs['class'] = 'custom-control-input'
+            elif isinstance(visible.field.widget, dj_forms.Select):
+                visible.field.widget.attrs['class'] = 'custom-select'
+            elif isinstance(visible.field.widget, dj_forms.FileInput):
+                visible.field.widget.attrs['class'] = 'custom-file-input'
             else:
                 visible.field.widget.attrs['class'] = 'form-control'
 
@@ -105,6 +110,26 @@ class SignUpForm(SupportsReturnTo, ConfirmPasswordForm):
         help_text=True,
         required=True,
         widget=dj_forms.PasswordInput()
+    )
+    test = dj_forms.BooleanField(
+        label='test'
+    )
+    test2 = dj_forms.ChoiceField(
+        choices=((str(i), str(i)) for i in range(10)),
+        label='test2',
+        widget=dj_forms.RadioSelect
+    )
+    test3 = dj_forms.ChoiceField(
+        choices=((str(i), str(i)) for i in range(10)),
+        label='test3'
+    )
+    test4 = dj_forms.ChoiceField(
+        choices=((str(i), str(i)) for i in range(10)),
+        label='test4',
+        widget=dj_forms.SelectMultiple
+    )
+    test5 = dj_forms.FileField(
+        label='test5'
     )
     # noinspection PyProtectedMember
     password_confirm = dj_forms.CharField(

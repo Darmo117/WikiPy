@@ -26,31 +26,30 @@
           {{ form.namespaces }}
         </div>
         <div class="col">
-          <div class="form-check">
-            <input id="wpy-search-form-default-ns" type="checkbox"
-                   class="form-check-input"/>
-            <label for="wpy-search-form-default-ns" class="form-check-label">
+          <div class="custom-control custom-checkbox">
+            <input id="wpy-search-form-default-ns" type="checkbox" class="custom-control-input"/>
+            <label for="wpy-search-form-default-ns" class="custom-control-label">
               {% wpy_translate trans_prefix|add:'default_ns_chk.label' %}
             </label>
           </div>
 
-          <div class="form-check">
-            <input id="wpy-search-form-talk-ns" type="checkbox" class="form-check-input"/>
-            <label for="wpy-search-form-talk-ns" class="form-check-label">
+          <div class="custom-control custom-checkbox">
+            <input id="wpy-search-form-talk-ns" type="checkbox" class="custom-control-input"/>
+            <label for="wpy-search-form-talk-ns" class="custom-control-label">
               {% wpy_translate trans_prefix|add:'talk_ns_chk.label' %}
             </label>
           </div>
 
-          <div class="form-check">
-            <input id="wpy-search-form-help-ns" type="checkbox" class="form-check-input"/>
-            <label for="wpy-search-form-help-ns" class="form-check-label">
+          <div class="custom-control custom-checkbox">
+            <input id="wpy-search-form-help-ns" type="checkbox" class="custom-control-input"/>
+            <label for="wpy-search-form-help-ns" class="custom-control-label">
               {% wpy_translate trans_prefix|add:'help_ns_chk.label' %}
             </label>
           </div>
 
-          <div class="form-check">
-            <input id="wpy-search-form-all-ns" type="checkbox" class="form-check-input"/>
-            <label for="wpy-search-form-all-ns" class="form-check-label">
+          <div class="custom-control custom-checkbox">
+            <input id="wpy-search-form-all-ns" type="checkbox" class="custom-control-input"/>
+            <label for="wpy-search-form-all-ns" class="custom-control-label">
               {% wpy_translate trans_prefix|add:'all_ns_chk.label' %}
             </label>
           </div>

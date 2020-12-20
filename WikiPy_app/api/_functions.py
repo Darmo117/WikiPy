@@ -100,7 +100,6 @@ def format_datetime(date_time: datetime.datetime, current_user: models.User, lan
     # Disabled tags
     for tag_name in 'cxX':  # TODO raise exception
         format_ = format_.replace('%' + tag_name, '%%' + tag_name)
-    print(format_)
 
     return date_time.strftime(format_)
 
@@ -168,13 +167,14 @@ def create_user(username: str, email: str = None, password: str = None, ip: str 
     talk_text = language.translate('link.talk')
     user_ns = settings.USER_NS.get_name(local=True)
     user_talk_ns = settings.USER_TALK_NS.get_name(local=True)
-    kwargs = {
-        'user': dj_user,
-        'ip_address': ip if anonymous else None,
-        'timezone': settings.TIME_ZONE,
-        'signature': f'[[{user_ns}:{username}|{username}]] ([[{user_talk_ns}:{username}|{talk_text}]])',
-    }
-    data = models.UserData(**kwargs)
+    data = models.UserData(
+        user=dj_user,
+        ip_address=ip if anonymous else None,
+        timezone=settings.TIME_ZONE,
+        signature=f'[[{user_ns}:{username}|{username}]] ([[{user_talk_ns}:{username}|{talk_text}]])',
+        max_image_file_preview_size=settings.IMAGE_PREVIEW_SIZES[6],
+        max_image_thumbnail_size=settings.THUMBNAIL_SIZES[4]
+    )
     data.save()
     user = models.User(dj_user, data)
     add_user_to_group(user, settings.GROUP_ALL, auto=True)
@@ -189,7 +189,6 @@ def create_user(username: str, email: str = None, password: str = None, ip: str 
 
 def update_user_data(user: models.User, **kwargs) -> models.User:
     allowed_fields = (
-        'skin',
         'lang_code',
         'timezone',
         'datetime_format_id',
@@ -202,7 +201,21 @@ def update_user_data(user: models.User, **kwargs) -> models.User:
         'send_copy_of_sent_emails',
         'send_watchlist_emails',
         'send_minor_watchlist_emails',
+        'skin',
         'datetime_format_id',
+        'timezone',
+        'max_image_file_preview_size',
+        'max_image_thumbnail_size',
+        'enable_media_viewer',
+        'display_hidden_categories',
+        'numbered_section_titles',
+        'confirm_rollback',
+        'default_revisions_list_size',
+        'all_edits_minor',
+        'blank_comment_prompt',
+        'unsaved_changes_warning',
+        'show_preview_first_edit',
+        'preview_above_edit_box',
         'django_email',
     )
     django_user = dj_auth.get_user_model().objects.get(username=user.username)
@@ -517,9 +530,13 @@ def get_diff(revision_id1: int, revision_id2: int, current_user: models.User, es
     return diff, revision1, revision2, nb_not_shown
 
 
-def paginate(values: typ.Iterable[typ.Any], url_params: typ.Dict[str, str]) -> typ.Tuple[dj_page.Paginator, int]:
+def paginate(user: models.User, values: typ.Iterable[typ.Any], url_params: typ.Dict[str, str]) \
+        -> typ.Tuple[dj_page.Paginator, int]:
     page = max(1, util.get_param(url_params, 'page', expected_type=int, default=1))
-    number_per_page = min(500, max(1, util.get_param(url_params, 'limit', expected_type=int, default=50)))
+    number_per_page = min(settings.REVISIONS_LIST_PAGE_MAX,
+                          max(settings.REVISIONS_LIST_PAGE_MIN,
+                              util.get_param(url_params, 'limit', expected_type=int,
+                                             default=user.data.default_revisions_list_size)))
 
     return dj_page.Paginator(values, number_per_page), page
 

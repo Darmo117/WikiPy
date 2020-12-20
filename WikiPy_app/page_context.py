@@ -36,7 +36,13 @@ class PageContext:
     user_can_edit: bool
     user_can_hide: bool
     date_time: datetime.datetime
-    local_date_time: datetime.datetime
+    user_date_time: datetime.datetime
+    date: datetime.date
+    user_date: datetime.date
+    time: datetime.time
+    user_time: datetime.time
+    revisions_list_page_min: int
+    revisions_list_page_max: int
 
     def __post_init__(self):
         self._context = None

@@ -93,6 +93,6 @@ figure > figcaption > a[role="button"] {
   float: right;
 }
 
-code, #wpy-edit-form-content {
+code, #wpy-edit-form-content, #wpy-edit-form-comment {
   font-family: "Bitstream Vera Sans Mono", Monaco, "Courier New", Courier, monospace;
 }

@@ -43,7 +43,7 @@ class DateTimeKeyword(MagicKeyword, abc.ABC):
 
     def _get_time(self, context) -> datetime:
         if self._local:
-            return context.local_date_time
+            return context.user_date_time
         return context.date_time
 
 

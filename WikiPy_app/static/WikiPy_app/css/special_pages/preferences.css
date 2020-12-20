@@ -3,23 +3,32 @@
   padding-right: 2rem;
 }
 
-#wpy-prefs-form .form-group.row {
-  margin-bottom: 0;
-}
-
 #wpy-prefs-form-submit {
   margin-top: 15px;
 }
 
-#wpy-prefs-form .wpy-prefs-form-section-title {
+.wpy-prefs-form-section-title:not(:first-child) {
+  margin-top: 30px;
+}
+
+.wpy-prefs-form-section-title {
   font-size: 130%;
-  margin-bottom: 10px;
+  margin-bottom: 30px;
 }
 
 #wpy-prefs-form-signature {
-  font-family: "Bitstream Vera Sans Mono", Monaco, "Courier New", Courier, monospace;
+  font-family: "Bitstream Vera Sans Mono", "Monaco", "Courier New", "Courier", monospace;
+}
+
+.form-group {
+  margin-bottom: 0.5rem;
 }
 
 .form-group ul.list-unstyled {
-  padding-left: 20px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+.form-group ul.list-unstyled > li:last-of-type > label {
+  margin-bottom: 0;
 }

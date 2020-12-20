@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import datetime
 import re
 import typing as typ
 
@@ -8,6 +9,7 @@ import django.contrib.auth as dj_auth
 import django.contrib.auth.models as dj_auth_models
 import django.core.exceptions as dj_exc
 import django.db.models as dj_models
+import pytz
 
 from . import settings
 
@@ -42,6 +44,11 @@ def _language_validator(value):
 
 def _non_validator(_):
     pass
+
+
+def _default_revisions_list_size_validator(value):
+    if not (settings.REVISIONS_LIST_PAGE_MIN <= value <= settings.REVISIONS_LIST_PAGE_MAX):
+        raise dj_exc.ValidationError('', code='invalid', params={'value': value})
 
 
 # Cannot inherit Django’s Model class as it causes problems with foreign keys.
@@ -181,6 +188,7 @@ MALE_GENDER = Gender(code='male', i18n_code='masculine')
 GENDERS = {gender.code: gender for gender in (NEUTRAL_GENDER, FEMALE_GENDER, MALE_GENDER)}
 
 
+# TODO make data accessible from JS API (read-only)
 class UserData(LockableModel, dj_models.Model):
     user = dj_models.OneToOneField(dj_auth.get_user_model(), on_delete=dj_models.CASCADE)
     ip_address = dj_models.CharField(max_length=50, null=True, default=None)
@@ -198,6 +206,19 @@ class UserData(LockableModel, dj_models.Model):
     send_copy_of_sent_emails = dj_models.BooleanField(default=False)
     send_watchlist_emails = dj_models.BooleanField(default=False)
     send_minor_watchlist_emails = dj_models.BooleanField(default=False)
+    max_image_file_preview_size = dj_models.IntegerField()  # Pixels
+    max_image_thumbnail_size = dj_models.IntegerField()  # Pixels
+    enable_media_viewer = dj_models.BooleanField(default=True)
+    display_hidden_categories = dj_models.BooleanField(default=False)
+    numbered_section_titles = dj_models.BooleanField(default=False)
+    default_revisions_list_size = dj_models.IntegerField(default=50,
+                                                         validators=[_default_revisions_list_size_validator])
+    confirm_rollback = dj_models.BooleanField(default=False)
+    all_edits_minor = dj_models.BooleanField(default=False)
+    blank_comment_prompt = dj_models.BooleanField(default=False)
+    unsaved_changes_warning = dj_models.BooleanField(default=True)
+    show_preview_first_edit = dj_models.BooleanField(default=False)
+    preview_above_edit_box = dj_models.BooleanField(default=True)
 
     @property
     def is_female(self) -> bool:
@@ -256,6 +277,10 @@ class UserData(LockableModel, dj_models.Model):
         else:
             format_id = language.default_datetime_format_id
         return formats[format_id % len(formats)]
+
+    @property
+    def timezone_info(self) -> datetime.tzinfo:
+        return pytz.timezone(self.timezone)
 
     def __str__(self):
         return repr(self)

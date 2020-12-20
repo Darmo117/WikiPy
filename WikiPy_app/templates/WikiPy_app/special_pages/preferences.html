@@ -1,11 +1,5 @@
 {% load wpy_tags %}
 
-{% if wpy_context.contribs_target_username %}
-  <div class="text-center">
-    <span class="wpy-contributions-userlink">{% wpy_user_link wpy_context.contribs_target_username full=True %}</span>
-  </div>
-  <hr/>
-{% endif %}
 <form id="wpy-prefs-form" method="post">
   {% with form=wpy_context.prefs_form trans_prefix='special.preferences.form.' %}
     <div class="card">
@@ -70,6 +64,7 @@
 
         <div id="wpy-prefs-form-editing-tab-content" class="card-body tab-pane"
              aria-labelledby="wpy-prefs-form-editing-tab" role="tabpanel">
+          {% include 'WikiPy_app/special_pages/include/preferences-editing.html' %}
         </div>
 
         <div id="wpy-prefs-form-recent-changes-tab-content" class="card-body tab-pane"
