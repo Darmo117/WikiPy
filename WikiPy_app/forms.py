@@ -29,10 +29,11 @@ def _init_namespace_choices(add_all: bool) -> typ.Iterable[typ.Tuple[str, str]]:
 
 
 class WikiPyForm(dj_forms.Form):
-    def __init__(self, name: str, *args, **kwargs):
+    def __init__(self, name: str, *args, warn_unsaved_changes: bool = False, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.__name = name
+        self.__warn_unsaved_changes = warn_unsaved_changes
 
         for visible in self.visible_fields():
             if isinstance(visible.field.widget, dj_forms.CheckboxInput) or \
@@ -50,8 +51,12 @@ class WikiPyForm(dj_forms.Form):
             field.widget.attrs['id'] = f'wpy-{self.__name}-form-' + field_name.replace('_', '-')
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.__name
+
+    @property
+    def warn_unsaved_changes(self) -> bool:
+        return self.__warn_unsaved_changes
 
 
 class SupportsReturnTo(WikiPyForm):
@@ -223,8 +228,9 @@ class EditPageForm(WikiPyForm):
         required=False
     )
 
-    def __init__(self, *args, language: settings.i18n.Language = None, disabled: bool = False, **kwargs):
-        super().__init__('edit', *args, **kwargs)
+    def __init__(self, *args, language: settings.i18n.Language = None, disabled: bool = False,
+                 warn_unsaved_changes=True, **kwargs):
+        super().__init__('edit', *args, warn_unsaved_changes=warn_unsaved_changes, **kwargs)
 
         if disabled:
             self.fields['content'].widget.attrs['disabled'] = True
@@ -289,4 +295,4 @@ class SetupPageForm(WikiPyForm, ConfirmPasswordForm):
     )
 
     def __init__(self, *args, **kwargs):
-        super().__init__('setup', *args, **kwargs)
+        super().__init__('setup', *args, warn_unsaved_changes=True, **kwargs)

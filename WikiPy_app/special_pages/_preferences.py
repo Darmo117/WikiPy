@@ -22,6 +22,7 @@ def _init_language_choices() -> typ.Iterable[typ.Tuple[str, str]]:
 # All in function to be able to get skins
 def load_special_page() -> SpecialPage:
     class PreferencesForm(forms.WikiPyForm):
+        # Personal info
         prefered_language = dj_forms.ChoiceField(
             choices=_init_language_choices(),
             label='prefered_language',
@@ -58,6 +59,7 @@ def load_special_page() -> SpecialPage:
             label='users_email_blacklist',
             required=False
         )
+        # Appearance
         skin = dj_forms.ChoiceField(
             choices=((s.name, s.label) for s in skins.get_loaded_skins()),
             label='skin',
@@ -107,6 +109,7 @@ def load_special_page() -> SpecialPage:
             min_value=settings.REVISIONS_LIST_PAGE_MIN,
             max_value=settings.REVISIONS_LIST_PAGE_MAX
         )
+        # Editing
         all_edits_minor = dj_forms.BooleanField(
             required=False,
             label='all_edits_minor'
@@ -127,9 +130,42 @@ def load_special_page() -> SpecialPage:
             required=False,
             label='preview_above_edit_box'
         )
+        # Recent changes
+        rc_max_days = dj_forms.IntegerField(
+            required=True,
+            label='rc_max_days',
+            min_value=settings.RC_DAYS_MIN,
+            max_value=settings.RC_DAYS_MAX
+        )
+        rc_max_revisions = dj_forms.IntegerField(
+            required=True,
+            label='rc_max_revisions',
+            min_value=settings.RC_REVISIONS_MIN,
+            max_value=settings.RC_REVISIONS_MAX
+        )
+        rc_group_by_page = dj_forms.BooleanField(
+            required=False,
+            label='rc_group_by_page'
+        )
+        rc_hide_minor = dj_forms.BooleanField(
+            required=False,
+            label='rc_hide_minor'
+        )
+        rc_hide_categories = dj_forms.BooleanField(
+            required=False,
+            label='rc_hide_categories'
+        )
+        rc_hide_patrolled = dj_forms.BooleanField(
+            required=False,
+            label='rc_hide_patrolled'
+        )
+        rc_hide_patrolled_new_pages = dj_forms.BooleanField(
+            required=False,
+            label='rc_hide_patrolled_new_pages'
+        )
 
         def __init__(self, base_context: page_context.PageContext, *args, **kwargs):
-            super().__init__('prefs', *args, **kwargs)
+            super().__init__('prefs', *args, warn_unsaved_changes=True, **kwargs)
             self.fields['datetime_format'].choices = (
                 ('*', 'auto'),
                 *[(i + 1, f) for i, f in enumerate(base_context.language.datetime_formats)]
@@ -223,6 +259,7 @@ def load_special_page() -> SpecialPage:
                 'send_copy_of_sent_emails': user.data.send_copy_of_sent_emails,
                 'send_watchlist_emails': user.data.send_watchlist_emails,
                 'send_minor_watchlist_emails': user.data.send_minor_watchlist_emails,
+
                 'skin': user.data.skin,
                 'datetime_format': datetime_format,
                 'timezone': user.data.timezone,
@@ -232,12 +269,21 @@ def load_special_page() -> SpecialPage:
                 'display_hidden_categories': user.data.display_hidden_categories,
                 'numbered_section_titles': user.data.numbered_section_titles,
                 'confirm_rollback': user.data.confirm_rollback,
+
                 'default_revisions_list_size': user.data.default_revisions_list_size,
                 'all_edits_minor': user.data.all_edits_minor,
                 'blank_comment_prompt': user.data.blank_comment_prompt,
                 'unsaved_changes_warning': user.data.unsaved_changes_warning,
                 'show_preview_first_edit': user.data.show_preview_first_edit,
                 'preview_above_edit_box': user.data.preview_above_edit_box,
+
+                'rc_max_days': user.data.rc_max_days,
+                'rc_max_revisions': user.data.rc_max_revisions,
+                'rc_group_by_page': user.data.rc_group_by_page,
+                'rc_hide_minor': user.data.rc_hide_minor,
+                'rc_hide_categories': user.data.rc_hide_categories,
+                'rc_hide_patrolled': user.data.rc_hide_patrolled,
+                'rc_hide_patrolled_new_pages': user.data.rc_hide_patrolled_new_pages,
             })
 
             return PreferencesPageContext(
@@ -256,6 +302,7 @@ def load_special_page() -> SpecialPage:
                 datetime_format = form.cleaned_data['datetime_format']
                 api.update_user_data(
                     user,
+
                     lang_code=form.cleaned_data['prefered_language'],
                     gender=models.GENDERS[form.cleaned_data['gender']],
                     signature=form.cleaned_data['signature'],
@@ -263,6 +310,7 @@ def load_special_page() -> SpecialPage:
                     send_copy_of_sent_emails=form.cleaned_data['send_copy_of_sent_emails'],
                     send_watchlist_emails=form.cleaned_data['send_watchlist_emails'],
                     send_minor_watchlist_emails=form.cleaned_data['send_minor_watchlist_emails'],
+
                     datetime_format_id=int(datetime_format) if datetime_format != '*' else None,
                     timezone=form.cleaned_data['timezone'],
                     max_image_file_preview_size=int(form.cleaned_data['max_image_preview_size']),
@@ -271,12 +319,21 @@ def load_special_page() -> SpecialPage:
                     display_hidden_categories=form.cleaned_data['display_hidden_categories'],
                     numbered_section_titles=form.cleaned_data['numbered_section_titles'],
                     confirm_rollback=form.cleaned_data['confirm_rollback'],
+
                     default_revisions_list_size=form.cleaned_data['default_revisions_list_size'],
                     all_edits_minor=form.cleaned_data['all_edits_minor'],
                     blank_comment_prompt=form.cleaned_data['blank_comment_prompt'],
                     unsaved_changes_warning=form.cleaned_data['unsaved_changes_warning'],
                     show_preview_first_edit=form.cleaned_data['show_preview_first_edit'],
-                    preview_above_edit_box=form.cleaned_data['preview_above_edit_box']
+                    preview_above_edit_box=form.cleaned_data['preview_above_edit_box'],
+
+                    rc_max_days=form.cleaned_data['rc_max_days'],
+                    rc_max_revisions=form.cleaned_data['rc_max_revisions'],
+                    rc_group_by_page=form.cleaned_data['rc_group_by_page'],
+                    rc_hide_minor=form.cleaned_data['rc_hide_minor'],
+                    rc_hide_categories=form.cleaned_data['rc_hide_categories'],
+                    rc_hide_patrolled=form.cleaned_data['rc_hide_patrolled'],
+                    rc_hide_patrolled_new_pages=form.cleaned_data['rc_hide_patrolled_new_pages']
                 )
                 # Reload page
                 return page_context.RedirectPageContext(base_context,

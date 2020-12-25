@@ -19,7 +19,7 @@ def register_default():
     ]
     for tag in default_html_tags:
         WikicodeParser.register_tag(tag)
-    default_magic_keywords = [
+    default_magic_keywords = (
         CurrentYearKeyword(local=False),
         CurrentMonthKeyword(local=False, padded=False),
         CurrentMonthKeyword(local=False, padded=True),
@@ -74,7 +74,7 @@ def register_default():
         PageTitleKeyword(),
         FullPageTitleKeyword(),
         UsernameKeyword(),
-    ]
+    )
     for mk in default_magic_keywords:
         WikicodeParser.register_magic_keyword(mk)
 
@@ -182,7 +182,7 @@ class WikicodeParser:
             page_title, anchor = redirect
             if no_redirect:
                 root_node = RedirectNode(target_page=page_title, anchor=anchor)
-            else:  # TODO attention aux boucles de redirection
+            else:
                 ns, title = api.extract_namespace_and_title(page_title, ns_as_id=True)
                 revision = api.get_page_revision(ns, title)
                 if revision:
@@ -191,14 +191,23 @@ class WikicodeParser:
                 else:
                     root_node = DocumentNode(ParagraphNode(TextNode(text=self.make_safe(wikicode))))
         else:
-            wikicode = self._substitute_magic_keywords(wikicode, context)
-            # wikicode = self._substitute_variables(wikicode, variables_values)
-            # wikicode = self._substitute_transclusions(wikicode)
-            # wikicode = self._substitute_functions(wikicode)
+            wikicode = self._substitute_and_transclude(wikicode, context, depth, variables_values)
+            wikicode = self._substitute_functions(wikicode)
+            wikicode = self._substitute_tables(wikicode)
             wikicode = wikicode.replace('{{!}}', '|')
             root_node = DocumentNode(*self._parse_document(wikicode))
 
         return root_node
+
+    def _substitute_and_transclude(self, wikicode: str, context, depth: int, variables_values: typ.Dict[str, str]) \
+            -> str:
+        if depth > self.MAX_DEPTH:
+            self.__max_depth_reached = True
+            return wikicode
+
+        wikicode = self._substitute_magic_keywords(wikicode, context)
+        wikicode = self._substitute_variables(wikicode, variables_values)
+        return self._substitute_transclusions(wikicode, context, depth)
 
     def _substitute_magic_keywords(self, wikicode: str, context) -> str:
         """
@@ -215,7 +224,12 @@ class WikicodeParser:
                 wikicode = wikicode.replace(token, mk.get_value(context))
         return wikicode
 
-    def _substitute_variables(self, wikicode: str, variables_values: typ.Dict[str, str]) -> str:
+    def _substitute_variables(self, wikicode: str, variables_values: typ.Dict[str, str], depth: int = 0) -> str:
+        # Maximum depth reached, stop parsing
+        if depth > self.MAX_DEPTH:
+            self.__max_depth_reached = True
+            return wikicode
+
         open_delimiter = '{['
         close_delimiter = ']}'
         result = ''
@@ -223,7 +237,7 @@ class WikicodeParser:
         in_variable = False
         in_name = False
         var_name = ''
-        var_default = ''
+        default_value = ''
         # Number of times the variable opening delimiter has been encountered
         opened_tags = 0
         i = 0
@@ -231,48 +245,197 @@ class WikicodeParser:
         while i < len(wikicode):
             c = wikicode[i]
             next_c = wikicode[i + 1] if i < len(wikicode) - 1 else ''
+            open_del = c + next_c == open_delimiter
+            close_del = c + next_c == close_delimiter
 
             if not in_variable:
-                if c + next_c == open_delimiter:
+                if open_del:
                     result += buffer
                     in_variable = True
                     in_name = True
+                    opened_tags += 1
+                    var_name = ''
+                    default_value = ''
                     buffer = ''
+                    i += 1
                 else:
                     buffer += c
+
             elif in_name:
-                if re.match(r'[ \w]', c):
+                if re.match(r'[ \w.-]', c):
                     var_name += c
-                elif c == '|' or c + next_c == close_delimiter:
+                elif c == '|' or close_del:
                     in_name = False
+                    if close_del:
+                        in_variable = False
+                        result += variables_values.get(var_name.strip(), open_delimiter + var_name + close_delimiter)
+                        opened_tags -= 1
+                        i += 1
                 else:
                     buffer += open_delimiter + var_name
                     in_variable = False
                     in_name = False
+                    opened_tags -= 1
+                    i -= 1  # Step back to not skip current character, it may be part of a tag opening
+
             else:
-                if c + next_c == open_delimiter:
+                if open_del:
                     opened_tags += 1
-                    buffer += c + next_c
+                    default_value += c + next_c
                     i += 1
-                elif c + next_c == close_delimiter:
+                elif close_del:
                     opened_tags -= 1
                     if opened_tags == 0:
-                        buffer = ''
+                        result += variables_values.get(
+                            var_name.strip(),
+                            self._substitute_variables(default_value.strip(), variables_values, depth=depth + 1)
+                        )
+                        default_value = ''
                         in_variable = False
                         i += 1
+                    else:
+                        default_value += c
+                else:
+                    default_value += c
+
+            i += 1
+        if in_variable:
+            buffer += open_delimiter + var_name
+            if not in_name:
+                buffer += '|' + variables_values.get(
+                    var_name.strip(),
+                    self._substitute_variables(default_value.strip(), variables_values, depth=depth + 1)
+                )
+
+        return result + buffer
+
+    def _substitute_transclusions(self, wikicode: str, context, depth: int) -> str:
+        # Maximum depth reached, stop parsing
+        if depth > self.MAX_DEPTH:
+            self.__max_depth_reached = True
+            return wikicode
+
+        from .. import api, settings
+
+        def transclude():
+            ns_id, title = api.extract_namespace_and_title(
+                api.get_actual_page_title(api.get_full_page_title(settings.TEMPLATE_NS.id, template_name.strip())),
+                ns_as_id=True
+            )
+            if revision := api.get_page_revision(ns_id, title):
+                return self._substitute_and_transclude(revision.content, context, depth + 1,
+                                                       variables_values={k.strip(): v.strip() for k, v in
+                                                                         params_values.items()})
+            return f'<span class="wpy-invalid-template">{api.get_namespace_name(ns_id)}:{title}</span>'
+
+        open_delimiter = '{{'
+        close_delimiter = '}}'
+        result = ''
+        buffer = ''
+        in_template = False
+        in_name = False
+        in_param_name = False
+        in_param_value = False
+        template_name = ''
+        param_index = 1
+        param_name = ''
+        param_value = ''
+        params_values = {}
+        i = 0
+
+        while i < len(wikicode):
+            c = wikicode[i]
+            next_c = wikicode[i + 1] if i < len(wikicode) - 1 else ''
+            open_del = c + next_c == open_delimiter
+            close_del = c + next_c == close_delimiter
+
+            if not in_template:
+                if open_del:
+                    result += buffer
+                    in_template = True
+                    in_name = True
+                    template_name = ''
+                    param_index = 1
+                    param_name = ''
+                    param_value = ''
+                    params_values = {}
+                    buffer = ''
+                    i += 1
                 else:
                     buffer += c
 
-            i += 1
+            elif in_name:
+                if re.match(r'[\s\w.-]', c):
+                    template_name += c
+                elif c == '|' or close_del:
+                    in_name = False
+                    if close_del:
+                        in_template = False
+                        result += transclude()
+                        i += 1
+                    else:
+                        in_param_name = True
+                        param_name = ''
+                        param_value = ''
+                else:
+                    buffer += open_delimiter + template_name
+                    in_template = False
+                    in_name = False
+                    i -= 1  # Step back to not skip current character, it may be part of a tag opening
 
-        return result
+            elif in_param_name:
+                if re.match(r'[\s\w.-]', c):
+                    param_name += c
+                elif c == '=':
+                    in_param_name = False
+                    in_param_value = True
+                elif c == '|' or close_del:
+                    # Positional parameter, param_name contains the actual value
+                    params_values[str(param_index)] = param_name
+                    if close_del:
+                        in_template = False
+                        in_param_name = False
+                        result += transclude()
+                        i += 1
+                        buffer = ''
+                    else:
+                        param_name = ''
+                        param_index += 1
+                else:
+                    in_param_name = False
+                    in_param_value = True
+                    param_value = param_name
+
+            elif in_param_value:
+                if c == '|' or close_del:
+                    params_values[param_name] = param_value
+                    in_param_value = False
+                    if close_del:
+                        in_template = False
+                        result += transclude()
+                        i += 1
+                        buffer = ''
+                    else:
+                        in_param_name = True
+                        param_name = ''
+                        param_value = ''
+                else:
+                    param_value += c
+
+            i += 1
+        if in_template:
+            buffer += open_delimiter + template_name
+            if params_values:
+                buffer += '|' + '|'.join(map(lambda item: ((item[0] + '=') if not item[0].isdigit() else '') + item[1],
+                                             params_values.items()))
+
+        return result + buffer
 
     def _substitute_functions(self, wikicode: str) -> str:
-        return wikicode  # TEMP
+        return wikicode  # TODO
 
-    # TODO attention aux boucles de redirection
-    def _substitute_transclusions(self, wikicode: str) -> str:
-        return wikicode  # TEMP
+    def _substitute_tables(self, wikicode: str) -> str:
+        return wikicode  # TODO
 
     def _parse_document(self, wikicode: str) -> typ.Sequence[WikicodeNode]:
         def new_paragraph(b: str):
@@ -330,6 +493,13 @@ class WikicodeParser:
                     opened_tags -= 1
                     if opened_tags == 0:
                         node = tag.parse_wikicode(buffer)
+                        if node.content_to_parse is not None:
+                            internal_nodes = self._parse_document(node.content_to_parse)
+                            if tag.multiline:
+                                node.set_parsed_content_nodes(internal_nodes)
+                            elif len(internal_nodes) != 0:
+                                # noinspection PyUnresolvedReferences
+                                node.set_parsed_content_nodes(internal_nodes[0].nodes)
                         if node.is_inline:
                             paragraph.append(node)
                         else:
@@ -396,50 +566,3 @@ class WikicodeParser:
             sections[t] = sections[t][:-1]
 
         return header, sections
-
-
-#####################
-# Substitution tags #
-#####################
-
-
-class SubstitutionTag(abc.ABC):
-    def __init__(self, open_delimiter: str, close_delimiter: str):
-        self.__open_delimiter = open_delimiter
-        self.__close_delimiter = close_delimiter
-
-    @property
-    def open_delimiter(self) -> str:
-        return self.__open_delimiter
-
-    @property
-    def close_delimiter(self) -> str:
-        return self.__close_delimiter
-
-    @abc.abstractmethod
-    def substitute(self, wikicode: str, params) -> str:
-        pass
-
-
-class TransclusionTag(SubstitutionTag):
-    def __init__(self):
-        super().__init__('{{', '}}')
-
-    def substitute(self, wikicode, params):
-        pass  # TODO
-
-
-class ParameterTag(SubstitutionTag):
-    def __init__(self):
-        super().__init__('{[', ']}')
-
-    def substitute(self, wikicode, params):
-        pass  # TODO
-
-
-class FunctionTag(SubstitutionTag):
-    def __init__(self):
-        super().__init__('{(', ')}')
-
-    def substitute(self, wikicode, params):
-        pass  # TODO

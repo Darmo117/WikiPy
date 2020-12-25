@@ -1,3 +1,4 @@
+import json
 import typing as typ
 import urllib.parse as url_parse
 
@@ -99,7 +100,7 @@ def _get_page(
     redirected_from = util.get_param(request.GET, 'r')
 
     if namespace_id != settings.SPECIAL_NS.id and action == pages.SUBMIT and len(request.POST) != 0:
-        form = forms.EditPageForm(request.POST)
+        form = forms.EditPageForm(request.POST, warn_unsaved_changes=user.data.unsaved_changes_warning)
         if form.is_valid():
             wikicode = form.cleaned_data['content']
             section_id = form.cleaned_data['section_id']
@@ -282,5 +283,6 @@ window.WPY_CONF = {{
     wpyGroups: {groups},
     wpyUrlPath: "{url_path}",
     wpyApiUrlPath: "{api_url_path}",
+    wpyTranslations: {json.dumps(language.javascript_mappings)}
 }};
 """)

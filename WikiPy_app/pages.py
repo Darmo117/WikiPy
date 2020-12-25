@@ -472,6 +472,7 @@ def _get_edit_page_context(
     form = form or forms.EditPageForm(
         language=base_context.language,
         disabled=not base_context.user_can_edit,
+        warn_unsaved_changes=base_context.user.data.unsaved_changes_warning,
         initial={'content': wikicode}
     )
 
@@ -560,5 +561,9 @@ def _get_base_page_context(
         time=now.time(),
         user_time=user_now.time(),
         revisions_list_page_min=settings.REVISIONS_LIST_PAGE_MIN,
-        revisions_list_page_max=settings.REVISIONS_LIST_PAGE_MAX
+        revisions_list_page_max=settings.REVISIONS_LIST_PAGE_MAX,
+        rc_min_days=settings.RC_DAYS_MIN,
+        rc_max_days=settings.RC_DAYS_MAX,
+        rc_min_revisions=settings.RC_REVISIONS_MIN,
+        rc_max_revisions=settings.RC_REVISIONS_MAX
     )

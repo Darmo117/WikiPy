@@ -190,8 +190,6 @@ def create_user(username: str, email: str = None, password: str = None, ip: str 
 def update_user_data(user: models.User, **kwargs) -> models.User:
     allowed_fields = (
         'lang_code',
-        'timezone',
-        'datetime_format_id',
         'signature',
         'gender',
         'email_pending_confirmation',
@@ -201,6 +199,7 @@ def update_user_data(user: models.User, **kwargs) -> models.User:
         'send_copy_of_sent_emails',
         'send_watchlist_emails',
         'send_minor_watchlist_emails',
+
         'skin',
         'datetime_format_id',
         'timezone',
@@ -210,12 +209,22 @@ def update_user_data(user: models.User, **kwargs) -> models.User:
         'display_hidden_categories',
         'numbered_section_titles',
         'confirm_rollback',
+
         'default_revisions_list_size',
         'all_edits_minor',
         'blank_comment_prompt',
         'unsaved_changes_warning',
         'show_preview_first_edit',
         'preview_above_edit_box',
+
+        'rc_max_days',
+        'rc_max_revisions',
+        'rc_group_by_page',
+        'rc_hide_minor',
+        'rc_hide_categories',
+        'rc_hide_patrolled',
+        'rc_hide_patrolled_new_pages',
+
         'django_email',
     )
     django_user = dj_auth.get_user_model().objects.get(username=user.username)
@@ -225,7 +234,7 @@ def update_user_data(user: models.User, **kwargs) -> models.User:
 
     for k, v in kwargs.items():
         if k not in allowed_fields:
-            raise ValueError(f'attempted to set disallowed field for user "{user.username}"')
+            raise ValueError(f'attempted to set disallowed field "{k}" for user "{user.username}"')
         if k.startswith('django_'):
             setattr(django_user, k[7:], v)
             dj_changed = True

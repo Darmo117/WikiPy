@@ -1,6 +1,8 @@
 {% load wpy_tags %}
 
 <form id="wpy-prefs-form" method="post">
+  <input type="hidden" name="warn-unsaved" value="1">
+
   {% with form=wpy_context.prefs_form trans_prefix='special.preferences.form.' %}
     <div class="card">
       <div class="card-header">
@@ -69,6 +71,7 @@
 
         <div id="wpy-prefs-form-recent-changes-tab-content" class="card-body tab-pane"
              aria-labelledby="wpy-prefs-form-recent-changes-tab" role="tabpanel">
+          {% include 'WikiPy_app/special_pages/include/preferences-recent-changes.html' %}
         </div>
 
         <div id="wpy-prefs-form-watchlist-tab-content" class="card-body tab-pane"

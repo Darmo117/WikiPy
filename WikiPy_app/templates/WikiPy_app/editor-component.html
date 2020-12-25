@@ -1,4 +1,5 @@
 {% load wpy_tags %}
+
 <div id="wpy-edit-notice">
   <div id="wpy-edit-notice-{{ wpy_context.page.namespace_id }}">
     {{ wpy_context.edit_notice }}
@@ -17,6 +18,10 @@
   <form action="{% url 'wikipy:page' raw_page_title=wpy_context.page.url_full_title %}?action=submit"
         method="post">
     {% with form=wpy_context.edit_form trans_prefix='form.edit.' %}
+      {% if form.warn_unsaved_changes %}
+        <input type="hidden" name="warn-unsaved" value="1">
+      {% endif %}
+
       <div class="form-group">
         <label class="sr-only" for="{{ form.content.id_for_label }}">
           {% wpy_translate trans_prefix|add:'content.label' %}

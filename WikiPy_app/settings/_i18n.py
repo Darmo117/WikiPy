@@ -20,6 +20,7 @@ class Language:
     month_names: typ.Tuple[typ.Tuple[str, str]]
     day_names: typ.Tuple[typ.Tuple[str, str]]
     _mappings: typ.Dict[str, str]
+    _js_mappings: typ.Dict[str, str]
 
     def get_month_name(self, index) -> str:
         return self.month_names[index - 1][0]
@@ -38,6 +39,10 @@ class Language:
         if value is not None:
             return string.Template(value).safe_substitute(kwargs)
         return None
+
+    @property
+    def javascript_mappings(self) -> dict:
+        return dict(self._js_mappings)
 
 
 _LANGUAGES: typ.Dict[str, Language] = {}
@@ -68,6 +73,8 @@ def load_languages(base_dir: str):
                 tuple(tuple(map(str, name)) for name in json_obj['day_names'])
             _check_day_names(days, lang_code)
             mappings = _build_mapping(json_obj['mappings'])
+            js_mappings = {k[len('javascript.'):]: v for k, v in mappings.items() if k.startswith('javascript.')}
+
             _LANGUAGES[lang_code] = Language(
                 code=lang_code,
                 name=lang_name,
@@ -77,7 +84,8 @@ def load_languages(base_dir: str):
                 datetime_formats=tuple(formats),
                 month_names=months,
                 day_names=days,
-                _mappings=mappings
+                _mappings=mappings,
+                _js_mappings=js_mappings
             )
 
 

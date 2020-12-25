@@ -1,0 +1,92 @@
+{% load wpy_tags %}
+
+<span class="wpy-prefs-form-section-title row" id="wpy-prefs-form-display-section">
+  {% wpy_translate trans_prefix|add:'section.display' %}
+</span>
+
+<div class="form-group row">
+  <label for="{{ form.rc_max_days.id_for_label }}" class="col-sm-2 col-form-label">
+    {% wpy_translate trans_prefix|add:'rc_max_days.label' %}
+  </label>
+  <div class="col-sm-8">
+    {{ form.rc_max_days }}
+    {% if form.rc_max_days.errors %}
+      <div class="invalid-feedback" style="display: block">
+        {% for error in form.rc_max_days.errors.as_data %}
+          {% wpy_translate trans_prefix|add:'rc_max_days.error.'|add:error.code min=wpy_context.rc_min_days max=wpy_context.rc_max_days %}
+        {% endfor %}
+      </div>
+    {% endif %}
+    <small class="form-text text-muted">
+      {% wpy_translate trans_prefix|add:'rc_max_days.help' min=wpy_context.rc_min_days max=wpy_context.rc_max_days %}
+    </small>
+  </div>
+</div>
+
+<div class="form-group row">
+  <label for="{{ form.rc_max_revisions.id_for_label }}" class="col-sm-2 col-form-label">
+    {% wpy_translate trans_prefix|add:'rc_max_revisions.label' %}
+  </label>
+  <div class="col-sm-8">
+    {{ form.rc_max_revisions }}
+    {% if form.rc_max_revisions.errors %}
+      <div class="invalid-feedback" style="display: block">
+        {% for error in form.rc_max_revisions.errors.as_data %}
+          {% wpy_translate trans_prefix|add:'rc_max_revisions.error.'|add:error.code min=wpy_context.rc_min_revisions max=wpy_context.rc_max_revisions %}
+        {% endfor %}
+      </div>
+    {% endif %}
+    <small class="form-text text-muted">
+      {% wpy_translate trans_prefix|add:'rc_max_revisions.help' min=wpy_context.rc_min_revisions max=wpy_context.rc_max_revisions %}
+    </small>
+  </div>
+</div>
+
+<div class="form-group custom-control custom-checkbox row">
+  <div class="col-sm-10">
+    {{ form.rc_group_by_page }}
+    <label class="custom-control-label" for="{{ form.rc_group_by_page.id_for_label }}">
+      {% wpy_translate trans_prefix|add:'rc_group_by_page.label' %}
+    </label>
+  </div>
+</div>
+
+<span class="wpy-prefs-form-section-title row" id="wpy-prefs-form-displayed-edits-section">
+  {% wpy_translate trans_prefix|add:'section.hidden_edits' %}
+</span>
+
+<div class="form-group custom-control custom-checkbox row">
+  <div class="col-sm-10">
+    {{ form.rc_hide_minor }}
+    <label class="custom-control-label" for="{{ form.rc_hide_minor.id_for_label }}">
+      {% wpy_translate trans_prefix|add:'rc_hide_minor.label' %}
+    </label>
+  </div>
+</div>
+
+<div class="form-group custom-control custom-checkbox row">
+  <div class="col-sm-10">
+    {{ form.rc_hide_categories }}
+    <label class="custom-control-label" for="{{ form.rc_hide_categories.id_for_label }}">
+      {% wpy_translate trans_prefix|add:'rc_hide_categories.label' %}
+    </label>
+  </div>
+</div>
+
+<div class="form-group custom-control custom-checkbox row">
+  <div class="col-sm-10">
+    {{ form.rc_hide_patrolled }}
+    <label class="custom-control-label" for="{{ form.rc_hide_patrolled.id_for_label }}">
+      {% wpy_translate trans_prefix|add:'rc_hide_patrolled.label' %}
+    </label>
+  </div>
+</div>
+
+<div class="form-group custom-control custom-checkbox row">
+  <div class="col-sm-10">
+    {{ form.rc_hide_patrolled_new_pages }}
+    <label class="custom-control-label" for="{{ form.rc_hide_patrolled_new_pages.id_for_label }}">
+      {% wpy_translate trans_prefix|add:'rc_hide_patrolled_new_pages.label' %}
+    </label>
+  </div>
+</div>

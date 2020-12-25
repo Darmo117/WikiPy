@@ -77,6 +77,10 @@ figure > figcaption > a[role="button"] {
   font-size: 120%;
 }
 
+figure.img-thumbnail {
+  margin-left: 10px;
+}
+
 /*****************
  * Parser output *
  *****************/

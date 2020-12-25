@@ -97,6 +97,17 @@
         "message": "<p>Bonjour, $username\u00a0!</p><p>Une demande de changement de votre adresse mail a été effectuée. Veuillez cliquer sur le lien ci-dessous pour confirmer l’action.</p><p>$link</p><p>Si vous avez reçu ce mail par erreur, merci de ne pas cliquer sur le lien et de supprimer ce mail immédiatement.</p>"
       }
     },
+    "javascript": {
+      "toast": {
+        "close": {
+          "tooltip": "Fermer"
+        },
+        "email_sent": {
+          "title": "Mail envoyé",
+          "message": "Un nouveau mail de confirmation a été envoyé. L’ancien code n’est désormais plus valide."
+        }
+      }
+    },
     "group": {
       "all": "Tous",
       "users": "Utilisateurs/Utilisatrices",
@@ -541,7 +552,9 @@
             "files": "Fichiers",
             "other_options": "Autres options",
             "editor": "Éditeur",
-            "preview": "Prévisualisation"
+            "preview": "Prévisualisation",
+            "display": "Affichage",
+            "hidden_edits": "Modifications masquées"
           },
           "username": {
             "label": "Nom d’utilisateur"
@@ -696,6 +709,39 @@
           },
           "preview_above_edit_box": {
             "label": "Afficher la prévisualisation au-dessus de la zone d’édition"
+          },
+          "rc_max_days": {
+            "label": "Nombre maximal de jours à afficher dans les modifications récentes",
+            "help": "Doit être compris entre $min et $max inclus.",
+            "error": {
+              "min_value": "La valeur doit être supérieure ou égale à $min.",
+              "max_value": "La valeur doit être inférieure ou égale à $max.",
+              "required": "Veuillez entrer une valeur."
+            }
+          },
+          "rc_max_revisions": {
+            "label": "Nombre maximal de modifications à afficher dans les modifications récentes",
+            "help": "Doit être compris entre $min et $max inclus.",
+            "error": {
+              "min_value": "La valeur doit être supérieure ou égale à $min.",
+              "max_value": "La valeur doit être inférieure ou égale à $max.",
+              "required": "Veuillez entrer une valeur."
+            }
+          },
+          "rc_group_by_page": {
+            "label": "Grouper les modifications par page"
+          },
+          "rc_hide_minor": {
+            "label": "Masquer les modifications mineures"
+          },
+          "rc_hide_categories": {
+            "label": "Masquer les catégorisations de page"
+          },
+          "rc_hide_patrolled": {
+            "label": "Masquer les modifications patrouillées"
+          },
+          "rc_hide_patrolled_new_pages": {
+            "label": "Masquer les créations de page patrouillées"
           },
           "submit": {
             "label": "Sauvegarder les changements"

@@ -39,5 +39,25 @@
       $password.keyup(checkPasswords);
       $passwordConfirmation.keyup(checkPasswords);
     }
+
+    // Store form state at page load
+    $form.initial_form_state = $form.serialize();
+
+    // Store form state after form submit
+    $form.submit(function () {
+      $form.initial_form_state = $form.serialize();
+    });
+
+    if ($form.find('input[name="warn-unsaved"]').length) {
+      // Check form changes before leaving the page and warn user if needed
+      $(window).bind("beforeunload", function (e) {
+        let form_state = $form.serialize();
+        if ($form.initial_form_state !== form_state) {
+          let message = "You have unsaved changes on this page. Do you want to leave this page and discard your changes or stay on this page?";
+          e.returnValue = message; // Cross-browser compatibility (src: MDN)
+          return message;
+        }
+      });
+    }
   });
 })();

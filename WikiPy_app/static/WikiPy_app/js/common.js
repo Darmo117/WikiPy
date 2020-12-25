@@ -62,6 +62,7 @@
         !k.endsWith("NamespaceName") &&
         !k.endsWith("NamespaceId") &&
         !k.startsWith("wpyUser") &&
+        k !== "wpyTranslations" &&
         !["wpyAction", "wpyContentType", "wpySkin"].includes(k) ||
         k === "wpyMainNamespaceName") {
       config.set(k, v);
@@ -145,6 +146,15 @@
         return WPY_CONF["wpyUserGroups"];
       },
     },
+    /**
+     * Returns the translation for the given key.
+     * If no mapping correspond to the given key, the key is returned.
+     * @param key {string}
+     * @return {string}
+     */
+    translate: function (key) {
+      return WPY_CONF["wpyTranslations"][key] || key;
+    },
     toast: {
       /**
        *
@@ -156,20 +166,24 @@
       show: function (title, message, autoHide, hideDelay) {
         autoHide = !!autoHide;
         hideDelay = Math.floor(hideDelay || 0);
+        let closeTooltip = wpy.translate("toast.close.tooltip");
         let $toast = $(`
-<div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="${hideDelay * 1000}" data-autohide="${autoHide}">
-  <div class="toast-header">
-    <strong class="mr-auto">${title}</strong>
-    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-      <span aria-hidden="true">×</span>
-    </button>
-  </div>
-  <div class="toast-body">${message}</div>
-</div>`);
+          <div class="toast" role="alert" aria-live="assertive" aria-atomic="true"
+              data-delay="${hideDelay * 1000}" data-autohide="${autoHide}">
+            <div class="toast-header">
+              <strong class="mr-auto">${title}</strong>
+              <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="${closeTooltip}"
+                  title="${closeTooltip}">
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+            <div class="toast-body">${message}</div>
+          </div>
+        `.trim());
         $("#wpy-toasts-area").append($toast);
-        $toast.toast('show');
+        $toast.toast("show");
         // Delete toats once it is completely hidden.
-        $toast.on('hidden.bs.toast', function () {
+        $toast.on("hidden.bs.toast", function () {
           $toast.remove();
         })
       }
@@ -235,8 +249,7 @@
         },
         function (data) {
           if (data["sent"]) {
-            // TODO translate
-            wpy.toast.show("Email sent", "The confirmation email has been sent again.", true, 5)
+            wpy.toast.show(wpy.translate("toast.email_sent.title"), wpy.translate("toast.email_sent.message"), true, 5)
           }
         }
     );

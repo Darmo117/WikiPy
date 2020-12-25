@@ -7,10 +7,18 @@ import typing as typ
 class WikicodeNode(abc.ABC):
     def __init__(self, inline: bool):
         self.__inline = inline
+        self.__internal_nodes = []
 
     @property
     def is_inline(self):
         return self.__inline
+
+    @property
+    def content_to_parse(self) -> typ.Optional[str]:
+        return None
+
+    def set_parsed_content_nodes(self, nodes: typ.Sequence[WikicodeNode]):
+        self.__internal_nodes = nodes
 
     @abc.abstractmethod
     def render(self, skin, context) -> str:
@@ -24,6 +32,18 @@ class WikicodeNode(abc.ABC):
         :return: The HTML code.
         """
         pass
+
+    def _render_internal_nodes(self, skin, context):
+        """
+        Renders the internal nodes as HTML.
+
+        :param skin: The current skin.
+        :type skin: WikiPy_app.skins.Skin
+        :param context: The context for the page being rendered.
+        :type context: WikiPy_app.page_context.PageContext
+        :return: The HTML code.
+        """
+        return ''.join(map(lambda n: n.render(skin, context), self.__internal_nodes))
 
 
 class TopLevelNode(WikicodeNode, abc.ABC):
@@ -149,12 +169,16 @@ class InternalLinkNode(TextNode):
     def anchor(self) -> typ.Optional[str]:
         return self.__anchor
 
+    @property
+    def content_to_parse(self) -> typ.Optional[str]:
+        return self.text
+
     def render(self, skin, context):
         return skin.format_internal_link(
             context.language,
             current_page_title=context.page.full_title,
             page_title=self.page_title,
-            text=self.text,
+            text=self._render_internal_nodes(skin, context),
             anchor=self.anchor
         )
 
@@ -171,48 +195,72 @@ class ExternalLinkNode(TextNode):
     def url(self) -> str:
         return self.__url
 
+    @property
+    def content_to_parse(self) -> typ.Optional[str]:
+        return self.text
+
     def render(self, skin, context):
-        return skin.format_external_link(self.url, self.text)
+        return skin.format_external_link(self.url, self._render_internal_nodes(skin, context))
 
     def __repr__(self):
         return f'ExternalLinkNode[url={repr(self.url)},text={repr(self.text)}]'
 
 
 class BoldTextNode(TextNode):
+    @property
+    def content_to_parse(self) -> typ.Optional[str]:
+        return self.text
+
     def render(self, skin, context):
-        return f'<span class="text-bold">{self.text}</span>'
+        return f'<strong class="text-bold">{self._render_internal_nodes(skin, context)}</strong>'
 
     def __repr__(self):
         return f'BoldTextNode[text={repr(self.text)}]'
 
 
 class ItalicTextNode(TextNode):
+    @property
+    def content_to_parse(self) -> typ.Optional[str]:
+        return self.text
+
     def render(self, skin, context):
-        return f'<span class="text-italic">{self.text}</span>'
+        return f'<em class="text-italic">{self._render_internal_nodes(skin, context)}</em>'
 
     def __repr__(self):
         return f'ItalicTextNode[text={repr(self.text)}]'
 
 
 class UnderlinedTextNode(TextNode):
+    @property
+    def content_to_parse(self) -> typ.Optional[str]:
+        return self.text
+
     def render(self, skin, context):
-        return f'<span class="text-underlined">{self.text}</span>'
+        return f'<span class="text-underlined">{self._render_internal_nodes(skin, context)}</span>'
 
     def __repr__(self):
         return f'UnderlinedTextNode[text={repr(self.text)}]'
 
 
 class OverlinedTextNode(TextNode):
+    @property
+    def content_to_parse(self) -> typ.Optional[str]:
+        return self.text
+
     def render(self, skin, context):
-        return f'<span class="text-overlined">{self.text}</span>'
+        return f'<span class="text-overlined">{self._render_internal_nodes(skin, context)}</span>'
 
     def __repr__(self):
         return f'OverlinedTextNode[text={repr(self.text)}]'
 
 
 class StrikethroughTextNode(TextNode):
+    @property
+    def content_to_parse(self) -> typ.Optional[str]:
+        return self.text
+
     def render(self, skin, context):
-        return f'<span class="text-stroke">{self.text}</span>'
+        return f'<s class="text-stroke">{self._render_internal_nodes(skin, context)}</s>'
 
     def __repr__(self):
         return f'Strikethrough[text={repr(self.text)}]'
@@ -237,6 +285,10 @@ class ImageOrVideoNode(WikicodeNode):
     def legend(self) -> str:
         return self.__legend
 
+    @property
+    def content_to_parse(self) -> typ.Optional[str]:
+        return self.__legend
+
     def render(self, skin, context):
         from .. import api, media_backends
 
@@ -247,44 +299,46 @@ class ImageOrVideoNode(WikicodeNode):
 
         tooltip = context.language.translate('media.button.size_up.tooltip')
         thumb = self.width == 'thumb'
-        width = self.width if not thumb else '200px'
+        width = self.width if not thumb else f'{context.user.data.max_image_thumbnail_size}px'
         classes = []
         if thumb:
             classes.append('pull-right')
-
-        style = f'style="width: {width};"'
 
         url = metadata.url
         mime_type_full = metadata.mime_type_full
         media_type = metadata.media_type
         template = f"""
 <figure class="img-thumbnail {' '.join(classes)}">
-  {{}}
+  {{tag}}
   <figcaption style="max-width: {width or ''}">
     <a href="#" role="button" class="mdi mdi-resize pull-right" title="{tooltip}"></a>
-    {self.legend or ''}
+    {self._render_internal_nodes(skin, context) or ''}
   </figcaption>
 </figure>
 """.strip()
 
         if media_type == media_backends.FileMetadata.VIDEO:
             no_video = context.language.translate('media.format.video.not_supported')
-            return template.format(f"""
-<video controls {style}>
+            return template.format(tag=f"""
+<video controls poster="{metadata.video_thumbnail or ''}" style="width: {width or ''};">
   <source src="{url}" type="{mime_type_full}">
   <p>{no_video}</p>
 </video>
 """.strip())
+
         elif media_type == media_backends.FileMetadata.AUDIO:
             no_audio = context.language.translate('media.format.audio.not_supported')
-            return template.format(f"""
-<audio controls {style}>
+            return template.format(tag=f"""
+<audio controls>
   <source src="{url}" type="{mime_type_full}">
   <p>{no_audio}</p>
 </audio>
 """.strip())
+
         elif media_type == media_backends.FileMetadata.IMAGE:
-            return template.format(f'<img src="{url}" alt="{self.file_name}" {style} />')
+            return template.format(
+                tag=f'<img src="{url}" alt="{self.file_name}" style="width: {width or ""};" />'
+            )
 
         message = context.language.translate('media.format.not_supported', media_type=media_type)
         return f'<span class="wpy-parser-error">{message}</span>'

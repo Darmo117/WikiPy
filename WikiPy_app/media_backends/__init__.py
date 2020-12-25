@@ -25,6 +25,7 @@ class FileMetadata:
     mime_type: str
     mime_subtype: str
     media_type: str
+    video_thumbnail: str = None
 
 
 class MediaBackend(abc.ABC):
@@ -57,7 +58,7 @@ class WikimediaCommonsBackend(MediaBackend):
             'action': 'query',
             'titles': 'File:' + file_name,
             'prop': 'imageinfo',
-            'iiprop': 'url|mime|mediatype',
+            'iiprop': 'url|mime|mediatype|size',
             'format': 'json',
         })
         json_obj = response.json()
@@ -71,13 +72,17 @@ class WikimediaCommonsBackend(MediaBackend):
         url = metadata['url']
         mime_type_full = metadata['mime']
         mime_type, mime_subtype = mime_type_full.split('/', maxsplit=1)
+        width = metadata['width']
+        url_parts = url.split('/')
+        url_parts.insert(5, 'thumb')
 
         return FileMetadata(
             url=url,
             media_type=metadata['mediatype'],
             mime_type_full=mime_type_full,
             mime_type=mime_type,
-            mime_subtype=mime_subtype
+            mime_subtype=mime_subtype,
+            video_thumbnail=f'{"/".join(url_parts)}/{width}px--{url.split("/")[-1]}.jpg'
         )
 
 

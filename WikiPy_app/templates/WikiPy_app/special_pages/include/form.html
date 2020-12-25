@@ -19,6 +19,10 @@
   <form method="post" id="wpy-{{ form.name }}-form" {% if action %}action="{{ action }}"{% endif %}>
     {% csrf_token %}
 
+    {% if form.warn_unsaved_changes %}
+      <input type="hidden" name="warn-unsaved" value="1">
+    {% endif %}
+
     {% for field in form %}
       {% with trans_field_prefix=trans_prefix|add:field.label|add:'.' %}
 

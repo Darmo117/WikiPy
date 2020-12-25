@@ -43,6 +43,10 @@ class PageContext:
     user_time: datetime.time
     revisions_list_page_min: int
     revisions_list_page_max: int
+    rc_min_days: int
+    rc_max_days: int
+    rc_min_revisions: int
+    rc_max_revisions: int
 
     def __post_init__(self):
         self._context = None

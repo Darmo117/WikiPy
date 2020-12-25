@@ -104,8 +104,6 @@ class InternalLinkTag(NonHtmlTag):
 
         if not self._check_title(title):
             return _nodes.TextNode(text=f'{self.open_delimiter}{wikicode}{self.close_delimiter}')
-        if text:
-            text = text.replace('<', '&lt;')
         return _nodes.InternalLinkNode(page_title=title, anchor=anchor, text=text)
 
     @staticmethod
@@ -139,8 +137,6 @@ class ExternalLinkTag(NonHtmlTag):
         if not self._check_url(url):
             return _nodes.TextNode(text=f'{self.open_delimiter}{wikicode}{self.close_delimiter}')
 
-        if text:
-            text = text.replace('<', '&lt;')
         return _nodes.ExternalLinkNode(url=url, text=text)
 
     @staticmethod
@@ -165,7 +161,7 @@ class ImageOrVideoTag(NonHtmlTag):
         if not self._check_file_name(file_name):
             return _nodes.TextNode(text=f'{self.open_delimiter}{wikicode}{self.close_delimiter}')
 
-        return _nodes.ImageOrVideoNode(file_name=file_name, width=width, legend=legend.replace('<', '&lt;'))
+        return _nodes.ImageOrVideoNode(file_name=file_name, width=width, legend=legend)
 
     @staticmethod
     def _split_params(params: str) -> typ.Tuple[str, typ.Optional[str]]:
@@ -189,7 +185,7 @@ class BoldTextTag(NonHtmlTag):
         super().__init__('bold', '**', '**', multiline=False, auto_recursive=False)
 
     def parse_wikicode(self, wikicode: str):
-        return _nodes.BoldTextNode(wikicode.replace('<', '&lt;'))  # Escape HTML tags
+        return _nodes.BoldTextNode(wikicode)
 
 
 class ItalicTextTag(NonHtmlTag):
@@ -197,7 +193,7 @@ class ItalicTextTag(NonHtmlTag):
         super().__init__('italic', '//', '//', multiline=False, auto_recursive=False)
 
     def parse_wikicode(self, wikicode: str):
-        return _nodes.ItalicTextNode(wikicode.replace('<', '&lt;'))  # Escape HTML tags
+        return _nodes.ItalicTextNode(wikicode)
 
 
 class UnderlinedTextTag(NonHtmlTag):
@@ -205,7 +201,7 @@ class UnderlinedTextTag(NonHtmlTag):
         super().__init__('underlined', '__', '__', multiline=False, auto_recursive=False)
 
     def parse_wikicode(self, wikicode: str):
-        return _nodes.UnderlinedTextNode(wikicode.replace('<', '&lt;'))  # Escape HTML tags
+        return _nodes.UnderlinedTextNode(wikicode)
 
 
 class StrikethroughTextTag(NonHtmlTag):
@@ -213,7 +209,7 @@ class StrikethroughTextTag(NonHtmlTag):
         super().__init__('strikethrough', '~~', '~~', multiline=False, auto_recursive=False)
 
     def parse_wikicode(self, wikicode: str):
-        return _nodes.StrikethroughTextNode(wikicode.replace('<', '&lt;'))  # Escape HTML tags
+        return _nodes.StrikethroughTextNode(wikicode)
 
 
 class OverlinedTextTag(NonHtmlTag):
@@ -221,4 +217,4 @@ class OverlinedTextTag(NonHtmlTag):
         super().__init__('overlined', '++', '++', multiline=False, auto_recursive=False)
 
     def parse_wikicode(self, wikicode: str):
-        return _nodes.OverlinedTextNode(wikicode.replace('<', '&lt;'))  # Escape HTML tags
+        return _nodes.OverlinedTextNode(wikicode)

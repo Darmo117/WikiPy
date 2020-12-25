@@ -50,4 +50,4 @@ function
 {(name|args)}
 
 magic keywords
-$$name$$
+{{name}}

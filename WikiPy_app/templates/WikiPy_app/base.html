@@ -169,6 +169,9 @@
       {% wpy_static 6 wpy_context.user.username|add:'/common.js' %}
       {% wpy_static 6 wpy_context.user.username|add:'/'|add:wpy_context.skin.name|add:'.js' %}
     {% endif %}
+    {% if wpy_context.mode == 'edit' %}
+      <script src="{% static 'WikiPy_app/js/special_pages/include/forms.js' %}"></script>
+    {% endif %}
   {% else %}
     <script src="{% static 'WikiPy_app/js/special_pages/include/forms.js' %}"></script>
   {% endif %}

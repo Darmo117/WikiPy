@@ -39,7 +39,7 @@ def _content_model_validator(value):
 
 def _language_validator(value):
     if not settings.i18n.get_language(value):
-        raise dj_exc.ValidationError('invalid content model', params={'value': value}, code='invalid')
+        raise dj_exc.ValidationError('invalid language', params={'value': value}, code='invalid')
 
 
 def _non_validator(_):
@@ -48,7 +48,17 @@ def _non_validator(_):
 
 def _default_revisions_list_size_validator(value):
     if not (settings.REVISIONS_LIST_PAGE_MIN <= value <= settings.REVISIONS_LIST_PAGE_MAX):
-        raise dj_exc.ValidationError('', code='invalid', params={'value': value})
+        raise dj_exc.ValidationError('invalid revisions list page size', code='invalid', params={'value': value})
+
+
+def _rc_max_days_validator(value):
+    if not (settings.RC_DAYS_MIN <= value <= settings.RC_DAYS_MAX):
+        raise dj_exc.ValidationError('invalid recent changes days limit', code='invalid', params={'value': value})
+
+
+def _rc_max_revisions_validator(value):
+    if not (settings.RC_REVISIONS_MIN <= value <= settings.RC_REVISIONS_MAX):
+        raise dj_exc.ValidationError('invalid recent changes revisions limit', code='invalid', params={'value': value})
 
 
 # Cannot inherit Django’s Model class as it causes problems with foreign keys.
@@ -192,12 +202,10 @@ GENDERS = {gender.code: gender for gender in (NEUTRAL_GENDER, FEMALE_GENDER, MAL
 class UserData(LockableModel, dj_models.Model):
     user = dj_models.OneToOneField(dj_auth.get_user_model(), on_delete=dj_models.CASCADE)
     ip_address = dj_models.CharField(max_length=50, null=True, default=None)
+
     # True = female, False = Male, None = Undefined
     _gender = dj_models.BooleanField(null=True, default=None)
-    skin = dj_models.CharField(max_length=50, default='default')
     lang_code = dj_models.CharField(max_length=10, default=settings.DEFAULT_LANGUAGE_CODE)
-    timezone = dj_models.CharField(max_length=50)
-    datetime_format_id = dj_models.IntegerField(null=True, default=None)
     signature = dj_models.CharField(max_length=100)
     email_confirmation_date = dj_models.DateTimeField(null=True, default=None)
     email_confirmation_code = dj_models.CharField(max_length=50, null=True, default=None)
@@ -206,6 +214,10 @@ class UserData(LockableModel, dj_models.Model):
     send_copy_of_sent_emails = dj_models.BooleanField(default=False)
     send_watchlist_emails = dj_models.BooleanField(default=False)
     send_minor_watchlist_emails = dj_models.BooleanField(default=False)
+
+    skin = dj_models.CharField(max_length=50, default='default')
+    timezone = dj_models.CharField(max_length=50)
+    datetime_format_id = dj_models.IntegerField(null=True, default=None)
     max_image_file_preview_size = dj_models.IntegerField()  # Pixels
     max_image_thumbnail_size = dj_models.IntegerField()  # Pixels
     enable_media_viewer = dj_models.BooleanField(default=True)
@@ -214,11 +226,20 @@ class UserData(LockableModel, dj_models.Model):
     default_revisions_list_size = dj_models.IntegerField(default=50,
                                                          validators=[_default_revisions_list_size_validator])
     confirm_rollback = dj_models.BooleanField(default=False)
+
     all_edits_minor = dj_models.BooleanField(default=False)
     blank_comment_prompt = dj_models.BooleanField(default=False)
     unsaved_changes_warning = dj_models.BooleanField(default=True)
     show_preview_first_edit = dj_models.BooleanField(default=False)
     preview_above_edit_box = dj_models.BooleanField(default=True)
+
+    rc_max_days = dj_models.IntegerField(default=2, validators=[_rc_max_days_validator])
+    rc_max_revisions = dj_models.IntegerField(default=50, validators=[_rc_max_revisions_validator])
+    rc_group_by_page = dj_models.BooleanField(default=False)
+    rc_hide_minor = dj_models.BooleanField(default=False)
+    rc_hide_categories = dj_models.BooleanField(default=False)
+    rc_hide_patrolled = dj_models.BooleanField(default=False)
+    rc_hide_patrolled_new_pages = dj_models.BooleanField(default=False)
 
     @property
     def is_female(self) -> bool:

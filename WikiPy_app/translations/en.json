@@ -101,6 +101,17 @@
         "message": "<p>Hello, $username!</p><p>A request has been made to change your email address. Please click the following link to confirm the action.</p><p>$link</p><p>If you received this email by mistake, please do not click the link and delete it immediatly.</p>"
       }
     },
+    "javascript": {
+      "toast": {
+        "close": {
+          "tooltip": "Close"
+        },
+        "email_sent": {
+          "title": "Email sent",
+          "message": "A new confirmation email has been sent. The previous code is no longer valid."
+        }
+      }
+    },
     "group": {
       "all": "All",
       "users": "Users",
@@ -545,7 +556,9 @@
             "files": "Files",
             "other_options": "Other options",
             "editor": "Editor",
-            "preview": "Preview"
+            "preview": "Preview",
+            "display": "Display",
+            "hidden_edits": "Hidden edits"
           },
           "username": {
             "label": "Username"
@@ -700,6 +713,39 @@
           },
           "preview_above_edit_box": {
             "label": "Show preview above edit box"
+          },
+          "rc_max_days": {
+            "label": "Maximum number of days to show in recent changes",
+            "help": "Value must be between $min and $max inclusive.",
+            "error": {
+              "min_value": "Value should be greater than or equal to $min.",
+              "max_value": "Value should be less than or equal to $max.",
+              "required": "Please enter a value."
+            }
+          },
+          "rc_max_revisions": {
+            "label": "Maximum number of revisions to show in recent changes",
+            "help": "Value must be between $min and $max inclusive.",
+            "error": {
+              "min_value": "Value should be greater than or equal to $min.",
+              "max_value": "Value should be less than or equal to $max.",
+              "required": "Please enter a value."
+            }
+          },
+          "rc_group_by_page": {
+            "label": "Group edits by page"
+          },
+          "rc_hide_minor": {
+            "label": "Hide minor edits"
+          },
+          "rc_hide_categories": {
+            "label": "Hide pages categorization"
+          },
+          "rc_hide_patrolled": {
+            "label": "Hide patrolled edits"
+          },
+          "rc_hide_patrolled_new_pages": {
+            "label": "Hide patrolled page creations"
           },
           "submit": {
             "label": "Save changes"
