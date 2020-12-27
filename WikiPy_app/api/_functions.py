@@ -396,7 +396,7 @@ def extract_namespace_and_title(full_title: str, ns_as_id=False, local_name=True
         -> typ.Tuple[typ.Union[str, int], str]:
     main_ns = settings.MAIN_NS.id if ns_as_id else settings.MAIN_NS.get_name(local=local_name)
 
-    split = full_title.split(':', maxsplit=1)
+    split = tuple(map(str.strip, full_title.split(':', maxsplit=1)))
 
     if len(split) == 1:
         ns_id = main_ns
@@ -497,6 +497,14 @@ def as_url_title(full_page_title: str, escape: bool = False) -> str:
 
 def title_from_url(url_title: str) -> str:
     return url_title.replace('_', ' ').strip()
+
+
+def get_wiki_url_path() -> str:
+    return dj_scut.reverse('wikipy:page', kwargs={'raw_page_title': ''})
+
+
+def get_api_url_path() -> str:
+    return dj_scut.reverse('wikipy_api:index')
 
 
 #########

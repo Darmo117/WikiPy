@@ -233,8 +233,10 @@
 
         if (href) {
           let url = new URL(href);
-          addLanguageParam(url, language);
-          $anchor.prop("href", url.toString());
+          if (url.hostname === location.hostname) {
+            addLanguageParam(url, language);
+            $anchor.prop("href", url.toString());
+          }
         }
       });
     }

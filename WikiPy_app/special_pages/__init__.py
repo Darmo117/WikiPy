@@ -1,13 +1,14 @@
 import abc
 import dataclasses
 import importlib
+import logging
 import os
 import typing as typ
 
 import django.core.handlers.wsgi as dj_wsgi
 from django.conf import settings as dj_settings
 
-from .. import apps, page_context, settings, forms, util
+from .. import apps, page_context, settings, forms, util, extensions
 
 MAINTENANCE_CAT = 'maintenance'
 PAGE_LISTS_CAT = 'page_lists'
@@ -237,20 +238,44 @@ class SpecialPage(abc.ABC):
 _SPECIAL_PAGES: typ.Dict[str, SpecialPage] = {}
 
 
-# TODO load extensions’ special pages
 def load_special_pages():
+    logging.info('Loading special pages…')
+
+    app_dir = os.path.join(dj_settings.BASE_DIR, apps.WikiPyAppConfig.name)
     titles = set()
-    files = os.listdir(os.path.join(dj_settings.BASE_DIR, apps.WikiPyAppConfig.name, 'special_pages'))
-    for filename in filter(lambda fn: not fn.startswith('__') and fn.endswith('.py'), files):
-        module = importlib.import_module(f'.{filename[:-3]}', package=__name__)
-        # noinspection PyUnresolvedReferences
-        sp: SpecialPage = module.load_special_page()
-        if sp.id in _SPECIAL_PAGES:
-            raise ValueError(f'duplicate special page ID "{sp.id}"')
-        if sp.get_title(local=False) in titles:
-            raise ValueError(f'duplicate special page title for ID "{sp.id}"')
-        titles.add(sp.get_title(local=False))
-        _SPECIAL_PAGES[sp.id] = sp
+
+    files = list(map(lambda f: (f, __name__), os.listdir(os.path.join(app_dir, 'special_pages'))))
+    # Extensions’ special pages
+    for ext in extensions.get_loaded_extensions():
+        files.extend(map(
+            lambda f: (f, f'{apps.WikiPyAppConfig.name}.extensions.{ext.id}.special_pages'),
+            os.listdir(os.path.join(app_dir, 'extensions', ext.id, 'special_pages'))
+        ))
+
+    total = 0
+    ok = 0
+    for filename, package in filter(lambda item: not item[0].startswith('__') and item[0].endswith('.py'), files):
+        logging.info(f'Found {"built-in" if __name__ == package else "extension"} special page: {package}.{filename}')
+        total += 1
+        try:
+            module = importlib.import_module(f'.{filename[:-3]}', package=package)
+            # noinspection PyUnresolvedReferences
+            sp: SpecialPage = module.load_special_page()
+        except ModuleNotFoundError:  # Should never happen
+            logging.error(f'Module "{package}.{filename}" not found, skipped.')
+        except AttributeError:
+            logging.error(f'Missing "load_special_page" function, skipped.')
+        else:
+            if sp.id in _SPECIAL_PAGES:
+                raise ValueError(f'duplicate special page ID "{sp.id}"')
+            if sp.get_title(local=False) in titles:
+                raise ValueError(f'duplicate special page title for ID "{sp.id}"')
+            titles.add(sp.get_title(local=False))
+            _SPECIAL_PAGES[sp.id] = sp
+            ok += 1
+            logging.info('Special page loaded successfully.')
+
+    logging.info(f'Special pages loaded (errors: {total - ok}).')
 
 
 def get_special_page(title: str) -> typ.Optional[SpecialPage]:

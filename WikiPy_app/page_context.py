@@ -4,6 +4,7 @@ import dataclasses
 import datetime
 import typing as typ
 
+import django.core.handlers.wsgi as dj_wsgi
 import django.core.paginator as dj_page
 import django.template.context as dj_context
 
@@ -14,6 +15,7 @@ TemplateContext = dj_context.RequestContext
 
 @dataclasses.dataclass
 class PageContext:
+    request: dj_wsgi.WSGIRequest
     project_name: str
     main_page_namespace: settings.Namespace
     main_page_title: str
@@ -92,7 +94,7 @@ class ReadPageContext(RevisionPageContext):
     is_redirection: bool
     redirected_from: typ.Optional[typ.Tuple[int, str]]
 
-    def __init__(self, context: PageContext, /, wikicode: str, is_redirection: bool,
+    def __init__(self, context: PageContext, /, wikicode: str = None, is_redirection: bool = None,
                  revision: typ.Optional[object] = None, archived: bool = False, rendered_page_content: str = '',
                  redirected_from: typ.Tuple[int, str] = None):
         super().__init__(context, wikicode=wikicode, revision=revision, archived=archived)

@@ -200,3 +200,7 @@ li:first-child .wpy-search-result {
   border: gray solid 1px;
   border-radius: 3px;
 }
+
+code {
+  color: inherit;
+}

@@ -347,11 +347,12 @@ class ImageOrVideoNode(WikicodeNode):
         return f'ImageOrVideoNode[file_name={repr(self.file_name)},width={repr(self.width)},legend={repr(self.legend)}]'
 
 
-class HtmlTagNode(WikicodeNode):
-    def __init__(self, name: str, inline: bool, **attributes: str):
+class HTMLTagNode(WikicodeNode):
+    def __init__(self, name: str, inline: bool, content: str, **attributes: str):
         super().__init__(inline=inline)
         self.__name = name
         self.__attributes = attributes
+        self.__content = content
 
     @property
     def name(self) -> str:
@@ -361,6 +362,22 @@ class HtmlTagNode(WikicodeNode):
     def attributes(self) -> typ.Dict[str, str]:
         return self.__attributes.copy()
 
+    @property
+    def content(self):
+        return self.__content
+
+    @property
+    def content_to_parse(self) -> typ.Optional[str]:
+        return self.__content
+
+    def render(self, skin, context):
+        return f'<{self.__name}>{self._render_internal_nodes(skin, context)}</{self.__name}>'
+
+    def __repr__(self):
+        return f'HtmlNode[name={self.__name},attributes={self.__attributes},content={self.__content}]'
+
+
+class ComplexHTMLTagNode(HTMLTagNode):
     def render(self, skin, context):
         pass  # TODO
 

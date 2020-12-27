@@ -1,9 +1,9 @@
-from . import Skin
+from .. import Skin
 
 
 class DefaultSkin(Skin):
-    def __init__(self):
-        super().__init__('default', 'Default Skin', **{'class': 'd-flex flex-column'})
+    def __init__(self, path: str):
+        super().__init__(path, 'default', **{'class': 'd-flex flex-column'})
 
     def _format_link(self, url, text, tooltip, page_exists, css_classes, access_key=None, external=False):
         if not page_exists:
@@ -22,5 +22,5 @@ class DefaultSkin(Skin):
         return link
 
 
-def load_skin():
-    return DefaultSkin()
+def load_skin(path: str):
+    return DefaultSkin(path)

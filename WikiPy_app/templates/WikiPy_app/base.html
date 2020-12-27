@@ -33,7 +33,7 @@
 
   <link href="{% static 'WikiPy_app/css/common.css' %}" rel="stylesheet"/>
   {# Using "with" to avoid warning #}
-  {% with path='WikiPy_app/skins/'|add:wpy_context.skin.name|add:'/style.css' %}
+  {% with path='WikiPy_app/skins/'|add:wpy_context.skin.id|add:'/style.css' %}
     <link href="{% static path %}" rel="stylesheet"/>
   {% endwith %}
   {% if wpy_context.mode == 'special' and wpy_context.load_special_page_css %}
@@ -44,10 +44,10 @@
   {% endif %}
   {% if wpy_context.mode != 'setup' %}
     {% wpy_static 4 'Common.css' %}
-    {% wpy_static 4 wpy_context.skin.name|add:'.css' %}
+    {% wpy_static 4 wpy_context.skin.id|add:'.css' %}
     {% if not wpy_context.user.is_anonymous %}
       {% wpy_static 6 wpy_context.user.username|add:'/common.css' %}
-      {% wpy_static 6 wpy_context.user.username|add:'/'|add:wpy_context.skin.name|add:'.css' %}
+      {% wpy_static 6 wpy_context.user.username|add:'/'|add:wpy_context.skin.id|add:'.css' %}
     {% endif %}
   {% endif %}
 
@@ -92,7 +92,11 @@
     <div id="wpy-redirect-info" class="text-muted">
       {% if wpy_context.is_redirection %}
         {% wpy_translate 'redirection_info.is_redirection' %}
-      {% elif wpy_context.redirected_from %}
+      {% endif %}
+      {% if wpy_context.is_redirection and wpy_context.redirected_from %}
+        <br/>
+      {% endif %}
+      {% if wpy_context.redirected_from %}
         {% wpy_inner_link namespace_id=wpy_context.redirected_from.0 page_title=wpy_context.redirected_from.1 no_redirect=1 as link %}
         {% wpy_translate 'redirection_info.redirected_from' link=link %}
       {% endif %}
@@ -142,7 +146,7 @@
 
   <script src="{% static 'WikiPy_app/js/common.js' %}"></script>
   {# Using "with" to avoid warning #}
-  {% with path='WikiPy_app/skins/'|add:wpy_context.skin.name|add:'/script.js' %}
+  {% with path='WikiPy_app/skins/'|add:wpy_context.skin.id|add:'/script.js' %}
     <script src="{% static path %}"></script>
   {% endwith %}
   {% if wpy_context.mode == 'special' and wpy_context.page_exists %}
@@ -164,10 +168,10 @@
 
   {% if wpy_context.mode != 'setup' %}
     {% wpy_static 4 'Common.js' %}
-    {% wpy_static 4 wpy_context.skin.name|add:'.js' %}
+    {% wpy_static 4 wpy_context.skin.id|add:'.js' %}
     {% if not wpy_context.user.is_anonymous %}
       {% wpy_static 6 wpy_context.user.username|add:'/common.js' %}
-      {% wpy_static 6 wpy_context.user.username|add:'/'|add:wpy_context.skin.name|add:'.js' %}
+      {% wpy_static 6 wpy_context.user.username|add:'/'|add:wpy_context.skin.id|add:'.js' %}
     {% endif %}
     {% if wpy_context.mode == 'edit' %}
       <script src="{% static 'WikiPy_app/js/special_pages/include/forms.js' %}"></script>

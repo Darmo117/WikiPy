@@ -91,6 +91,12 @@
   ],
   "default_datetime_format": 1,
   "mappings": {
+    "parser": {
+      "error": {
+        "circular_transclusion": "Transclusion circulaire détectée\u00a0!",
+        "too_many_redirects": "Trop grand nombre de redirections pour le modèle «\u00a0$template_name\u00a0»\u00a0!"
+      }
+    },
     "email": {
       "confirm_email": {
         "subject": "Confirmation de changement d’adresse mail",
@@ -871,6 +877,92 @@
       "my_page": {
         "display_title": "Ma page"
       },
+      "install_info": {
+        "general": {
+          "title": "Informations générales",
+          "table": {
+            "version": {
+              "label": "Version"
+            },
+            "wiki_url_path": {
+              "label": "Chemin d’URL du wiki"
+            },
+            "api_url_path": {
+              "label": "Chemin d’URL de l’API"
+            }
+          }
+        },
+        "resources": {
+          "table": {
+            "name": {
+              "label": "Nom"
+            },
+            "version": {
+              "label": "Version"
+            },
+            "license": {
+              "label": "Licence"
+            },
+            "description": {
+              "label": "Description"
+            },
+            "authors": {
+              "label": "Auteurs et autrices"
+            }
+          },
+          "extensions": {
+            "empty": "Il n’y a aucune extension installée."
+          }
+        },
+        "skins": {
+          "title": "Habillages installés"
+        },
+        "extensions": {
+          "title": "Extensions installées"
+        },
+        "parser": {
+          "title": "Informations sur l’analyseur syntaxique",
+          "tags": {
+            "title": "Balises chargées",
+            "empty": "Aucune balise.",
+            "table": {
+              "built_in": "Balise native",
+              "name": {
+                "label": "Nom"
+              },
+              "extension": {
+                "label": "Extension"
+              }
+            }
+          },
+          "functions": {
+            "title": "Fonctions chargées",
+            "empty": "Aucune fonction.",
+            "table": {
+              "built_in": "Fonction native",
+              "name": {
+                "label": "Nom"
+              },
+              "extension": {
+                "label": "Extension"
+              }
+            }
+          },
+          "magic_keywords": {
+            "title": "Mot-clés magiques chargés",
+            "empty": "Aucun mot-clé magique.",
+            "table": {
+              "built_in": "Mot-clé natif",
+              "name": {
+                "label": "Nom"
+              },
+              "extension": {
+                "label": "Extension"
+              }
+            }
+          }
+        }
+      },
       "special_pages": {
         "display_title": "Pages spéciales",
         "tooltip": "Liste de toutes les pages spéciales",
@@ -1024,7 +1116,7 @@
           "Krasnoyarsk": "Krasnoïarsk",
           "Kuala_Lumpur": "Kuala Lumpur",
           "Kuwait": "Koweït",
-        "Macau": "Macao",
+          "Macau": "Macao",
           "Manila": "Manille",
           "Muscat": "Mascate",
           "Nicosia": "Nicosie",

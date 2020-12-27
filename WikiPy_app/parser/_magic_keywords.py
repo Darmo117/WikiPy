@@ -1,30 +1,6 @@
-import abc
 import datetime
-import re
 
-_name_regex = re.compile(r'^\w+$')
-
-
-class MagicKeyword(abc.ABC):
-    def __init__(self, name: str):
-        if not re.fullmatch(_name_regex, name):
-            raise ValueError(f'invalid magic keyword name "{name}"')
-        self.__name = name.upper()
-
-    @property
-    def name(self) -> str:
-        return self.__name
-
-    @abc.abstractmethod
-    def get_value(self, context) -> str:
-        """
-        Returns the value of this keyword for the given context.
-
-        :param context: The context to use.
-        :type context: WikiPy_app.page_context.PageContext
-        :return: The value.
-        """
-        pass
+from . import _registry
 
 
 #########
@@ -32,122 +8,231 @@ class MagicKeyword(abc.ABC):
 #########
 
 
-class DateTimeKeyword(MagicKeyword, abc.ABC):
-    def __init__(self, name: str, local: bool):
-        if local:
-            prefix = 'local_'
-        else:
-            prefix = 'current_'
-        super().__init__(prefix + name)
-        self._local = local
-
-    def _get_time(self, context) -> datetime:
-        if self._local:
-            return context.user_date_time
-        return context.date_time
+def _get_datetime(context, user_time: bool) -> datetime:
+    if user_time:
+        return context.user_date_time
+    return context.date_time
 
 
-class CurrentYearKeyword(DateTimeKeyword):
-    def __init__(self, local: bool):
-        super().__init__('year', local)
-
-    def get_value(self, context):
-        return str(self._get_time(context).year)
+# Years
 
 
-class CurrentMonthKeyword(DateTimeKeyword):
-    def __init__(self, local: bool, padded: bool):
-        super().__init__('month' + ('_padded' if padded else ''), local)
-        self._padded = padded
-
-    def get_value(self, context):
-        s = str(self._get_time(context).month)
-        if self._padded:
-            return s.ljust(2, '0')
-        return s
+def _get_year(context, user_time: bool) -> str:
+    return str(_get_datetime(context, user_time=user_time).year)
 
 
-class CurrentMonthNameKeyword(DateTimeKeyword):
-    def __init__(self, local: bool, abbr: bool):
-        super().__init__('month_name' + ('_abbr' if abbr else ''), local)
-        self._abbr = abbr
-
-    def get_value(self, context):
-        m = self._get_time(context).month
-        lang = context.default_language
-        if self._abbr:
-            return lang.get_month_abbreviation(m)
-        return lang.get_month_name(m)
+@_registry.magic_keyword(takes_context=True)
+def user_current_year(context):
+    return _get_year(context, user_time=True)
 
 
-class CurrentDayKeyword(DateTimeKeyword):
-    def __init__(self, local: bool, padded: bool):
-        super().__init__('day' + ('_padded' if padded else ''), local)
-        self._padded = padded
-
-    def get_value(self, context):
-        s = str(self._get_time(context).day)
-        if self._padded:
-            return s.ljust(2, '0')
-        return s
+@_registry.magic_keyword(takes_context=True)
+def server_current_year(context):
+    return _get_year(context, user_time=False)
 
 
-class CurrentDayOfWeekKeyword(DateTimeKeyword):
-    def __init__(self, local: bool):
-        super().__init__('dow', local)
-
-    def get_value(self, context):
-        return str(self._get_time(context).weekday())  # Monday == 0
+# Months
 
 
-class CurrentDayNameKeyword(DateTimeKeyword):
-    def __init__(self, local: bool):
-        super().__init__('day_name', local)
-
-    def get_value(self, context):
-        return context.default_language.get_day_name(self._get_time(context).weekday())
-
-
-class CurrentTimeKeyword(DateTimeKeyword):
-    def __init__(self, local: bool):
-        super().__init__('time', local)
-
-    def get_value(self, context):
-        h = self._get_time(context).hour
-        m = self._get_time(context).minute
-        return f'{h:02}:{m:02}'
+def _get_month(context, user_time: bool, padded: bool) -> str:
+    month = str(_get_datetime(context, user_time=user_time).month)
+    if padded:
+        return month.rjust(2, '0')
+    return month
 
 
-class CurrentHourKeyword(DateTimeKeyword):
-    def __init__(self, local: bool):
-        super().__init__('hour', local)
-
-    def get_value(self, context):
-        return str(self._get_time(context).hour).ljust(2, '0')
+@_registry.magic_keyword(takes_context=True)
+def user_current_month(context):
+    return _get_month(context, user_time=True, padded=False)
 
 
-class CurrentMinuteKeyword(DateTimeKeyword):
-    def __init__(self, local: bool):
-        super().__init__('minute', local)
-
-    def get_value(self, context):
-        return str(self._get_time(context).minute).ljust(2, '0')
+@_registry.magic_keyword(takes_context=True)
+def server_current_month(context):
+    return _get_month(context, user_time=False, padded=False)
 
 
-class CurrentWeekKeyword(DateTimeKeyword):
-    def __init__(self, local: bool):
-        super().__init__('week', local)
-
-    def get_value(self, context):
-        return str(self._get_time(context).strftime('%V'))
+@_registry.magic_keyword(takes_context=True)
+def user_current_month_padded(context):
+    return _get_month(context, user_time=True, padded=True)
 
 
-class CurrentTimestampKeyword(DateTimeKeyword):
-    def __init__(self):
-        super().__init__('timestamp', False)
+@_registry.magic_keyword(takes_context=True)
+def server_current_month_padded(context):
+    return _get_month(context, user_time=False, padded=True)
 
-    def get_value(self, context):
-        return str(int(self._get_time(context).timestamp()))
+
+def _get_month_name(context, user_time: bool, abbr: bool) -> str:
+    month = _get_datetime(context, user_time=user_time).month
+    lang = context.language
+    if abbr:
+        return lang.get_month_abbreviation(month)
+    return lang.get_month_name(month)
+
+
+@_registry.magic_keyword(takes_context=True)
+def user_current_month_name(context):
+    return _get_month_name(context, user_time=True, abbr=False)
+
+
+@_registry.magic_keyword(takes_context=True)
+def server_current_month_name(context):
+    return _get_month_name(context, user_time=False, abbr=False)
+
+
+@_registry.magic_keyword(takes_context=True)
+def user_current_month_name_abbr(context):
+    return _get_month_name(context, user_time=True, abbr=True)
+
+
+@_registry.magic_keyword(takes_context=True)
+def server_current_month_name_abbr(context):
+    return _get_month_name(context, user_time=False, abbr=True)
+
+
+# Days
+
+
+def _get_day(context, user_time: bool, padded: bool) -> str:
+    d = str(_get_datetime(context, user_time=user_time).day)
+    if padded:
+        return d.rjust(2, '0')
+    return d
+
+
+@_registry.magic_keyword(takes_context=True)
+def user_current_day(context):
+    return _get_day(context, user_time=True, padded=False)
+
+
+@_registry.magic_keyword(takes_context=True)
+def server_current_day(context):
+    return _get_day(context, user_time=False, padded=False)
+
+
+@_registry.magic_keyword(takes_context=True)
+def user_current_day_padded(context):
+    return _get_day(context, user_time=True, padded=True)
+
+
+@_registry.magic_keyword(takes_context=True)
+def server_current_day_padded(context):
+    return _get_day(context, user_time=False, padded=True)
+
+
+def _get_day_name(context, user_time: bool, abbr: bool) -> str:
+    day = _get_datetime(context, user_time=user_time).weekday()
+    lang = context.language
+    if abbr:
+        return lang.get_day_abbreviation(day)
+    return lang.get_day_name(day)
+
+
+@_registry.magic_keyword(takes_context=True)
+def user_current_day_name(context):
+    return _get_day_name(context, user_time=True, abbr=False)
+
+
+@_registry.magic_keyword(takes_context=True)
+def server_current_day_name(context):
+    return _get_day_name(context, user_time=False, abbr=False)
+
+
+@_registry.magic_keyword(takes_context=True)
+def user_current_day_name_abbr(context):
+    return _get_day_name(context, user_time=True, abbr=True)
+
+
+@_registry.magic_keyword(takes_context=True)
+def server_current_day_name_abbr(context):
+    return _get_day_name(context, user_time=False, abbr=True)
+
+
+########
+# Time #
+########
+
+
+def _get_time(context, user_time: bool) -> str:
+    dt = _get_datetime(context, user_time=user_time)
+    return f'{dt.hour:02}:{dt.minute:02}'
+
+
+@_registry.magic_keyword(takes_context=True)
+def user_current_time(context):
+    return _get_time(context, user_time=True)
+
+
+@_registry.magic_keyword(takes_context=True)
+def server_current_time(context):
+    return _get_time(context, user_time=False)
+
+
+# Hours
+
+
+def _get_hour(context, user_time: bool) -> str:
+    return str(_get_datetime(context, user_time=user_time).hour).rjust(2, '0')
+
+
+@_registry.magic_keyword(takes_context=True)
+def user_current_hour(context):
+    return _get_hour(context, user_time=True)
+
+
+@_registry.magic_keyword(takes_context=True)
+def server_current_hour(context):
+    return _get_hour(context, user_time=False)
+
+
+# Minutes
+
+
+def _get_minute(context, user_time: bool) -> str:
+    return str(_get_datetime(context, user_time=user_time).minute).rjust(2, '0')
+
+
+@_registry.magic_keyword(takes_context=True)
+def user_current_minute(context):
+    return _get_minute(context, user_time=True)
+
+
+@_registry.magic_keyword(takes_context=True)
+def server_current_minute(context):
+    return _get_minute(context, user_time=False)
+
+
+# Weeks
+
+
+def _get_week(context, user_time: bool) -> str:
+    return str(_get_datetime(context, user_time=user_time).strftime('%V'))
+
+
+@_registry.magic_keyword(takes_context=True)
+def user_current_week(context):
+    return _get_datetime(context, user_time=True)
+
+
+@_registry.magic_keyword(takes_context=True)
+def server_current_week(context):
+    return _get_datetime(context, user_time=False)
+
+
+# Timestamp
+
+
+def _get_timestamp(context, user_time: bool) -> str:
+    return str(int(_get_datetime(context, user_time=user_time).timestamp()))
+
+
+@_registry.magic_keyword(takes_context=True)
+def user_current_timestamp(context):
+    return _get_timestamp(context, user_time=True)
+
+
+@_registry.magic_keyword(takes_context=True)
+def server_current_timestamp(context):
+    return _get_timestamp(context, user_time=False)
 
 
 #################
@@ -155,37 +240,25 @@ class CurrentTimestampKeyword(DateTimeKeyword):
 #################
 
 
-class SiteNameKeyword(MagicKeyword):
-    def __init__(self):
-        super().__init__('site_name')
-
-    def get_value(self, context):
-        return context.project_name
+@_registry.magic_keyword(takes_context=True)
+def site_name(context):
+    return context.project_name
 
 
-class ServerNameKeyword(MagicKeyword):
-    def __init__(self):
-        super().__init__('server_name')
-
-    def get_value(self, context):
-        raise ValueError(self.name + ' not implemented')  # TODO
+@_registry.magic_keyword(takes_context=True)
+def server_name(context):
+    return context.request.get_host()
 
 
-class CurrentVersionKeyword(MagicKeyword):
-    def __init__(self):
-        super().__init__('current_version')
-
-    def get_value(self, context):
-        from .. import settings
-        return settings.VERSION
+@_registry.magic_keyword
+def current_version():
+    from .. import settings
+    return settings.VERSION
 
 
-class SiteLanguageKeyword(MagicKeyword):
-    def __init__(self):
-        super().__init__('site_lang')
-
-    def get_value(self, context):
-        return context.default_language.code
+@_registry.magic_keyword(takes_context=True)
+def site_lang(context):
+    return context.default_language.code
 
 
 #########
@@ -193,28 +266,23 @@ class SiteLanguageKeyword(MagicKeyword):
 #########
 
 
-class WritingDirectionMarkKeyword(MagicKeyword):
-    def __init__(self):
-        super().__init__('dir_mark')
-
-    def get_value(self, context):
-        return '&lrm;' if context.page.content_language.writing_direction == 'ltr' else '&rlm;'
+@_registry.magic_keyword(takes_context=True)
+def dir_mark(context):
+    return '&lrm;' if context.page.content_language.writing_direction == 'ltr' else '&rlm;'
 
 
-class PageIdKeyword(MagicKeyword):
-    def __init__(self):
-        super().__init__('page_id')
+@_registry.magic_keyword(takes_context=True)
+def page_id(context):
+    if context.page_exists:
+        return str(context.page.id)
+    return ''
 
-    def get_value(self, context):
-        raise ValueError(self.name + ' not implemented')  # TODO
 
-
-class PageLanguageKeyword(MagicKeyword):
-    def __init__(self):
-        super().__init__('page_language')
-
-    def get_value(self, context):
+@_registry.magic_keyword(takes_context=True)
+def page_language(context):
+    if context.page_exists:
         return context.page.content_language.code
+    return ''
 
 
 #############
@@ -222,98 +290,84 @@ class PageLanguageKeyword(MagicKeyword):
 #############
 
 
-class RevisionKeyword(MagicKeyword, abc.ABC):
-    def __init__(self, name: str, attr: str, get_attr=str):
-        """
-        .
+def _get_revision_info(context, attr: str, get_attr=str):
+    """
+    Retrieves the given attribute value of the context’s page revision if it exists.
 
-        :param name: Keyword’s main name.
-        :param attr: Name of the attribute to fetch.
-        :param get_attr: The function to apply to the revision to get the value to return.
-        :type get_attr: typing.Callable[[WikiPy_app.models.PageRevision], str]
-        """
-        super().__init__('revision_' + name)
-        self._attr = attr
-        self._get_attr = get_attr
-
-    def get_value(self, context):
-        if hasattr(context, 'revision'):
-            return self._get_attr(getattr(context.revision, self._attr))
-        return ''
+    :param attr: Name of the attribute to fetch.
+    :param get_attr: The function to apply to the revision to get the value to return.
+    :type get_attr: typing.Callable[[WikiPy_app.models.PageRevision], str]
+    """
+    if hasattr(context, 'revision'):
+        return get_attr(getattr(context.revision, attr))
+    return ''
 
 
-class RevisionIdKeyword(RevisionKeyword):
-    def __init__(self):
-        super().__init__('id', 'id')
+@_registry.magic_keyword(takes_context=True)
+def revision_id(context):
+    return _get_revision_info(context, 'id')
 
 
-class RevisionYearKeyword(RevisionKeyword):
-    def __init__(self):
-        super().__init__('year', 'date', lambda d: str(d.year))
+@_registry.magic_keyword(takes_context=True)
+def revision_year(context):
+    return _get_revision_info(context, 'date', lambda d: str(d.year))
 
 
-class RevisionMonthKeyword(RevisionKeyword):
-    def __init__(self, padded: bool):
-        super().__init__('month' + ('_padded' if padded else ''), 'date',
-                         lambda d: str(d.month).ljust(2, '0') if padded else str(d.month))
+@_registry.magic_keyword(takes_context=True)
+def revision_month(context):
+    return _get_revision_info(context, 'date', lambda d: str(d.month))
 
 
-class RevisionDayKeyword(RevisionKeyword):
-    def __init__(self, padded: bool):
-        super().__init__('day' + ('_padded' if padded else ''), 'date',
-                         lambda d: str(d.day).ljust(2, '0') if padded else str(d.day))
+@_registry.magic_keyword(takes_context=True)
+def revision_month_padded(context):
+    return _get_revision_info(context, 'date', lambda d: str(d.month).rjust(2, '0'))
 
 
-class RevisionTimestampKeyword(RevisionKeyword):
-    def __init__(self):
-        super().__init__('timestamp', 'date', lambda d: str(d.timestamp()))
+@_registry.magic_keyword(takes_context=True)
+def revision_day(context):
+    return _get_revision_info(context, 'date', lambda d: str(d.day))
 
 
-class RevisionUserKeyword(RevisionKeyword):
-    def __init__(self):
-        super().__init__('user', 'author', lambda a: a.username)
+@_registry.magic_keyword(takes_context=True)
+def revision_day_padded(context):
+    return _get_revision_info(context, 'date', lambda d: str(d.day).rjust(2, '0'))
 
 
-class RevisionSizeKeyword(RevisionKeyword):
-    def __init__(self):
-        super().__init__('size', 'diff_size')
+@_registry.magic_keyword(takes_context=True)
+def revision_timestamp(context):
+    return _get_revision_info(context, 'date', lambda d: str(d.timestamp()))
 
 
-class NamespaceNameKeyword(MagicKeyword):
-    def __init__(self):
-        super().__init__('namespace_name')
-
-    def get_value(self, context):
-        return context.page.namespace.get_name(local=True, gender=context.page_namespace_gender)
+@_registry.magic_keyword(takes_context=True)
+def revision_user(context):
+    return _get_revision_info(context, 'author', lambda a: a.username)
 
 
-class NamespaceIdKeyword(MagicKeyword):
-    def __init__(self):
-        super().__init__('namespace_id')
-
-    def get_value(self, context):
-        return str(context.page.namespace_id)
+@_registry.magic_keyword(takes_context=True)
+def revision_size(context):
+    return _get_revision_info(context, 'diff_size')
 
 
-class FullPageTitleKeyword(MagicKeyword):
-    def __init__(self):
-        super().__init__('full_page_title')
-
-    def get_value(self, context):
-        return context.page.full_title
+@_registry.magic_keyword(takes_context=True)
+def namespace_name(context):
+    return context.page.namespace.get_name(local=True, gender=context.page_namespace_gender)
 
 
-class PageTitleKeyword(MagicKeyword):
-    def __init__(self):
-        super().__init__('page_title')
-
-    def get_value(self, context):
-        return context.page.title
+@_registry.magic_keyword(takes_context=True)
+def namespace_id(context):
+    return str(context.page.namespace_id)
 
 
-class UsernameKeyword(MagicKeyword):
-    def __init__(self):
-        super().__init__('username')
+@_registry.magic_keyword(takes_context=True)
+def full_page_title(context):
+    return context.page.full_title
 
-    def get_value(self, context):
-        return context.user.username
+
+@_registry.magic_keyword(takes_context=True)
+def page_title(context):
+    return context.page.title
+
+
+@_registry.magic_keyword(takes_context=True)
+def username(context):
+    return context.user.username

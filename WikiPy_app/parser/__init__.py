@@ -1,85 +1,37 @@
 from __future__ import annotations
 
+from ._functions import *
 from ._magic_keywords import *
 from ._nodes import *
+from ._registry import *
 from ._tags import *
 
 __all__ = [
     'WikicodeParser',
     'WikicodeNode',
     'RedirectNode',
-    'HtmlTag',
+    'HTMLTag',
     'MagicKeyword',
+    'magic_keyword',
+    'parser_function',
+    'load_magic_keywords',
+    'load_functions',
 ]
 
 
-def register_default():
-    default_html_tags = [
-        # TODO
-    ]
-    for tag in default_html_tags:
-        WikicodeParser.register_tag(tag)
-    default_magic_keywords = (
-        CurrentYearKeyword(local=False),
-        CurrentMonthKeyword(local=False, padded=False),
-        CurrentMonthKeyword(local=False, padded=True),
-        CurrentMonthNameKeyword(local=False, abbr=False),
-        CurrentMonthNameKeyword(local=False, abbr=True),
-        CurrentDayKeyword(local=False, padded=False),
-        CurrentDayKeyword(local=False, padded=True),
-        CurrentDayOfWeekKeyword(local=False),
-        CurrentDayNameKeyword(local=False),
-        CurrentTimeKeyword(local=False),
-        CurrentHourKeyword(local=False),
-        CurrentMinuteKeyword(local=False),
-        CurrentWeekKeyword(local=False),
-
-        CurrentYearKeyword(local=True),
-        CurrentMonthKeyword(local=True, padded=False),
-        CurrentMonthKeyword(local=True, padded=True),
-        CurrentMonthNameKeyword(local=True, abbr=False),
-        CurrentMonthNameKeyword(local=True, abbr=True),
-        CurrentDayKeyword(local=True, padded=False),
-        CurrentDayKeyword(local=True, padded=True),
-        CurrentDayOfWeekKeyword(local=True),
-        CurrentDayNameKeyword(local=True),
-        CurrentTimeKeyword(local=True),
-        CurrentHourKeyword(local=True),
-        CurrentMinuteKeyword(local=True),
-        CurrentWeekKeyword(local=True),
-
-        CurrentTimestampKeyword(),
-
-        SiteNameKeyword(),
-        ServerNameKeyword(),
-        CurrentVersionKeyword(),
-        SiteLanguageKeyword(),
-
-        WritingDirectionMarkKeyword(),
-        PageIdKeyword(),
-        PageLanguageKeyword(),
-
-        RevisionIdKeyword(),
-        RevisionYearKeyword(),
-        RevisionMonthKeyword(padded=False),
-        RevisionMonthKeyword(padded=True),
-        RevisionDayKeyword(padded=False),
-        RevisionDayKeyword(padded=True),
-        RevisionTimestampKeyword(),
-        RevisionUserKeyword(),
-        RevisionSizeKeyword(),
-
-        NamespaceNameKeyword(),
-        NamespaceIdKeyword(),
-        PageTitleKeyword(),
-        FullPageTitleKeyword(),
-        UsernameKeyword(),
-    )
-    for mk in default_magic_keywords:
-        WikicodeParser.register_magic_keyword(mk)
+def load_magic_keywords():
+    for mk in get_registered_magic_keywords().values():
+        # noinspection PyProtectedMember
+        WikicodeParser._register_magic_keyword(mk)
 
 
-def _init_special_tags() -> typ.Dict[str, NonHtmlTag]:
+def load_functions():
+    for name, function in get_registered_functions().items():
+        # noinspection PyProtectedMember
+        WikicodeParser._register_function(function, name)
+
+
+def _init_special_tags() -> typ.Dict[str, NonHTMLTag]:
     tags = [
         InternalLinkTag(),
         ExternalLinkTag(),
@@ -94,9 +46,9 @@ def _init_special_tags() -> typ.Dict[str, NonHtmlTag]:
 
 
 class WikicodeParser:
-    # TODO appliquer la regex des titres
+    # TODO use titles’ regex
     REDIRECT_PATTERN = re.compile(r'@REDIRECT\[\[([^\n]+?)(?:#([^\n]+?))?]]')
-    MAX_DEPTH = 50  # TODO changer après tests
+    MAX_TRANSCLUSIONS_DEPTH = 50  # TODO change after tests
 
     # States
     TEXT = 'text'
@@ -104,41 +56,33 @@ class WikicodeParser:
     HTML_TAG = 'html_tag'
     DELIMITER = 'delimiter'
 
-    __magic_keywords: typ.Dict[str, MagicKeyword] = {}
-    __special_tags: typ.Dict[str, NonHtmlTag] = _init_special_tags()
-    __html_tags: typ.Dict[str, HtmlTag] = {}
-
-    @classmethod
-    def register_tag(cls, tag: HtmlTag):
-        if tag.name in cls.__html_tags:
-            raise ValueError(f'attempt to register two tags with the same name "{tag.name}"')
-        cls.__html_tags[tag.name] = tag
-
-    @classmethod
-    def registered_tags(cls) -> typ.Dict[str, HtmlTag]:
-        return cls.__html_tags
-
-    @classmethod
-    def register_magic_keyword(cls, mk: MagicKeyword):
-        if mk.name in cls.__magic_keywords:
-            raise ValueError(f'attempt to register two magic keywords with the same name "{mk.name}"')
-        cls.__magic_keywords[mk.name] = mk
-
-    @classmethod
-    def registered_magic_keywords(cls) -> typ.Dict[str, MagicKeyword]:
-        return cls.__magic_keywords
-
-    @staticmethod
-    def make_safe(text: str) -> str:
-        return text.replace('<', '&lt;').replace('>', '&gt;')
+    __magic_keywords: typ.Dict[str, _registry.MagicKeyword] = {}  # TODO add extension ID
+    __special_tags: typ.Dict[str, NonHTMLTag] = _init_special_tags()
+    __html_tags: typ.Dict[str, HTMLTag] = {}  # TODO add extension ID
+    __functions: typ.Dict[str, _registry.ParserFunction] = {}  # TODO add extension ID
 
     def __init__(self):
         self.__max_depth_reached = False
+        self.__too_many_redirects = False
+        self.__circular_transclusion = False
+        self.__called_non_existant_template = False
         self.__delimiters_starts = {t.open_delimiter[0] for t in self.__special_tags.values()}
 
     @property
     def max_depth_reached(self) -> bool:
         return self.__max_depth_reached
+
+    @property
+    def too_many_redirects(self) -> bool:
+        return self.__too_many_redirects
+
+    @property
+    def circular_transclusion_detected(self) -> bool:
+        return self.__circular_transclusion
+
+    @property
+    def called_non_existant_template(self) -> bool:
+        return self.__called_non_existant_template
 
     def parse_wikicode(self, wikicode: str, context, no_redirect: bool = False) \
             -> typ.Union[DocumentNode, RedirectNode]:
@@ -174,7 +118,7 @@ class WikicodeParser:
         wikicode = wikicode.strip()
 
         # Maximum depth reached, stop parsing
-        if depth > self.MAX_DEPTH:
+        if depth > self.MAX_TRANSCLUSIONS_DEPTH:
             self.__max_depth_reached = True
             return DocumentNode(ParagraphNode(TextNode(text=self.make_safe(wikicode))))
 
@@ -201,7 +145,7 @@ class WikicodeParser:
 
     def _substitute_and_transclude(self, wikicode: str, context, depth: int, variables_values: typ.Dict[str, str]) \
             -> str:
-        if depth > self.MAX_DEPTH:
+        if depth > self.MAX_TRANSCLUSIONS_DEPTH:
             self.__max_depth_reached = True
             return wikicode
 
@@ -221,12 +165,12 @@ class WikicodeParser:
         for name, mk in self.__magic_keywords.items():
             token = f'{{{{{name}}}}}'
             if token in wikicode:
-                wikicode = wikicode.replace(token, mk.get_value(context))
+                wikicode = wikicode.replace(token, mk(context) if mk.takes_context else mk())
         return wikicode
 
     def _substitute_variables(self, wikicode: str, variables_values: typ.Dict[str, str], depth: int = 0) -> str:
         # Maximum depth reached, stop parsing
-        if depth > self.MAX_DEPTH:
+        if depth > self.MAX_TRANSCLUSIONS_DEPTH:
             self.__max_depth_reached = True
             return wikicode
 
@@ -311,22 +255,48 @@ class WikicodeParser:
 
     def _substitute_transclusions(self, wikicode: str, context, depth: int) -> str:
         # Maximum depth reached, stop parsing
-        if depth > self.MAX_DEPTH:
+        if depth > self.MAX_TRANSCLUSIONS_DEPTH:
             self.__max_depth_reached = True
             return wikicode
 
         from .. import api, settings
 
         def transclude():
-            ns_id, title = api.extract_namespace_and_title(
-                api.get_actual_page_title(api.get_full_page_title(settings.TEMPLATE_NS.id, template_name.strip())),
-                ns_as_id=True
-            )
-            if revision := api.get_page_revision(ns_id, title):
-                return self._substitute_and_transclude(revision.content, context, depth + 1,
-                                                       variables_values={k.strip(): v.strip() for k, v in
-                                                                         params_values.items()})
-            return f'<span class="wpy-invalid-template">{api.get_namespace_name(ns_id)}:{title}</span>'
+            redirects_depth = 0
+            current_template_name = template_name
+            while redirects_depth <= settings.MAX_REDIRECTS_DEPTH:
+                ns_id, title = api.extract_namespace_and_title(current_template_name, ns_as_id=True)
+                if ns_id == settings.MAIN_NS.id and not current_template_name.strip().startswith(':'):
+                    full_title = api.get_full_page_title(settings.TEMPLATE_NS.id, title)
+                else:
+                    full_title = api.get_full_page_title(ns_id, title)
+                ns_id, title = api.extract_namespace_and_title(
+                    api.get_actual_page_title(api.title_from_url(full_title)),
+                    ns_as_id=True
+                )
+
+                if ns_id == context.page.namespace_id and title == context.page.title:
+                    self.__circular_transclusion = True
+                    text = context.language.translate('parser.error.circular_transclusion')
+                    return f'<span class="wpy-circular-transclusion">{text}</span>'
+
+                revision = api.get_page_revision(ns_id, title)
+                if revision:
+                    redirect = self.get_redirect(revision.content)
+                    if redirect:
+                        current_template_name = redirect[0]
+                        redirects_depth += 1
+                    else:
+                        return self._substitute_and_transclude(revision.content, context, depth + 1,
+                                                               variables_values={k.strip(): v.strip() for k, v in
+                                                                                 params_values.items()})
+                else:
+                    self.__called_non_existant_template = True
+                    return f'[[{api.get_namespace_name(ns_id)}:{title}]]'
+
+            self.__too_many_redirects = True
+            text = context.language.translate('parser.error.too_many_redirects', template_name=template_name)
+            return f'<span class="wpy-too-many-redirects">{text}</span>'
 
         open_delimiter = '{{'
         close_delimiter = '}}'
@@ -341,6 +311,7 @@ class WikicodeParser:
         param_name = ''
         param_value = ''
         params_values = {}
+        opened_tags = 0
         i = 0
 
         while i < len(wikicode):
@@ -365,7 +336,7 @@ class WikicodeParser:
                     buffer += c
 
             elif in_name:
-                if re.match(r'[\s\w.-]', c):
+                if re.match(r'[\s\w:.-]', c):
                     template_name += c
                 elif c == '|' or close_del:
                     in_name = False
@@ -387,6 +358,10 @@ class WikicodeParser:
                 if re.match(r'[\s\w.-]', c):
                     param_name += c
                 elif c == '=':
+                    if param_name.strip() == '':
+                        param_value = param_name + '='
+                        param_name = str(param_index)
+                        param_index += 1
                     in_param_name = False
                     in_param_value = True
                 elif c == '|' or close_del:
@@ -401,13 +376,32 @@ class WikicodeParser:
                     else:
                         param_name = ''
                         param_index += 1
+                elif open_del:
+                    opened_tags += 1
+                    in_param_name = False
+                    in_param_value = True
+                    param_value = param_name + c + next_c
+                    param_name = str(param_index)
+                    param_index += 1
+                    i += 1
                 else:
                     in_param_name = False
                     in_param_value = True
                     param_value = param_name
 
             elif in_param_value:
-                if c == '|' or close_del:
+                if opened_tags > 0:
+                    if close_del:
+                        opened_tags -= 1
+                        param_value += c + next_c
+                        i += 1
+                    elif open_del:
+                        opened_tags += 1
+                        param_value += c + next_c
+                        i += 1
+                    else:
+                        param_value += c
+                elif c == '|' or close_del:
                     params_values[param_name] = param_value
                     in_param_value = False
                     if close_del:
@@ -419,21 +413,35 @@ class WikicodeParser:
                         in_param_name = True
                         param_name = ''
                         param_value = ''
+                elif open_del:
+                    opened_tags += 1
+                    param_value += c + next_c
+                    i += 1
                 else:
                     param_value += c
 
             i += 1
         if in_template:
             buffer += open_delimiter + template_name
+            if param_name:
+                params_values[param_name] = param_value
             if params_values:
-                buffer += '|' + '|'.join(map(lambda item: ((item[0] + '=') if not item[0].isdigit() else '') + item[1],
-                                             params_values.items()))
+                def subst(item):
+                    if not item[0].strip().isdigit():
+                        key = (item[0] + '=')
+                    else:
+                        key = ''
+                    return key + self._substitute_transclusions(item[1], context, depth)
+
+                buffer += '|' + '|'.join(map(subst, params_values.items()))
 
         return result + buffer
 
+    # noinspection PyMethodMayBeStatic
     def _substitute_functions(self, wikicode: str) -> str:
         return wikicode  # TODO
 
+    # noinspection PyMethodMayBeStatic
     def _substitute_tables(self, wikicode: str) -> str:
         return wikicode  # TODO
 
@@ -459,7 +467,6 @@ class WikicodeParser:
         while i < len(wikicode):
             c = wikicode[i]
             next_c = wikicode[i + 1] if i < len(wikicode) - 1 else ''
-            # print(repr(c), state)  # DEBUG
 
             if state == self.TEXT:
                 if t := self.__special_tags.get(c + next_c):
@@ -521,6 +528,40 @@ class WikicodeParser:
         return nodes
 
     @classmethod
+    def _register_tag(cls, tag: HTMLTag):
+        if tag.name in cls.__html_tags:
+            raise ValueError(f'attempt to register two tags with the same name "{tag.name}"')
+        cls.__html_tags[tag.name] = tag
+
+    @classmethod
+    def registered_tags(cls) -> typ.List[HTMLTag]:
+        return sorted(cls.__html_tags.values(), key=lambda t: t.name)
+
+    @classmethod
+    def _register_magic_keyword(cls, mk: _registry.MagicKeyword):
+        if mk.name in cls.__magic_keywords:
+            raise ValueError(f'attempt to register two magic keywords with the same name "{mk.name}"')
+        cls.__magic_keywords[mk.name] = mk
+
+    @classmethod
+    def registered_magic_keywords(cls) -> typ.List[_registry.MagicKeyword]:
+        return sorted(cls.__magic_keywords.values(), key=lambda mk: mk.name)
+
+    @classmethod
+    def _register_function(cls, function: _registry.ParserFunction, name: str):
+        if name in cls.__functions:
+            raise ValueError(f'attempt to register two functions with the same name "{name}"')
+        cls.__functions[name] = function
+
+    @classmethod
+    def registered_functions(cls) -> typ.List[_registry.ParserFunction]:
+        return sorted(cls.__functions.values(), key=lambda f: f.name)
+
+    @staticmethod
+    def make_safe(text: str) -> str:
+        return text.replace('<', '&lt;').replace('>', '&gt;')
+
+    @classmethod
     def get_redirect(cls, wikicode: str) -> typ.Optional[typ.Tuple[str, typ.Optional[str]]]:
         from .. import api
 
@@ -532,9 +573,10 @@ class WikicodeParser:
             except (api.BadTitleException, api.EmptyPageTitleException):
                 pass
             else:
-                return title, anchor
+                return api.get_actual_page_title(title), anchor
         return None
 
+    # TODO
     @staticmethod
     def paste_sections(header: str, sections: typ.Dict[int, str]):
         return header + '\n' + '\n'.join(sections.values())

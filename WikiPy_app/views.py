@@ -10,6 +10,12 @@ import slimit
 
 from . import pages, api, apps, web_api, setup, settings, page_context, forms, models, util, skins
 
+# Session keys
+SESSION_REDIRECTED_FROM = 'redirected_from'
+SESSION_NO_REDIRECT = 'no_redirect'
+# Get keys
+GET_NO_REDIRECT = 'no_redirect'
+
 
 def setup_page(request: dj_wsgi.WSGIRequest) -> dj_http.HttpResponse:
     if not setup.are_pages_setup():
@@ -96,8 +102,11 @@ def _get_page(
         skin: str
 ) -> dj_http.HttpResponse:
     namespace_id, title = api.extract_namespace_and_title(page_title, ns_as_id=True)
-    redirect_enabled = not util.get_param(request.GET, 'no_redirect', expected_type=bool, default=False)
-    redirected_from = util.get_param(request.GET, 'r')
+    redirect_enabled = (not request.session.get(GET_NO_REDIRECT, False) and
+                        not util.get_param(request.GET, GET_NO_REDIRECT, expected_type=bool, default=False))
+    redirects_list = request.session.get(SESSION_REDIRECTED_FROM)
+    # Reset session’s page-related params
+    request.session[SESSION_NO_REDIRECT] = False
 
     if namespace_id != settings.SPECIAL_NS.id and action == pages.SUBMIT and len(request.POST) != 0:
         form = forms.EditPageForm(request.POST, warn_unsaved_changes=user.data.unsaved_changes_warning)
@@ -117,9 +126,9 @@ def _get_page(
             follow_page = form.cleaned_data['follow_page']  # TODO
             (context, status), redirect = pages.submit_page_content(request, namespace_id, title, user, wikicode,
                                                                     comment, minor, language, section_id=section_id)
-            # TODO detect redirect loops
             if status == pages.FOUND and redirect:
-                return _redirect('page', api.get_full_page_title(namespace_id, title), no_redirect=1)
+                request.session[SESSION_NO_REDIRECT] = True
+                return _redirect('page', api.get_full_page_title(namespace_id, title))
         else:
             context, status = pages.get_page_context(
                 request,
@@ -142,7 +151,7 @@ def _get_page(
             skin,
             action=action,
             redirect_enabled=redirect_enabled,
-            redirected_from=redirected_from
+            redirects_list=redirects_list
         )
 
     # Handle redirection pages
@@ -151,11 +160,16 @@ def _get_page(
         if not getattr(context, 'is_path', False):
             kwargs = {}
             if getattr(context, 'display_redirect'):
-                # In case of cascading redirections, keep title of first page
-                kwargs['r'] = redirected_from or page_title
+                if not request.session.get(SESSION_REDIRECTED_FROM):
+                    request.session[SESSION_REDIRECTED_FROM] = []
+                # Keep track of all cascading redirections
+                request.session[SESSION_REDIRECTED_FROM].append(page_title)
             return _redirect('page', path, anchor=getattr(context, 'redirect_anchor'), **kwargs)
         else:
             return dj_scut.HttpResponseRedirect(path)
+    else:
+        # Reset redirects chain
+        request.session[SESSION_REDIRECTED_FROM] = []
 
     if action == 'raw' and context.page.namespace_id != settings.SPECIAL_NS.id:
         return _get_raw(request, context, status)
@@ -246,8 +260,8 @@ def _generate_js(context: page_context.PageContext) -> str:
         if ns.is_talk:
             talk_namespaces.append(ns_id)
 
-    url_path = dj_scut.reverse('wikipy:page', args=[''])
-    api_url_path = dj_scut.reverse('wikipy_api:index')
+    url_path = api.get_wiki_url_path()
+    api_url_path = api.get_api_url_path()
     groups = {g.name: g.label(context.language) for g in settings.GROUPS.values()}
 
     return slimit.minify(f"""
@@ -270,7 +284,7 @@ window.WPY_CONF = {{
     wpyUserId: "{context.user.django_user.id}",
     wpyUserIsLoggedIn: {str(context.user.is_logged_in).lower()},
     wpyAction: "{context.mode}",
-    wpySkin: "{context.skin.name}",
+    wpySkin: "{context.skin.id}",
     wpyLanguageCode: "{language.code}",
     wpyLanguageCodes: {[lang.name for lang in context.languages]},
     wpyWritingDirection: "{language.writing_direction}",

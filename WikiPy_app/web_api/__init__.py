@@ -6,6 +6,13 @@ import dicttoxml
 
 from .. import settings, models, api
 
+__all__ = [
+    'HELP_PAGE',
+    'RESULT_PAGE',
+    'RAW_RESULT',
+    'handle_api',
+]
+
 HELP_PAGE = 'help'
 RESULT_PAGE = 'result'
 RAW_RESULT = 'raw_result'
@@ -114,11 +121,3 @@ def _get_context(content_type: str, content: str, language: settings.i18n.Langua
         'content': content,
         'language': language,
     }
-
-
-__all__ = [
-    'HELP_PAGE',
-    'RESULT_PAGE',
-    'RAW_RESULT',
-    'handle_api',
-]

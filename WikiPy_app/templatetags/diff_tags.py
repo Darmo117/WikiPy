@@ -4,7 +4,7 @@ import django.template as dj_template
 import django.utils.safestring as dj_safe
 
 from . import wpy_tags
-from .. import api, skins, settings, models, special_pages, page_context
+from .. import api, settings, models, special_pages, page_context
 
 register = dj_template.Library()
 

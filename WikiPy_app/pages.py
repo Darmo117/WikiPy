@@ -22,9 +22,11 @@ def get_main_page_title() -> str:
     return api.get_full_page_title(settings.MAIN_PAGE_NAMESPACE_ID, settings.MAIN_PAGE_TITLE)
 
 
-def get_setup_page_context(user: models.User, language: settings.i18n.Language, skin: str) -> page_context.PageContext:
+def get_setup_page_context(request: dj_wsgi.WSGIRequest, user: models.User, language: settings.i18n.Language,
+                           skin: str) -> page_context.PageContext:
     page, _ = api.get_page(settings.SPECIAL_NS.id, 'Setup')
     return _get_base_page_context(
+        request,
         page=page,
         mode=SETUP,
         user=user,
@@ -48,7 +50,7 @@ def get_page_context(
         *,
         action: str = None,
         redirect_enabled: bool = True,
-        redirected_from: str = None,
+        redirects_list: typ.List[str] = None,
         form: forms.EditPageForm = None
 ) -> typ.Tuple[page_context.PageContext, int]:
     if namespace_id != settings.SPECIAL_NS.id:
@@ -59,6 +61,7 @@ def get_page_context(
 
         if action == EDIT:
             return _get_edit_page(
+                request,
                 page=page,
                 user=user,
                 language=language,
@@ -71,6 +74,7 @@ def get_page_context(
             )
         elif action == HISTORY:
             return _get_page_history(
+                request,
                 page=page,
                 user=user,
                 language=language,
@@ -82,6 +86,7 @@ def get_page_context(
             )
         else:
             return _get_page(
+                request,
                 page=page,
                 user=user,
                 language=language,
@@ -90,7 +95,7 @@ def get_page_context(
                 can_read=can_read,
                 can_edit=can_edit,
                 redirect_enabled=redirect_enabled,
-                redirected_from=redirected_from,
+                redirects_list=redirects_list,
                 revision_id=revision_id,
                 raw=action == 'raw'
             )
@@ -113,6 +118,7 @@ def _get_special_page_context(
     if page_exists:
         special_page = special_pages.get_special_page(base_title)
         base_context = _get_base_page_context(
+            request,
             page=page,
             mode=SPECIAL,
             user=user,
@@ -128,6 +134,7 @@ def _get_special_page_context(
         return context, FOUND
 
     return _get_page(
+        request,
         page=page,
         user=user,
         language=language,
@@ -140,6 +147,7 @@ def _get_special_page_context(
 
 
 def _get_page(
+        request: dj_wsgi.WSGIRequest,
         page: models.Page,
         user: models.User,
         language: settings.i18n.Language,
@@ -148,7 +156,7 @@ def _get_page(
         can_read: bool,
         can_edit: bool,
         redirect_enabled: bool,
-        redirected_from: str = None,
+        redirects_list: typ.List[str] = None,
         revision_id: int = None,
         raw: bool = False
 ) -> typ.Tuple[page_context.PageContext, int]:
@@ -180,11 +188,14 @@ def _get_page(
                 if redir:
                     display_redirect = True
                     redirect, redirect_anchor = redir
+                    if redirect in (redirects_list or []):
+                        redirect_enabled = False
         except api.RevisionDoesNotExist:
             wikicode, page_lang = api.get_message('InvalidRevisionID')
             wikicode = _format_message(wikicode, revision_id=revision_id)
 
     context = _get_read_page_context(
+        request,
         page=page,
         user=user,
         language=language,
@@ -197,7 +208,7 @@ def _get_page(
         can_edit=can_edit,
         revision=revision,
         archived=revision is not None and revision_id is not None,
-        redirected_from=redirected_from,
+        redirected_from=redirects_list[0] if redirects_list else None,
         raw=raw
     )
 
@@ -209,6 +220,7 @@ def _get_page(
 
 
 def _get_edit_page(
+        request: dj_wsgi.WSGIRequest,
         page: models.Page,
         user: models.User,
         language: settings.i18n.Language,
@@ -223,6 +235,7 @@ def _get_edit_page(
         if not can_edit and not page_exists:
             error_message, page_lang = api.get_page_message(page, 'CreateForbidden', no_page_notice=True)
             return (_get_read_page_context(
+                request,
                 page=page,
                 user=user,
                 language=language,
@@ -259,6 +272,7 @@ def _get_edit_page(
             status = NOT_FOUND
 
         return (_get_edit_page_context(
+            request,
             page=page,
             user=user,
             language=language,
@@ -276,6 +290,7 @@ def _get_edit_page(
     else:
         wikicode, page_lang = api.get_page_message(page, 'ReadForbidden')
         return (_get_read_page_context(
+            request,
             page=page,
             user=user,
             language=language,
@@ -290,6 +305,7 @@ def _get_edit_page(
 
 
 def _get_page_history(
+        request: dj_wsgi.WSGIRequest,
         page: models.Page,
         user: models.User,
         language: settings.i18n.Language,
@@ -304,6 +320,7 @@ def _get_page_history(
             revisions = api.get_page_revisions(page, user)
             paginator, paginator_page = api.paginate(user, revisions, url_params)
             return (_get_page_history_context(
+                request,
                 page=page,
                 user=user,
                 language=language,
@@ -316,6 +333,7 @@ def _get_page_history(
             ), FOUND)
         else:
             return (_get_page_history_context(
+                request,
                 page=page,
                 user=user,
                 language=language,
@@ -329,6 +347,7 @@ def _get_page_history(
     else:
         wikicode, page_lang = api.get_page_message(page, 'ReadForbidden')
         return (_get_read_page_context(
+            request,
             page=page,
             user=user,
             language=language,
@@ -384,6 +403,7 @@ def _format_message(page_content: str, **kwargs) -> str:
 
 
 def _get_read_page_context(
+        request: dj_wsgi.WSGIRequest,
         page: models.Page,
         user: models.User,
         language: settings.i18n.Language,
@@ -400,6 +420,7 @@ def _get_read_page_context(
         raw: bool = False
 ) -> page_context.PageContext:
     base_context = _get_base_page_context(
+        request,
         page=page,
         mode=SPECIAL if page.namespace_id == settings.SPECIAL_NS.id else READ,
         user=user,
@@ -412,8 +433,15 @@ def _get_read_page_context(
         can_edit=can_edit
     )
 
+    context = page_context.ReadPageContext(
+        base_context,
+        wikicode=wikicode,
+        revision=revision,
+        archived=archived
+    )
+
     if not raw and page.content_model == settings.PAGE_TYPE_WIKI:
-        render, is_redirect = api.render_wikicode(wikicode, base_context, no_redirect=True, enable_comment=True)
+        render, is_redirect = api.render_wikicode(wikicode, context, no_redirect=True, enable_comment=True)
         render = dj_safe.mark_safe(render)
     else:
         render = wikicode
@@ -423,18 +451,15 @@ def _get_read_page_context(
     else:
         referer = None
 
-    return page_context.ReadPageContext(
-        base_context,
-        wikicode=wikicode,
-        revision=revision,
-        archived=archived,
-        rendered_page_content=render,
-        is_redirection=is_redirect,
-        redirected_from=referer
-    )
+    context.rendered_page_content = render
+    context.is_redirection = is_redirect
+    context.redirected_from = referer
+
+    return context
 
 
 def _get_edit_page_context(
+        request: dj_wsgi.WSGIRequest,
         page: models.Page,
         user: models.User,
         language: settings.i18n.Language,
@@ -450,6 +475,7 @@ def _get_edit_page_context(
         form: forms.EditPageForm = None
 ) -> page_context.PageContext:
     base_context = _get_base_page_context(
+        request,
         page=page,
         mode=EDIT,
         user=user,
@@ -488,6 +514,7 @@ def _get_edit_page_context(
 
 
 def _get_page_history_context(
+        request: dj_wsgi.WSGIRequest,
         page: models.Page,
         user: models.User,
         language: settings.i18n.Language,
@@ -499,6 +526,7 @@ def _get_page_history_context(
         page_exists: bool
 ) -> page_context.PageContext:
     base_context = _get_base_page_context(
+        request,
         page=page,
         mode=HISTORY,
         user=user,
@@ -514,6 +542,7 @@ def _get_page_history_context(
 
 
 def _get_base_page_context(
+        request: dj_wsgi.WSGIRequest,
         page: models.Page,
         mode: str,
         user: models.User,
@@ -533,6 +562,7 @@ def _get_base_page_context(
     user_now = api.now(user.data.timezone_info)
 
     return page_context.PageContext(
+        request=request,
         project_name=settings.PROJECT_NAME,
         main_page_namespace=settings.NAMESPACES[settings.MAIN_PAGE_NAMESPACE_ID],
         main_page_title=settings.MAIN_PAGE_TITLE,

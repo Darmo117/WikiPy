@@ -2,11 +2,20 @@ import collections
 import dataclasses
 import datetime
 import json
+import logging
 import os
 import string
 import typing as typ
 
 from .. import apps
+
+__all__ = [
+    'Language',
+    'load_languages',
+    'get_language',
+    'get_languages',
+    'load_resource_mappings',
+]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -48,7 +57,6 @@ class Language:
 _LANGUAGES: typ.Dict[str, Language] = {}
 
 
-# TODO load extensions’ translations
 def load_languages(base_dir: str):
     global _LANGUAGES
 
@@ -89,6 +97,23 @@ def load_languages(base_dir: str):
             )
 
 
+def get_language(code: str) -> typ.Optional[Language]:
+    return _LANGUAGES.get(code)
+
+
+def get_languages() -> typ.Dict[str, Language]:
+    return dict(_LANGUAGES)
+
+
+def load_resource_mappings(resource_type: str, ident: str, lang_code: str,
+                           mappings: typ.Mapping[str, typ.Union[str, typ.Mapping]]):
+    if lang := get_language(lang_code):
+        for k, v in _build_mapping(mappings).items():
+            # noinspection PyProtectedMember
+            lang._mappings[f'{resource_type}.{ident}.{k}'] = v
+        logging.info(f'Mappings for {resource_type} "{ident}" in language "{lang_code}" successfully loaded.')
+
+
 def _check_datetime_formats(formats: typ.Sequence[str], lang_code: str):
     for dt_format in formats:
         try:
@@ -117,14 +142,6 @@ def _check_day_names(names: typ.Sequence, lang_code: str):
             raise ValueError(f'invalid day name entry for language "{lang_code}"')
 
 
-def get_language(code: str) -> typ.Optional[Language]:
-    return _LANGUAGES.get(code)
-
-
-def get_languages() -> typ.Dict[str, Language]:
-    return dict(_LANGUAGES)
-
-
 def _build_mapping(json_object: typ.Mapping[str, typ.Union[str, typ.Mapping]], root: str = None) \
         -> typ.Dict[str, str]:
     mapping = {}
@@ -142,11 +159,3 @@ def _build_mapping(json_object: typ.Mapping[str, typ.Union[str, typ.Mapping]], r
             raise ValueError(f'illegal value type "{type(v)}" for translation value')
 
     return mapping
-
-
-__all__ = [
-    'Language',
-    'load_languages',
-    'get_language',
-    'get_languages',
-]

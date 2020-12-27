@@ -22,7 +22,14 @@ def wpy_page_title(page_title: str, ns_id: int = settings.MAIN_NS.id):
 
 @register.simple_tag(takes_context=True)
 def wpy_translate(context: page_context.TemplateContext, key: str, **kwargs):
-    return dj_safe.mark_safe(context.get('wpy_context').language.translate(key, **kwargs))
+    trans = context.get('wpy_context').language.translate(key, **kwargs)
+    return dj_safe.mark_safe(trans) if trans is not None else None
+
+
+@register.simple_tag(takes_context=True)
+def wpy_translate_resource(context: page_context.TemplateContext, resource: settings.resource_loader.ExternalResource,
+                           attr: str, none_if_undefined: bool = False) -> str:
+    return getattr(resource, attr)(context.get('wpy_context').language, none_if_undefined)
 
 
 @register.simple_tag
@@ -295,6 +302,13 @@ def wpy_diff_link(context: page_context.TemplateContext, revision: models.PageRe
         link = f'{nav_link} ({link})'
 
     return dj_safe.mark_safe(link)
+
+
+@register.simple_tag(takes_context=True)
+def wpy_external_link(context: page_context.TemplateContext, url: str, text: str = None):
+    wpy_context: page_context.PageContext = context.get('wpy_context')
+    skin = wpy_context.skin
+    return dj_safe.mark_safe(skin.format_external_link(url, text))
 
 
 @register.simple_tag(takes_context=True)

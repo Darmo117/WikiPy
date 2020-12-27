@@ -34,7 +34,7 @@ class Tag(abc.ABC):
 #############
 
 
-class HtmlTag(Tag, abc.ABC):
+class HTMLTag(Tag, abc.ABC):
     def __init__(self, name: str, inline: bool, auto_recursive: bool, *attributes: str):
         super().__init__(name, auto_recursive)
         self.__name = name
@@ -55,7 +55,7 @@ class HtmlTag(Tag, abc.ABC):
 #################
 
 
-class NonHtmlTag(Tag, abc.ABC):
+class NonHTMLTag(Tag, abc.ABC):
     """
     This type of tag that cannot be defined through extensions.
     """
@@ -88,7 +88,7 @@ class NonHtmlTag(Tag, abc.ABC):
         return self.__multiline
 
 
-class InternalLinkTag(NonHtmlTag):
+class InternalLinkTag(NonHTMLTag):
     def __init__(self):
         super().__init__('internal_link', '[[', ']]', multiline=False, auto_recursive=False)
 
@@ -122,7 +122,7 @@ class InternalLinkTag(NonHtmlTag):
         return not re.search(settings.INVALID_TITLE_REGEX, page_title)
 
 
-class ExternalLinkTag(NonHtmlTag):
+class ExternalLinkTag(NonHTMLTag):
     def __init__(self):
         super().__init__('external_link', '[(', ')]', multiline=False, auto_recursive=False)
 
@@ -144,7 +144,7 @@ class ExternalLinkTag(NonHtmlTag):
         return re.match('^https?://', url) and not re.search(r'["\s]', url)
 
 
-class ImageOrVideoTag(NonHtmlTag):
+class ImageOrVideoTag(NonHTMLTag):
     def __init__(self):
         super().__init__('image_video', '[{', '}]', multiline=False, auto_recursive=False)
 
@@ -180,7 +180,7 @@ class ImageOrVideoTag(NonHtmlTag):
                 and file_name[file_name.rindex('.') + 1:] in settings.MEDIA_FORMATS)
 
 
-class BoldTextTag(NonHtmlTag):
+class BoldTextTag(NonHTMLTag):
     def __init__(self):
         super().__init__('bold', '**', '**', multiline=False, auto_recursive=False)
 
@@ -188,7 +188,7 @@ class BoldTextTag(NonHtmlTag):
         return _nodes.BoldTextNode(wikicode)
 
 
-class ItalicTextTag(NonHtmlTag):
+class ItalicTextTag(NonHTMLTag):
     def __init__(self):
         super().__init__('italic', '//', '//', multiline=False, auto_recursive=False)
 
@@ -196,7 +196,7 @@ class ItalicTextTag(NonHtmlTag):
         return _nodes.ItalicTextNode(wikicode)
 
 
-class UnderlinedTextTag(NonHtmlTag):
+class UnderlinedTextTag(NonHTMLTag):
     def __init__(self):
         super().__init__('underlined', '__', '__', multiline=False, auto_recursive=False)
 
@@ -204,7 +204,7 @@ class UnderlinedTextTag(NonHtmlTag):
         return _nodes.UnderlinedTextNode(wikicode)
 
 
-class StrikethroughTextTag(NonHtmlTag):
+class StrikethroughTextTag(NonHTMLTag):
     def __init__(self):
         super().__init__('strikethrough', '~~', '~~', multiline=False, auto_recursive=False)
 
@@ -212,7 +212,7 @@ class StrikethroughTextTag(NonHtmlTag):
         return _nodes.StrikethroughTextNode(wikicode)
 
 
-class OverlinedTextTag(NonHtmlTag):
+class OverlinedTextTag(NonHTMLTag):
     def __init__(self):
         super().__init__('overlined', '++', '++', multiline=False, auto_recursive=False)
 

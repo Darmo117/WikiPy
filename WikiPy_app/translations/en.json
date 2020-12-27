@@ -95,6 +95,12 @@
   ],
   "default_datetime_format": 0,
   "mappings": {
+    "parser": {
+      "error": {
+        "circular_transclusion": "Circular transclusion detected!",
+        "too_many_redirects": "Too many redirects for template “$template_name”!"
+      }
+    },
     "email": {
       "confirm_email": {
         "subject": "Email address change confirmation",
@@ -862,6 +868,92 @@
       "journals": {
         "display_title": "Page journals",
         "tooltip": "See journals for this page"
+      },
+      "install_info": {
+        "general": {
+          "title": "General information",
+          "table": {
+            "version": {
+              "label": "Version"
+            },
+            "wiki_url_path": {
+              "label": "Wiki URL path"
+            },
+            "api_url_path": {
+              "label": "API URL path"
+            }
+          }
+        },
+        "resources": {
+          "table": {
+            "name": {
+              "label": "Name"
+            },
+            "version": {
+              "label": "Version"
+            },
+            "license": {
+              "label": "License"
+            },
+            "description": {
+              "label": "Description"
+            },
+            "authors": {
+              "label": "Authors"
+            }
+          },
+          "extensions": {
+            "empty": "There are no installed extensions."
+          }
+        },
+        "skins": {
+          "title": "Installed skins"
+        },
+        "extensions": {
+          "title": "Installed extensions"
+        },
+        "parser": {
+          "title": "Parser information",
+          "tags": {
+            "title": "Loaded tags",
+            "empty": "No tags.",
+            "table": {
+              "built_in": "Built-in",
+              "name": {
+                "label": "Name"
+              },
+              "extension": {
+                "label": "Extension"
+              }
+            }
+          },
+          "functions": {
+            "title": "Loaded functions",
+            "empty": "No functions.",
+            "table": {
+              "built_in": "Built-in",
+              "name": {
+                "label": "Name"
+              },
+              "extension": {
+                "label": "Extension"
+              }
+            }
+          },
+          "magic_keywords": {
+            "title": "Loaded magic keywords",
+            "empty": "No magic keywords.",
+            "table": {
+              "built_in": "Built-in",
+              "name": {
+                "label": "Name"
+              },
+              "extension": {
+                "label": "Extension"
+              }
+            }
+          }
+        }
       },
       "special_pages": {
         "display_title": "Special pages",

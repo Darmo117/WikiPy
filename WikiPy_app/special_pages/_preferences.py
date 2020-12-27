@@ -61,7 +61,7 @@ def load_special_page() -> SpecialPage:
         )
         # Appearance
         skin = dj_forms.ChoiceField(
-            choices=((s.name, s.label) for s in skins.get_loaded_skins()),
+            choices=(),
             label='skin',
             widget=dj_forms.RadioSelect,
             required=True
@@ -166,6 +166,8 @@ def load_special_page() -> SpecialPage:
 
         def __init__(self, base_context: page_context.PageContext, *args, **kwargs):
             super().__init__('prefs', *args, warn_unsaved_changes=True, **kwargs)
+            self.fields['skin'].choices = ((s.id, s.name(base_context.language)) for s in skins.get_loaded_skins())
+
             self.fields['datetime_format'].choices = (
                 ('*', 'auto'),
                 *[(i + 1, f) for i, f in enumerate(base_context.language.datetime_formats)]

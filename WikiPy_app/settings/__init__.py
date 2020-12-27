@@ -5,16 +5,20 @@ import re as _re
 import typing as _typ
 
 from . import _i18n as i18n
+from . import _resource_loader as resource_loader
 from ._config_values import *
 from ._group import UserGroup
 from ._namespace import Namespace
-from .. import apps as _apps, media_backends as _mb, parser as _parser
+from .. import apps as _apps, media_backends as _media_backends, parser as _parser
 
 VERSION = '1.0'
 
 ALLOWED_HOSTS = []
 
 APP_NAME = ''
+
+BASE_DIR = ''
+WIKI_APP_DIR = ''
 
 FROM_EMAIL = ''
 EMAIL_HOST = ''
@@ -73,7 +77,8 @@ FILE_TALK_NS: Namespace
 GADGET_NS: Namespace
 GADGET_TALK_NS: Namespace
 
-_skin_names = ''
+_skin_names = []
+_extension_names = []
 
 
 def init(base_dir: str):
@@ -84,11 +89,14 @@ def init(base_dir: str):
         MEDIA_BACKEND_ID, WIKI_NS, WIKI_TALK_NS, SPECIAL_NS, MAIN_NS, MAIN_TALK_NS, \
         CATEGORY_NS, CATEGORY_TALK_NS, WIKIPY_NS, WIKIPY_TALK_NS, USER_NS, USER_TALK_NS, TEMPLATE_NS, \
         TEMPLATE_TALK_NS, MODULE_NS, MODULE_TALK_NS, HELP_NS, HELP_TALK_NS, FILE_NS, FILE_TALK_NS, GADGET_NS, \
-        GADGET_TALK_NS, _skin_names
+        GADGET_TALK_NS, _skin_names, _extension_names, BASE_DIR, WIKI_APP_DIR
 
-    _logging.basicConfig(format='%(levelname)s:%(message)s', level=_logging.DEBUG)
+    _logging.basicConfig(format=_apps.WikiPyAppConfig.name + ':%(levelname)s:%(message)s', level=_logging.DEBUG)
 
-    config_path = _os.path.join(base_dir, _apps.WikiPyAppConfig.name, 'config.json')
+    BASE_DIR = base_dir
+    WIKI_APP_DIR = _os.path.join(base_dir, _apps.WikiPyAppConfig.name)
+
+    config_path = _os.path.join(WIKI_APP_DIR, 'config.json')
     with open(config_path, mode='r', encoding='UTF-8') as _config_file:
         json_config = _json.load(_config_file)
 
@@ -131,10 +139,15 @@ def init(base_dir: str):
 
         _skin_names = list(map(str, json_config['skins']))
 
+    _extension_names = filter(
+        lambda d: _os.path.isdir(_os.path.join(WIKI_APP_DIR, 'extensions', d)) and not d.startswith('_'),
+        _os.listdir(_os.path.join(WIKI_APP_DIR, 'extensions'))
+    )
+
     i18n.load_languages(base_dir)
 
     def load_ns_file(filename: str):
-        ns_config_path = _os.path.join(base_dir, _apps.WikiPyAppConfig.name, filename + '.json')
+        ns_config_path = _os.path.join(WIKI_APP_DIR, filename + '.json')
         with open(ns_config_path, mode='r', encoding='UTF-8') as _namespaces_file:
             json_obj: _typ.Mapping[str, _typ.Mapping] = _json.load(_namespaces_file)
 
@@ -171,7 +184,7 @@ def init(base_dir: str):
                                                    can_be_main=False, alias=talk_ns_alias)
 
     NAMESPACES = {}
-    with open(_os.path.join(base_dir, _apps.WikiPyAppConfig.name, 'namespaces_names.json'), mode='r',
+    with open(_os.path.join(WIKI_APP_DIR, 'namespaces_names.json'), mode='r',
               encoding='UTF-8') as f:
         ns_names = _json.load(f)
 
@@ -403,7 +416,7 @@ def init(base_dir: str):
     if not NAMESPACES[MAIN_PAGE_NAMESPACE_ID].can_be_main:
         raise ValueError(f'invalid main page namespace ID')
 
-    with open(_os.path.join(base_dir, _apps.WikiPyAppConfig.name, 'special_pages_names.json'), mode='r',
+    with open(_os.path.join(WIKI_APP_DIR, 'special_pages_names.json'), mode='r',
               encoding='UTF-8') as f:
         for k, v in _json.load(f).items():
             SPECIAL_PAGES_LOCAL_NAMES[k] = str(v)
@@ -518,18 +531,35 @@ def init(base_dir: str):
 
         GROUPS[group_name] = UserGroup(group_name, hide_rc, needs_validation, global_rights, namespace_rights, editable)
 
-    _mb.register_default()
-    if not _mb.get_backend(MEDIA_BACKEND_ID):
+    _media_backends.register_default()
+    if not _media_backends.get_backend(MEDIA_BACKEND_ID):
         raise ValueError(f'invalid media backend ID "{MEDIA_BACKEND_ID}"')
-
-    _parser.register_default()
 
 
 def post_load():
     # Avoid circular imports
-    from .. import special_pages, api, skins
+    from .. import special_pages, api, skins, extensions
 
+    _logging.info('Loading skins…')
+    ok = 0
     for skin_name in _skin_names:
-        skins.load_skin(skin_name)
+        ok += skins.load_skin(skin_name)
+    if ok == 0:
+        raise RuntimeError('No skins loaded, abort.')
+    _logging.info(f'Skins loaded (errors: {len(_skin_names) - ok}).')
+
+    _logging.info('Loading extensions…')
+    ok = 0
+    for extension_name in _extension_names:
+        _logging.info(f'Loading extension "{extension_name}"…')
+        ok += extensions.load_extension(extension_name)
+        ext = extensions.get_extension(extension_name)
+        ext.load_magic_keywords()
+        ext.load_parser_functions()
+        _logging.info(f'Extension loaded successfully.')
+    _logging.info(f'Extensions loaded (errors: {len(_skin_names) - ok}).')
+
+    _parser.load_magic_keywords()
+    _parser.load_functions()
     special_pages.load_special_pages()
     api.open_email_connection()

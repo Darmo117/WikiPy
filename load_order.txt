@@ -1,0 +1,33 @@
+django settings
+
+init:
+  _i18n module
+  _config_values module
+  _namespaces module
+  _groups module
+  apps module
+  media_backends module
+  parser module
+
+  namespaces
+  groups
+  media backends
+  parser registry
+  parser defaults
+
+post load:
+  special_pages module
+    page_context module
+    forms module
+      api_module
+        models module
+    util module
+  skins_module
+  extensions_module
+
+  skins
+  extensions meta info
+  extensions parser functions
+  default special pages
+  extensions special pages
+  email server connection
