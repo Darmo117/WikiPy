@@ -53,8 +53,12 @@ a.wpy-redlink {
 
 #wpy-revision-tags-legend-box {
   float: right;
-  width: 400px;
-  margin-bottom: 10px;
+  width: 25em;
+  margin-bottom: 1em;
+}
+
+#wpy-revision-tags-legend-box li {
+  line-height: 1.8;
 }
 
 #wpy-revision-tags-legend-box .card-header .mdi {
@@ -74,19 +78,19 @@ figure {
 }
 
 figure > figcaption > a[role="button"] {
-  font-size: 120%;
+  font-size: 1.2em;
 }
 
 figure.img-thumbnail {
-  margin-left: 10px;
+  margin-left: 1em;
 }
 
-/*****************
- * Parser output *
- *****************/
+/********
+ * Code *
+ ********/
 
-.wpy-parser-error {
-  color: red;
+pre, code, #wpy-edit-form-content, #wpy-edit-form-comment {
+  font-family: "Bitstream Vera Sans Mono", Monaco, "Courier New", Courier, monospace;
 }
 
 /*********
@@ -95,8 +99,4 @@ figure.img-thumbnail {
 
 .pull-right {
   float: right;
-}
-
-code, #wpy-edit-form-content, #wpy-edit-form-comment {
-  font-family: "Bitstream Vera Sans Mono", Monaco, "Courier New", Courier, monospace;
 }

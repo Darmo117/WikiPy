@@ -30,9 +30,9 @@
   border-style: solid;
   border-width: 1px 3px;
   border-color: lightgray;
-  border-radius: 5px;
+  border-radius: 0.5em;
   background-color: #fbfbfb;
-  padding: 3px 5px;
+  padding: 0.25em 0.5em;
   vertical-align: top;
 }
 
@@ -56,7 +56,7 @@
 
 #wpy-diff-table .wpy-diff-change {
   padding: 0.25em 0;
-  border-radius: 3px;
+  border-radius: 0.25em;
 }
 
 #wpy-diff-table del {

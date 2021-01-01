@@ -53,12 +53,16 @@ def wpy_render(context: page_context.TemplateContext, wikicode: str):
 
 @register.simple_tag(takes_context=True)
 def wpy_format_date(context: page_context.TemplateContext, date: datetime.datetime, custom_format: str = None):
-    return dj_safe.mark_safe(api.format_datetime(
+    wpy_context: page_context.PageContext = context['wpy_context']
+    date = date.astimezone(wpy_context.user.data.timezone_info)
+    formated_date = api.format_datetime(
         date,
-        context['wpy_context'].user,
-        context['wpy_context'].language,
+        wpy_context.user,
+        wpy_context.language,
         custom_format=custom_format
-    ))
+    )
+    iso_date = date.strftime("%Y-%m-%d %H:%M:%S%z")
+    return dj_safe.mark_safe(f'<time datetime="{iso_date}">{formated_date}</time>')
 
 
 @register.simple_tag(takes_context=True)

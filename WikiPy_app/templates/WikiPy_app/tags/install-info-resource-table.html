@@ -34,8 +34,18 @@
           </td>
           <td>
             {% for author, url in resource.authors %}
-              {% if url %}{% wpy_external_link url=url text=author %}{% else %}{{ author }}{% endif %}<!--
-            -->{% if not forloop.last %},{% endif %}
+              {% if forloop.last and author == '...' %}
+                {% wpy_translate 'special.install_info.resources.table.authors.and_others' %}
+              {% else %}
+                {% if url %}{% wpy_external_link url=url text=author %}{% else %}{{ author }}{% endif %}<!--
+             -->{% if not forloop.last %}<!--
+             -->{% if forloop.revcounter0 == 1 %}
+                {% wpy_translate 'special.install_info.resources.table.authors.and' %}
+                {% else %}<!--
+             -->,<!--
+             -->{% endif %}<!--
+             -->{% endif %}
+              {% endif %}
             {% endfor %}
           </td>
         </tr>

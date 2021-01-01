@@ -3,6 +3,9 @@ import typing as typ
 
 import django.core.handlers.wsgi as dj_wsgi
 import django.utils.safestring as dj_safe
+import pygments
+import pygments.formatters as pyg_format
+import pygments.lexers as pyg_lex
 
 from . import api, settings, models, special_pages, page_context, forms, util, skins
 
@@ -55,6 +58,8 @@ def get_page_context(
 ) -> typ.Tuple[page_context.PageContext, int]:
     if namespace_id != settings.SPECIAL_NS.id:
         page, page_exists = api.get_page(namespace_id, title)
+        if not page_exists:
+            page.content_model = api.get_default_content_model(namespace_id, title)
         can_edit = api.can_edit_page(user, namespace_id, title)
         can_read = api.can_read_page(user, namespace_id, title)
         revision_id = util.get_param(request.GET, 'revision_id', expected_type=int)
@@ -440,8 +445,44 @@ def _get_read_page_context(
         archived=archived
     )
 
-    if not raw and page.content_model == settings.PAGE_TYPE_WIKI:
-        render, is_redirect = api.render_wikicode(wikicode, context, no_redirect=True, enable_comment=True)
+    if not raw:
+        if page.content_model == settings.PAGE_TYPE_WIKI:
+            render, is_redirect = api.render_wikicode(wikicode, context, no_redirect=True, enable_comment=True)
+        else:
+            # Custom HTML formatter because default one wraps
+            # pre tag inside div and we don’t want that.
+            # noinspection PyUnresolvedReferences
+            class CodeHtmlFormatter(pyg_format.HtmlFormatter):
+                def wrap(self, source, _):
+                    return self._wrap_code(source)
+
+                # noinspection PyMethodMayBeStatic
+                def _wrap_code(self, source):
+                    yield 0, '<pre class="wpy-code-highlight"><code>'
+                    for i, t in source:
+                        yield i, t.replace('linenos', 'wpy-code-highlight-line-number')
+                    yield 0, '</code></pre>'
+
+            lexer_type = {
+                settings.PAGE_TYPE_MODULE: 'python3',
+                settings.PAGE_TYPE_JAVASCRIPT: 'js',
+                settings.PAGE_TYPE_STYLESHEET: 'css',
+            }.get(page.content_model)
+
+            if lexer_type is not None:
+                render = pygments.highlight(
+                    wikicode,
+                    pyg_lex.get_lexer_by_name(lexer_type),
+                    CodeHtmlFormatter(**{
+                        'linenos': 'table',
+                        'classprefix': 'wpy-code-highlight-',
+                        'cssclass': 'wpy-code-highlight-',
+                        'lineseparator': '<br/>',
+                    })
+                )
+            else:
+                render = wikicode
+            is_redirect = False
         render = dj_safe.mark_safe(render)
     else:
         render = wikicode

@@ -1,3 +1,4 @@
+{% load static %}
 {% load wpy_tags %}
 
 <div id="wpy-edit-notice">
@@ -5,19 +6,21 @@
     {{ wpy_context.edit_notice }}
   </div>
 </div>
+
 {% if wpy_context.archived and wpy_context.user_can_edit %}
   <div class="wpy-edit-diff-warning-box alert alert-warning" role="alert">
     {% wpy_translate 'form.edit.revision_warning' %}
   </div>
 {% endif %}
+
 {% if not wpy_context.revision and wpy_context.page_exists %}
   <div class="wpy-edit-diff-error-box alert alert-danger" role="alert">
     {{ wpy_context.error_notice }}
   </div>
 {% else %}
-  <form action="{% url 'wikipy:page' raw_page_title=wpy_context.page.url_full_title %}?action=submit"
-        method="post">
-    {% with form=wpy_context.edit_form trans_prefix='form.edit.' %}
+  {% with form=wpy_context.edit_form trans_prefix='form.edit.' %}
+    <form action="{% url 'wikipy:page' raw_page_title=wpy_context.page.url_full_title %}?action=submit"
+          method="post">
       {% if form.warn_unsaved_changes %}
         <input type="hidden" name="warn-unsaved" value="1">
       {% endif %}
@@ -26,6 +29,7 @@
         <label class="sr-only" for="{{ form.content.id_for_label }}">
           {% wpy_translate trans_prefix|add:'content.label' %}
         </label>
+        <div id="wpy-ace-editor"></div>
         {{ form.content }}
       </div>
 
@@ -73,6 +77,6 @@
         {{ form.section_id }}
         {% csrf_token %}
       {% endif %}
-    {% endwith %}
-  </form>
+    </form>
+  {% endwith %}
 {% endif %}

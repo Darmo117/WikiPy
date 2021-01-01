@@ -167,8 +167,8 @@ class SpecialPage(abc.ABC):
         from .. import api
 
         sub_title_values = sub_title.split('/')
-        if sub_title_values == ['']:
-            sub_title_values = []
+        if sub_title_values[-1] == '':  # Ignore trailing / in page title
+            del sub_title_values[-1]
 
         # Redirect to login page if login required and not logged in
         if self.__requires_logged_in and not base_context.user.is_logged_in:

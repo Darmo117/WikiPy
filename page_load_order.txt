@@ -1,0 +1,36 @@
+<head>
+  (CDN) bootstrap.css
+  (static) WikiPy_app/css/common.css
+  (static) WikiPy_app/<skin_id>/style.css
+  if special page and has css:
+    (static) WikiPy_app/css/special_pages/<special_page_id>.css
+  WikiPy:Common.css
+  WikiPy:<skin_id>.css
+  if user logged in:
+    User:<username>/common.css
+    User:<username>/<skin_id>.css
+  (CDN) materialdesignicons.css
+</head>
+<body>
+  Page content
+
+  (generated, embedded) WPY_CONFIG
+  (static) WikiPy_app/js/jquery.js
+  (CDN) popper.js
+  (CDN) bootstrap.js
+  (static) WikiPy_app/js/common.js
+  (static) WikiPy_app/skins/<skin_id>/script.js
+  if special page:
+    (static) WikiPy_app/js/special_pages/<special_page_id>.js
+    if has form:
+      (static) WikiPy_app/js/forms.js
+  WikiPy:Common.js
+  WikiPy:<skin_id>.js
+  if user logged in:
+    User:<username>/common.js
+    User:<username>/<skin_id>.js
+  if edit mode:
+    (static) WikiPy_app/js/ace-editor/ace.js
+    (static) WikiPy_app/js/editor.js
+    (static) WikiPy_app/js/forms.js
+</body>

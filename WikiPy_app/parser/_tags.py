@@ -34,7 +34,7 @@ class Tag(abc.ABC):
 #############
 
 
-class HTMLTag(Tag, abc.ABC):
+class ExtendedHTMLTag(Tag, abc.ABC):
     def __init__(self, name: str, inline: bool, auto_recursive: bool, *attributes: str):
         super().__init__(name, auto_recursive)
         self.__name = name
@@ -56,13 +56,10 @@ class HTMLTag(Tag, abc.ABC):
 
 
 class NonHTMLTag(Tag, abc.ABC):
-    """
-    This type of tag that cannot be defined through extensions.
-    """
+    """This type of tag that cannot be defined through extensions."""
 
     def __init__(self, name: str, open_delimiter: str, close_delimiter: str, multiline: bool, auto_recursive: bool):
-        r"""
-        Defines a non-HTML tag. This type of tag has opening and closing delimiters.
+        r"""Defines a non-HTML tag. This type of tag has opening and closing delimiters.
 
         :param name: Tag’s internal name.
         :param open_delimiter: Opening delimiter, must be exactly 2 characters long.

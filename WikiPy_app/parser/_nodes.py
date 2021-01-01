@@ -7,7 +7,7 @@ import typing as typ
 class WikicodeNode(abc.ABC):
     def __init__(self, inline: bool):
         self.__inline = inline
-        self.__internal_nodes = []
+        self._internal_nodes = []
 
     @property
     def is_inline(self):
@@ -18,12 +18,21 @@ class WikicodeNode(abc.ABC):
         return None
 
     def set_parsed_content_nodes(self, nodes: typ.Sequence[WikicodeNode]):
-        self.__internal_nodes = nodes
+        self._internal_nodes = nodes
+
+    def substitute_placeholders(self, placeholders: typ.Dict[str, str]):
+        """Substitutes remaining placeholders in the text of
+        this node and all its sub-nodes if any.
+
+        :param placeholders: The placeholders registry.
+        """
+        for node in self._internal_nodes:
+            node.substitute_placeholders(placeholders)
 
     @abc.abstractmethod
     def render(self, skin, context) -> str:
-        """
-        Renders this node as HTML.
+        """Renders this node as HTML.
+        Returned string is considered safe.
 
         :param skin: The current skin.
         :type skin: WikiPy_app.skins.Skin
@@ -43,22 +52,25 @@ class WikicodeNode(abc.ABC):
         :type context: WikiPy_app.page_context.PageContext
         :return: The HTML code.
         """
-        return ''.join(map(lambda n: n.render(skin, context), self.__internal_nodes))
+        return ''.join(map(lambda n: n.render(skin, context), self._internal_nodes))
+
+    @staticmethod
+    def _do_substitute_placeholders(text: str, placeholders: typ.Dict[str, str]) -> str:
+        """Helper method to substitute placeholder in a given string."""
+        for ph, subst in placeholders.items():
+            text = text.replace(ph, subst)
+        return text
 
 
 class TopLevelNode(WikicodeNode, abc.ABC):
-    """
-    A top level node is a node that is at the root of the page document.
-    """
+    """A top level node is a node that is at the root of the page document."""
 
     def __init__(self):
         super().__init__(inline=False)
 
 
 class InlineNode(WikicodeNode, abc.ABC):
-    """
-    An inline node is a node that is part of a paragraph, title or table cell.
-    """
+    """An inline node is a node that is part of a paragraph, title or table cell."""
 
     def __init__(self):
         super().__init__(inline=True)
@@ -67,18 +79,18 @@ class InlineNode(WikicodeNode, abc.ABC):
 class DocumentNode(TopLevelNode):
     def __init__(self, *nodes: TopLevelNode):
         super().__init__()
-        self.__nodes = nodes
+        self._internal_nodes = nodes
 
     @property
     def is_empty(self) -> bool:
-        return len(self.__nodes) == 0
+        return len(self._internal_nodes) == 0
 
     @property
     def nodes(self) -> typ.Tuple[TopLevelNode]:
-        return self.__nodes
+        return self._internal_nodes
 
     def render(self, skin, context):
-        return ''.join(map(lambda n: n.render(skin, context), self.__nodes))
+        return ''.join(map(lambda n: n.render(skin, context), self._internal_nodes))
 
     def __repr__(self):
         return 'DocumentNode[' + ', '.join([repr(node) for node in self.nodes]) + ']'
@@ -102,24 +114,24 @@ class TitleNode(TopLevelNode):
         pass  # TODO
 
     def __repr__(self):
-        return f'TitleNode[content={repr(self.content)},level={self.level}]'
+        return f'TitleNode[content={self.content!r},level={self.level}]'
 
 
 class ParagraphNode(TopLevelNode):
     def __init__(self, *text_nodes: WikicodeNode):
         super().__init__()
-        self.__nodes = list(text_nodes)
+        self._internal_nodes = list(text_nodes)
 
     @property
     def is_empty(self):
-        return len(self.__nodes) == 0
+        return len(self._internal_nodes) == 0
 
     @property
     def nodes(self) -> typ.Tuple[WikicodeNode]:
-        return tuple(self.__nodes)
+        return tuple(self._internal_nodes)
 
     def append(self, text_node: WikicodeNode):
-        self.__nodes.append(text_node)
+        self._internal_nodes.append(text_node)
 
     def render(self, skin, context):
         return '<p>' + ''.join(map(lambda n: n.render(skin, context), self.nodes)) + '</p>'
@@ -137,11 +149,17 @@ class TextNode(InlineNode):
     def text(self) -> str:
         return self.__text
 
+    def substitute_placeholders(self, placeholders: typ.Dict[str, str]):
+        if self._internal_nodes:
+            super().substitute_placeholders(placeholders)
+        else:
+            self.__text = self._do_substitute_placeholders(self.__text, placeholders)
+
     def render(self, skin, context):
         return self.text
 
     def __repr__(self):
-        return f'TextNode[text={repr(self.text)}]'
+        return f'TextNode[text={self.text!r}]'
 
 
 class InternalLinkNode(TextNode):
@@ -183,7 +201,7 @@ class InternalLinkNode(TextNode):
         )
 
     def __repr__(self):
-        return f'InternalLinkNode[page_title={repr(self.page_title)},anchor={repr(self.anchor)},text={repr(self.text)}]'
+        return f'InternalLinkNode[page_title={self.page_title!r},anchor={self.anchor!r},text={self.text!r}]'
 
 
 class ExternalLinkNode(TextNode):
@@ -203,7 +221,7 @@ class ExternalLinkNode(TextNode):
         return skin.format_external_link(self.url, self._render_internal_nodes(skin, context))
 
     def __repr__(self):
-        return f'ExternalLinkNode[url={repr(self.url)},text={repr(self.text)}]'
+        return f'ExternalLinkNode[url={self.url!r},text={self.text!r}]'
 
 
 class BoldTextNode(TextNode):
@@ -227,7 +245,7 @@ class ItalicTextNode(TextNode):
         return f'<em class="text-italic">{self._render_internal_nodes(skin, context)}</em>'
 
     def __repr__(self):
-        return f'ItalicTextNode[text={repr(self.text)}]'
+        return f'ItalicTextNode[text={self.text!r}]'
 
 
 class UnderlinedTextNode(TextNode):
@@ -239,7 +257,7 @@ class UnderlinedTextNode(TextNode):
         return f'<span class="text-underlined">{self._render_internal_nodes(skin, context)}</span>'
 
     def __repr__(self):
-        return f'UnderlinedTextNode[text={repr(self.text)}]'
+        return f'UnderlinedTextNode[text={self.text!r}]'
 
 
 class OverlinedTextNode(TextNode):
@@ -251,7 +269,7 @@ class OverlinedTextNode(TextNode):
         return f'<span class="text-overlined">{self._render_internal_nodes(skin, context)}</span>'
 
     def __repr__(self):
-        return f'OverlinedTextNode[text={repr(self.text)}]'
+        return f'OverlinedTextNode[text={self.text!r}]'
 
 
 class StrikethroughTextNode(TextNode):
@@ -263,7 +281,7 @@ class StrikethroughTextNode(TextNode):
         return f'<s class="text-stroke">{self._render_internal_nodes(skin, context)}</s>'
 
     def __repr__(self):
-        return f'Strikethrough[text={repr(self.text)}]'
+        return f'Strikethrough[text={self.text!r}]'
 
 
 class ImageOrVideoNode(WikicodeNode):
@@ -344,10 +362,10 @@ class ImageOrVideoNode(WikicodeNode):
         return f'<span class="wpy-parser-error">{message}</span>'
 
     def __repr__(self):
-        return f'ImageOrVideoNode[file_name={repr(self.file_name)},width={repr(self.width)},legend={repr(self.legend)}]'
+        return f'ImageOrVideoNode[file_name={self.file_name!r},width={self.width!r},legend={self.legend!r}]'
 
 
-class HTMLTagNode(WikicodeNode):
+class ExtendedHTMLTagNode(WikicodeNode, abc.ABC):
     def __init__(self, name: str, inline: bool, content: str, **attributes: str):
         super().__init__(inline=inline)
         self.__name = name
@@ -366,20 +384,8 @@ class HTMLTagNode(WikicodeNode):
     def content(self):
         return self.__content
 
-    @property
-    def content_to_parse(self) -> typ.Optional[str]:
-        return self.__content
-
-    def render(self, skin, context):
-        return f'<{self.__name}>{self._render_internal_nodes(skin, context)}</{self.__name}>'
-
     def __repr__(self):
-        return f'HtmlNode[name={self.__name},attributes={self.__attributes},content={self.__content}]'
-
-
-class ComplexHTMLTagNode(HTMLTagNode):
-    def render(self, skin, context):
-        pass  # TODO
+        return f'ExtendedHtmlNode[name={self.__name},attributes={self.__attributes},content={self.__content}]'
 
 
 class RedirectNode(TopLevelNode):
@@ -411,4 +417,4 @@ class RedirectNode(TopLevelNode):
         return f'<span id="wpy-redirect-link"><span class="mdi mdi-subdirectory-arrow-right"></span> {link}</span>'
 
     def __repr__(self):
-        return f'RedirectNode[target_page={repr(self.target_page)},anchor={repr(self.anchor)}]'
+        return f'RedirectNode[target_page={self.target_page!r},anchor={self.anchor!r}]'

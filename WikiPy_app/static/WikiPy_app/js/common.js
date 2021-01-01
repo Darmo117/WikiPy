@@ -1,6 +1,15 @@
 "use strict";
 
 (function () {
+  if (!Array.prototype.remove) {
+    Array.prototype.remove = function (value) {
+      let index = this.indexOf(value);
+      if (index > -1) {
+        this.splice(index, 1);
+      }
+    };
+  }
+
   let WPY_CONF = {};
   // noinspection JSUnresolvedVariable
   for (let [k, v] of Object.entries(window.WPY_CONF || {})) {
@@ -9,7 +18,7 @@
   // noinspection JSUnresolvedVariable
   delete window.WPY_CONF;
 
-  class Map {
+  class LockableMap {
     _values;
     _immutable;
 
@@ -56,7 +65,7 @@
     }
   }
 
-  let config = new Map();
+  let config = new LockableMap();
   for (let [k, v] of Object.entries(WPY_CONF)) {
     if (!k.endsWith("PageTitle") &&
         !k.endsWith("NamespaceName") &&
@@ -71,8 +80,120 @@
   config.setImmutable();
 
   window.wpy = {
-    Map: Map,
+    Map: LockableMap,
+
     config: config,
+
+    modules: {},
+
+    /**
+     * Returns the translation for the given key.
+     * If no mapping correspond to the given key, the key is returned.
+     * @param key {string}
+     * @return {string}
+     */
+    translate: function (key) {
+      return WPY_CONF["wpyTranslations"][key] || key;
+    },
+
+    /**
+     * Registers a callback to be called once all
+     * modules in the given dependencies list have been loaded.
+     * If all dependencies have already been loaded, the callback is
+     * called immediately.
+     * @param dependencies {Array<string>|string} The list of dependencies.
+     * @param callback {Function} The function to call.
+     */
+    when: function (dependencies, callback) {
+      if (typeof dependencies === "string") {
+        dependencies = [dependencies];
+      }
+      if (typeof callback !== "function") {
+        throw new TypeError("callback must be callable");
+      }
+      let toRemove = [];
+      for (let d of dependencies) {
+        if (this.getModule(d)) {
+          toRemove.push(d);
+        }
+      }
+      toRemove.forEach(d => dependencies.remove(d));
+
+      if (!dependencies.length) {
+        // All dependencies have already been loaded, call the function now
+        callback();
+      } else {
+        this._eventsQueue.set(callback, dependencies);
+      }
+    },
+
+    /**
+     * Registers a module for the given name. A property "id" holding the name of the module is added
+     * to the object returned by the function.
+     * @param moduleName {string} The module’s name. Must follow the format "[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*".
+     * @param f {Function} The callback function that will load the module. It must return an object.
+     */
+    registerModule: function (moduleName, f) {
+      if (!/^\w+(\.\w+)*$/.exec(moduleName)) {
+        console.error(`Invalid module name "${moduleName}", skipped.`);
+        return;
+      }
+      if (this.getModule(moduleName)) {
+        console.error(`A module with the name "${moduleName}" is already registered, skipped.`);
+        return;
+      }
+
+      let module = f();
+      module.id = moduleName;
+      let names = moduleName.split('.');
+      let obj = this.modules;
+      // Build modules "namespaces"
+      for (let i = 0, last = false; i < names.length; i++, last = i === names.length - 1) {
+        let name = names[i];
+        if (!obj.hasOwnProperty(name)) {
+          if (last) {
+            obj[name] = module;
+          } else {
+            obj = obj[name] = {};
+          }
+        }
+        else {
+          obj = obj[name];
+        }
+      }
+      this._modules[moduleName] = module;
+
+      let toRemove = [];
+      for (let [callback, dependencies] of this._eventsQueue) {
+        if (dependencies.includes(moduleName)) {
+          dependencies.remove(moduleName);
+          if (!dependencies.length) {
+            callback();
+            toRemove.push(callback);
+          }
+        }
+      }
+      toRemove.forEach(d => this._eventsQueue.delete(d));
+    },
+
+    /**
+     * Returns the module for the given name.
+     * @param name {string} The module’s name.
+     * @return {object|undefined} The module or undefined in none correspond.
+     */
+    getModule: function (name) {
+      return this._modules[name];
+    },
+
+    /**
+     * Tells whether the given module has been loaded.
+     * @param name {string} The module’s name.
+     * @return {boolean} True if it is loaded, false otherwise.
+     */
+    isModuleLoaded: function (name) {
+      return !!this.getModule(name);
+    },
+
     currentPage: {
       getTitle: function (url) {
         let key = "PageTitle";
@@ -129,6 +250,7 @@
         return WPY_CONF["wpySkin"];
       },
     },
+
     currentUser: {
       getName: function () {
         return WPY_CONF["wpyUserName"];
@@ -146,15 +268,7 @@
         return WPY_CONF["wpyUserGroups"];
       },
     },
-    /**
-     * Returns the translation for the given key.
-     * If no mapping correspond to the given key, the key is returned.
-     * @param key {string}
-     * @return {string}
-     */
-    translate: function (key) {
-      return WPY_CONF["wpyTranslations"][key] || key;
-    },
+
     toast: {
       /**
        *
@@ -188,6 +302,11 @@
         })
       }
     },
+
+    /** @private */
+    _modules: {},
+    /** @private */
+    _eventsQueue: new Map(),
   };
 
   /* Add keystroke in tooltips of elements with accesskey attribute. */

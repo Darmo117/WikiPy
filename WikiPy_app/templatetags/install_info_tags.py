@@ -12,7 +12,7 @@ def generate_resource_table(context: page_context.TemplateContext,
                             resources: typ.List[settings.resource_loader.ExternalResource], resource_type: str):
     return {
         'wpy_context': context.get('wpy_context'),
-        'resource_type': resource_type.title(),
+        'resource_type': resource_type,
         'resources': resources,
     }
 

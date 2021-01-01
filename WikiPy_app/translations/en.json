@@ -870,6 +870,7 @@
         "tooltip": "See journals for this page"
       },
       "install_info": {
+        "display_title": "Installation information",
         "general": {
           "title": "General information",
           "table": {
@@ -899,7 +900,9 @@
               "label": "Description"
             },
             "authors": {
-              "label": "Authors"
+              "label": "Authors",
+              "and": "and",
+              "and_others": "others"
             }
           },
           "extensions": {
@@ -952,6 +955,19 @@
                 "label": "Extension"
               }
             }
+          }
+        },
+        "license": {
+          "not_found": "No license information was found for “$name”.",
+          "resource_error": "Invalid resource ID.",
+          "error": {
+            "title": "Error"
+          },
+          "skins": {
+            "title": "License for skin $name"
+          },
+          "extensions": {
+            "title": "License for extension $name"
           }
         }
       },

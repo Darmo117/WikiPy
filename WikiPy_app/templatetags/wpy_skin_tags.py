@@ -4,6 +4,7 @@ import django.template as dj_template
 import django.templatetags.static as dj_static
 import django.utils.safestring as dj_safe
 
+from . import wpy_tags
 from .. import api, page_context
 
 register = dj_template.Library()
@@ -29,7 +30,7 @@ def wpy_skin_render(context: page_context.TemplateContext, key: str, **kwargs: t
     elif key == 'footer':
         res = ''
         if wpy_context.page.latest_revision:
-            formatted_date = api.format_datetime(wpy_context.page.latest_revision.date, wpy_context.user, language)
+            formatted_date = wpy_tags.wpy_format_date(context, wpy_context.page.latest_revision.date)
             last_edit = language.translate('footer.last_edit', date=formatted_date)
             res = f'<p>{last_edit}</p>'
         license_ = language.translate('footer.license')

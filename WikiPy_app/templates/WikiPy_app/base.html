@@ -23,12 +23,10 @@
   {# CSS #}
 
   {% if wpy_context.language.writing_direction == 'ltr' %}
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
-          integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'WikiPy_app/libs/bootstrap/bootstrap.min.css' %}">
   {% else %}
     <!-- https://bootstrap.rtlcss.com -->
-    <link rel="stylesheet" href="https://cdn.rtlcss.com/bootstrap/v4.2.1/css/bootstrap.min.css"
-          integrity="sha384-vus3nQHTD+5mpDiZ4rkEPlnkcyTP+49BhJ4wJeJunw06ZAp+wzzeBPUXr42fi8If" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'WikiPy_app/libs/bootstrap/bootstrap-rtl.min.css' %}">
   {% endif %}
 
   <link href="{% static 'WikiPy_app/css/common.css' %}" rel="stylesheet"/>
@@ -51,7 +49,7 @@
     {% endif %}
   {% endif %}
 
-  <link rel="stylesheet" href="//cdn.materialdesignicons.com/5.4.55/css/materialdesignicons.min.css"/>
+  <link rel="stylesheet" href="{% static 'WikiPy_app/libs/MaterialDesignIcons/css/materialdesignicons.min.css' %}"/>
 
   {% block head %}{% endblock %}
   {% if wpy_context.noindex %}
@@ -130,18 +128,13 @@
   {# JS #}
 
   <script>{{ js_data }}</script>
-  <script src="{% static 'WikiPy_app/js/jquery-3.5.1.min.js' %}"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
-          integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
-          crossorigin="anonymous"></script>
+  <script src="{% static 'WikiPy_app/libs/jquery-3.5.1.min.js' %}"></script>
+  <script src="{% static 'WikiPy_app/libs/popper.min.js' %}"></script>
   {% if wpy_context.language.writing_direction == 'ltr' %}
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
-            integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
-            crossorigin="anonymous"></script>
+    <script src="{% static 'WikiPy_app/libs/bootstrap/bootstrap.min.js' %}"></script>
   {% else %}
-    <script src="https://cdn.rtlcss.com/bootstrap/v4.2.1/js/bootstrap.min.js"
-            integrity="sha384-a9xOd0rz8w0J8zqj1qJic7GPFfyMfoiuDjC9rqXlVOcGO/dmRqzMn34gZYDTel8k"
-            crossorigin="anonymous"></script>
+    <!-- https://bootstrap.rtlcss.com -->
+    <script src="{% static 'WikiPy_app/libs/bootstrap/bootstrap-rtl.min.js' %}"></script>
   {% endif %}
 
   <script src="{% static 'WikiPy_app/js/common.js' %}"></script>
@@ -150,20 +143,15 @@
     <script src="{% static path %}"></script>
   {% endwith %}
   {% if wpy_context.mode == 'special' and wpy_context.page_exists %}
-    {% with path='WikiPy_app/js/special_pages/' %}
-      {% if wpy_context.load_special_page_js %}
-        {# Using "with" to avoid warning #}
-        {% with p=path|add:wpy_context.special_page_id|add:'.js' %}
-          <script src="{% static p %}"></script>
-        {% endwith %}
-      {% endif %}
-      {% if wpy_context.load_special_page_form %}
-        {# Using "with" to avoid warning #}
-        {% with p=path|add:'include/forms.js' %}
-          <script src="{% static p %}"></script>
-        {% endwith %}
-      {% endif %}
-    {% endwith %}
+    {% if wpy_context.load_special_page_js %}
+      {# Using "with" to avoid warning #}
+      {% with p='WikiPy_app/js/special_pages/'|add:wpy_context.special_page_id|add:'.js' %}
+        <script src="{% static p %}"></script>
+      {% endwith %}
+    {% endif %}
+    {% if wpy_context.load_special_page_form %}
+      <script src="{% static 'WikiPy_app/js/forms.js' %}"></script>
+    {% endif %}
   {% endif %}
 
   {% if wpy_context.mode != 'setup' %}
@@ -174,20 +162,12 @@
       {% wpy_static 6 wpy_context.user.username|add:'/'|add:wpy_context.skin.id|add:'.js' %}
     {% endif %}
     {% if wpy_context.mode == 'edit' %}
-      <script src="{% static 'WikiPy_app/js/special_pages/include/forms.js' %}"></script>
+      <script src="{% static 'WikiPy_app/js/ace-editor/ace.js' %}"></script>
+      <script src="{% static 'WikiPy_app/js/editor.js' %}"></script>
+      <script src="{% static 'WikiPy_app/js/forms.js' %}"></script>
     {% endif %}
   {% else %}
-    <script src="{% static 'WikiPy_app/js/special_pages/include/forms.js' %}"></script>
+    <script src="{% static 'WikiPy_app/js/forms.js' %}"></script>
   {% endif %}
-
-  {# TODO let users choose style #}
-  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
-  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/highlight.min.js"></script>
-  <!--suppress JSUnresolvedVariable -->
-  <script>
-    $('code.wpy-code-highlight').each(function () {
-      hljs.highlightBlock(this);
-    });
-  </script>
 </body>
 </html>

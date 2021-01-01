@@ -311,8 +311,8 @@ def load_skin(name: str) -> bool:
     return True
 
 
-def get_skin(name: str) -> typ.Optional[Skin]:
-    return _loaded_skins.get(name)
+def get_skin(ident: str) -> typ.Optional[Skin]:
+    return _loaded_skins.get(ident)
 
 
 def get_loaded_skins() -> typ.Iterable[Skin]:

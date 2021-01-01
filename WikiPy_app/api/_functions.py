@@ -697,6 +697,19 @@ def render_wikicode(wikicode: str, context, no_redirect: bool = False, enable_co
     return render
 
 
+def get_default_content_model(namespace_id: int, title: str):
+    content_model = settings.PAGE_TYPE_WIKI
+    allow_js_css = (namespace_id in [settings.WIKIPY_NS.id, settings.GADGET_NS.id] or
+                    namespace_id == settings.USER_NS.id and '/' in title)
+    if allow_js_css and title.endswith('.css'):
+        content_model = settings.PAGE_TYPE_STYLESHEET
+    elif allow_js_css and title.endswith('.js'):
+        content_model = settings.PAGE_TYPE_JAVASCRIPT
+    elif namespace_id == settings.MODULE_NS.id:
+        content_model = settings.PAGE_TYPE_MODULE
+    return content_model
+
+
 # TODO gérer les conflits
 def submit_page_content(namespace_id: int, title: str, current_user: models.User, wikicode: str,
                         comment: typ.Optional[str], minor: bool, section_id: int = None):
@@ -704,16 +717,11 @@ def submit_page_content(namespace_id: int, title: str, current_user: models.User
     if exists:
         page = _get_page(namespace_id, title)
     else:
-        content_model = settings.PAGE_TYPE_WIKI
-        allow_js_css = (namespace_id in [settings.WIKIPY_NS.id, settings.GADGET_NS.id] or
-                        namespace_id == settings.USER_NS.id and '/' in title)
-        if allow_js_css and title.endswith('.css'):
-            content_model = settings.PAGE_TYPE_STYLESHEET
-        elif allow_js_css and title.endswith('.js'):
-            content_model = settings.PAGE_TYPE_JAVASCRIPT
-        elif namespace_id == settings.MODULE_NS.id:
-            content_model = settings.PAGE_TYPE_MODULE
-        page = models.Page(namespace_id=namespace_id, title=title, content_model=content_model)
+        page = models.Page(
+            namespace_id=namespace_id,
+            title=title,
+            content_model=get_default_content_model(namespace_id, title)
+        )
 
     if not can_edit_page(current_user, namespace_id, title):
         raise _errors.PageEditForbidden(page)

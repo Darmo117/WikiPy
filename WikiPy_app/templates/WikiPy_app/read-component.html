@@ -18,16 +18,4 @@
   </div>
 {% endif %}
 
-{% if wpy_context.page.content_model == 'wiki_page' %}
-  {{ wpy_context.rendered_page_content }}
-{% else %}
-  {% with cm=wpy_context.page.content_model %}
-    {% spaceless %}
-      <pre>
-        <code class="wpy-code-highlight {% if cm == 'module' %}python{% else %}{{ cm }}{% endif %}"><!--
-          -->{{ wpy_context.rendered_page_content }}<!--
-        --></code>
-      </pre>
-    {% endspaceless %}
-  {% endwith %}
-{% endif %}
+{{ wpy_context.rendered_page_content }}

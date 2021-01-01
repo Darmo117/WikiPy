@@ -41,8 +41,10 @@
                 <!--suppress HtmlFormInputWithoutLabel -->
                 <select id="wpy-language-select" class="custom-select">
                   {% for lang in wpy_context.languages %}
-                    <option {% if lang.code == wpy_context.language.code %}selected{% endif %}
-                            value="{{ lang.code }}">{{ lang.name }}</option>
+                    <option {% if lang.code == wpy_context.language.code %}selected{% endif %} value="{{ lang.code }}"
+                            dir="{{ lang.writing_direction }}">
+                      {{ lang.name }}
+                    </option>
                   {% endfor %}
                 </select>
               </div>

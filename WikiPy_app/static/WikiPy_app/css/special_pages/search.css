@@ -1,7 +1,7 @@
-.wpy-search-result:first-child {
-  margin-top: 10px;
+li.wpy-search-result {
+  margin-bottom: 1em;
 }
 
-.wpy-search-result {
-  margin-bottom: 10px;
+li:first-child.wpy-search-result {
+  margin-top: 1em;
 }

@@ -1,22 +1,36 @@
 from __future__ import annotations
 
-from ._functions import *
-from ._magic_keywords import *
-from ._nodes import *
+import random
+import re
+import typing as typ
+
+from . import _functions
+from . import _magic_keywords
+from . import _nodes
+from . import _tags
 from ._registry import *
-from ._tags import *
 
 __all__ = [
     'WikicodeParser',
     'WikicodeNode',
     'RedirectNode',
-    'HTMLTag',
-    'MagicKeyword',
-    'magic_keyword',
-    'parser_function',
+    'ExtendedHTMLTagNode',
+    'ExtendedHTMLTag',
     'load_magic_keywords',
     'load_functions',
+    'magic_keyword',
+    'parser_function',
+    'get_registered_magic_keywords',
+    'get_registered_functions',
+    'ParserFeature',
+    'ParserFunction',
+    'MagicKeyword',
 ]
+
+WikicodeNode = _nodes.WikicodeNode
+RedirectNode = _nodes.RedirectNode
+ExtendedHTMLTagNode = _nodes.ExtendedHTMLTagNode
+ExtendedHTMLTag = _tags.ExtendedHTMLTag
 
 
 def load_magic_keywords():
@@ -31,16 +45,16 @@ def load_functions():
         WikicodeParser._register_function(function, name)
 
 
-def _init_special_tags() -> typ.Dict[str, NonHTMLTag]:
+def _init_special_tags() -> typ.Dict[str, _tags.NonHTMLTag]:
     tags = [
-        InternalLinkTag(),
-        ExternalLinkTag(),
-        BoldTextTag(),
-        ItalicTextTag(),
-        UnderlinedTextTag(),
-        StrikethroughTextTag(),
-        OverlinedTextTag(),
-        ImageOrVideoTag(),
+        _tags.InternalLinkTag(),
+        _tags.ExternalLinkTag(),
+        _tags.BoldTextTag(),
+        _tags.ItalicTextTag(),
+        _tags.UnderlinedTextTag(),
+        _tags.StrikethroughTextTag(),
+        _tags.OverlinedTextTag(),
+        _tags.ImageOrVideoTag(),
     ]
     return {t.open_delimiter: t for t in tags}
 
@@ -56,10 +70,75 @@ class WikicodeParser:
     HTML_TAG = 'html_tag'
     DELIMITER = 'delimiter'
 
-    __magic_keywords: typ.Dict[str, _registry.MagicKeyword] = {}  # TODO add extension ID
-    __special_tags: typ.Dict[str, NonHTMLTag] = _init_special_tags()
-    __html_tags: typ.Dict[str, HTMLTag] = {}  # TODO add extension ID
-    __functions: typ.Dict[str, _registry.ParserFunction] = {}  # TODO add extension ID
+    # TODO disable all on* attributes
+    # True means the tag is standalone
+    ALLOWED_HTML_TAGS = (
+        ('abbr', False),
+        ('address', False),
+        ('area', True),
+        ('article', False),
+        ('aside', False),
+        ('b', False),
+        ('bdi', False),
+        ('bdo', False),
+        ('blockquote', False),
+        ('br', True),
+        ('button', False),
+        ('canvas', False),
+        ('cite', False),
+        ('code', False),
+        ('data', False),
+        ('dd', False),
+        ('del', False),
+        ('details', False),
+        ('dfn', False),
+        ('div', False),
+        ('dl', False),
+        ('dt', False),
+        ('em', False),
+        ('footer', False),
+        ('header', False),
+        ('hr', True),
+        ('i', False),
+        ('ins', False),
+        ('kbd', False),
+        ('label', False),
+        ('li', False),
+        ('main', False),
+        ('map', False),
+        ('mark', False),
+        ('meter', False),
+        ('nav', False),
+        ('noscript', False),
+        ('ol', False),
+        ('output', False),
+        ('p', False),
+        ('pre', False),
+        ('progress', False),
+        ('q', False),
+        ('rp', False),
+        ('rt', False),
+        ('ruby', False),
+        ('s', False),
+        ('samp', False),
+        ('section', False),
+        ('small', False),
+        ('span', False),
+        ('strong', False),
+        ('sub', False),
+        ('summary', False),
+        ('sup', False),
+        ('time', False),
+        ('u', False),
+        ('ul', False),
+        ('var', False),
+        ('wbr', False),
+    )
+
+    __magic_keywords: typ.Dict[str, _registry.MagicKeyword] = {}
+    __special_tags: typ.Dict[str, _tags.NonHTMLTag] = _init_special_tags()
+    __html_tags: typ.Dict[str, _tags.ExtendedHTMLTag] = {}  # TODO add extension ID
+    __functions: typ.Dict[str, _registry.ParserFunction] = {}
 
     def __init__(self):
         self.__max_depth_reached = False
@@ -67,6 +146,7 @@ class WikicodeParser:
         self.__circular_transclusion = False
         self.__called_non_existant_template = False
         self.__delimiters_starts = {t.open_delimiter[0] for t in self.__special_tags.values()}
+        self.__placeholders = {}
 
     @property
     def max_depth_reached(self) -> bool:
@@ -85,7 +165,7 @@ class WikicodeParser:
         return self.__called_non_existant_template
 
     def parse_wikicode(self, wikicode: str, context, no_redirect: bool = False) \
-            -> typ.Union[DocumentNode, RedirectNode]:
+            -> typ.Union[_nodes.DocumentNode, _nodes.RedirectNode]:
         """
         Parses the given wikicode.
 
@@ -99,7 +179,8 @@ class WikicodeParser:
         return self._parse_wikicode_impl(wikicode, context, 0, no_redirect, {})
 
     def _parse_wikicode_impl(self, wikicode: str, context, depth: int, no_redirect: bool,
-                             variables_values: typ.Dict[str, str]) -> typ.Union[DocumentNode, RedirectNode]:
+                             variables_values: typ.Dict[str, str]) \
+            -> typ.Union[_nodes.DocumentNode, _nodes.RedirectNode]:
         """
         Parses the given wikicode.
 
@@ -120,12 +201,12 @@ class WikicodeParser:
         # Maximum depth reached, stop parsing
         if depth > self.MAX_TRANSCLUSIONS_DEPTH:
             self.__max_depth_reached = True
-            return DocumentNode(ParagraphNode(TextNode(text=self.make_safe(wikicode))))
+            return _nodes.DocumentNode(_nodes.ParagraphNode(_nodes.TextNode(text=self.make_safe(wikicode))))
 
         if redirect := self.get_redirect(wikicode):
             page_title, anchor = redirect
             if no_redirect:
-                root_node = RedirectNode(target_page=page_title, anchor=anchor)
+                root_node = _nodes.RedirectNode(target_page=page_title, anchor=anchor)
             else:
                 ns, title = api.extract_namespace_and_title(page_title, ns_as_id=True)
                 revision = api.get_page_revision(ns, title)
@@ -133,13 +214,15 @@ class WikicodeParser:
                     root_node = self._parse_wikicode_impl(revision.content, context, depth + 1, no_redirect=False,
                                                           variables_values=variables_values)
                 else:
-                    root_node = DocumentNode(ParagraphNode(TextNode(text=self.make_safe(wikicode))))
+                    root_node = _nodes.DocumentNode(
+                        _nodes.ParagraphNode(_nodes.TextNode(text=self.make_safe(wikicode))))
         else:
             wikicode = self._substitute_and_transclude(wikicode, context, depth, variables_values)
             wikicode = self._substitute_functions(wikicode)
+            wikicode = self._substitute_tags(wikicode)
             wikicode = self._substitute_tables(wikicode)
             wikicode = wikicode.replace('{{!}}', '|')
-            root_node = DocumentNode(*self._parse_document(wikicode))
+            root_node = _nodes.DocumentNode(*self._parse_document(wikicode, top=depth == 0))
 
         return root_node
 
@@ -278,7 +361,10 @@ class WikicodeParser:
                 if ns_id == context.page.namespace_id and title == context.page.title:
                     self.__circular_transclusion = True
                     text = context.language.translate('parser.error.circular_transclusion')
-                    return f'<span class="wpy-circular-transclusion">{text}</span>'
+                    return self._generate_placeholder(
+                        'error',
+                        f'<span class="wpy-parser-error wpy-circular-transclusion">{text}</span>'
+                    )
 
                 revision = api.get_page_revision(ns_id, title)
                 if revision:
@@ -296,7 +382,10 @@ class WikicodeParser:
 
             self.__too_many_redirects = True
             text = context.language.translate('parser.error.too_many_redirects', template_name=template_name)
-            return f'<span class="wpy-too-many-redirects">{text}</span>'
+            return self._generate_placeholder(
+                'error',
+                f'<span class="wpy-parser-error wpy-too-many-redirects">{text}</span>'
+            )
 
         open_delimiter = '{{'
         close_delimiter = '}}'
@@ -441,24 +530,32 @@ class WikicodeParser:
     def _substitute_functions(self, wikicode: str) -> str:
         return wikicode  # TODO
 
+    def _substitute_tags(self, wikicode: str) -> str:
+        return self.make_safe(wikicode)  # TODO
+
     # noinspection PyMethodMayBeStatic
     def _substitute_tables(self, wikicode: str) -> str:
         return wikicode  # TODO
 
-    def _parse_document(self, wikicode: str) -> typ.Sequence[WikicodeNode]:
+    def _parse_document(self, wikicode: str, top: bool = False) -> typ.Sequence[_nodes.WikicodeNode]:
         def new_paragraph(b: str):
             nonlocal paragraph
 
             if b.strip():
-                paragraph.append(TextNode(text=self.make_safe(b)))
+                paragraph.append(_nodes.TextNode(text=b))
             if not paragraph.is_empty:
                 nodes.append(paragraph)
-                paragraph = ParagraphNode()
+                paragraph = _nodes.ParagraphNode()
+
+        if top:
+            # Tags should be already parsed at this point,
+            # we can safely re-insert placeholders (except nowikis)
+            wikicode = self._substitute_placeholders(wikicode)
 
         state = self.TEXT
         tag = None
         nodes = []
-        paragraph = ParagraphNode()
+        paragraph = _nodes.ParagraphNode()
         buffer = ''
         # Number of times the current delimiter has been encountered for the current tag
         opened_tags = 0
@@ -473,7 +570,7 @@ class WikicodeParser:
                     tag = t
                     opened_tags = 1
                     if buffer:
-                        paragraph.append(TextNode(text=self.make_safe(buffer)))
+                        paragraph.append(_nodes.TextNode(text=buffer))
                         buffer = ''
                     state = self.SPECIAL_TAG
                     i += 1
@@ -481,8 +578,6 @@ class WikicodeParser:
                     new_paragraph(buffer)
                     buffer = ''
                     i += 1
-                elif c == '<':  # Escape HTML tags
-                    buffer += '&lt;'
                 else:
                     buffer += c
 
@@ -523,18 +618,48 @@ class WikicodeParser:
         if tag:
             buffer = tag.open_delimiter + buffer
         new_paragraph(buffer)
+
+        if top:
+            for node in nodes:
+                node.substitute_placeholders(self.__placeholders)
+
         print('Parser nodes:', nodes)  # DEBUG
 
         return nodes
 
+    def _generate_placeholder(self, name: str, content: str) -> str:
+        """Generates a new placeholder with the given name and content.
+        The generated placeholder and its associated content are then
+        stored into the placeholders registry.
+
+        :param name: The name to insert into this placeholder.
+        :param content: The content this placeholder replaces.
+        :return: The generated placeholder.
+        """
+        n = random.randint(0, 0xffffffff)
+        placeholder = f"""?#`PLACEHOLDER--{name}-{hex(n)[2:].rjust(8, '0').upper()}--REDLOHECALP`#?"""
+        self.__placeholders[placeholder] = content
+        return placeholder
+
+    def _substitute_placeholders(self, text: str) -> str:
+        """Substitutes all placeholders in the given text by using the placeholders registry.
+
+        :param text: The text.
+        :return: The text with all placeholders substituted.
+        """
+        for ph, subst in self.__placeholders.items():
+            if ph in text and 'nowiki' not in ph:
+                text = text.replace(ph, subst)
+        return text
+
     @classmethod
-    def _register_tag(cls, tag: HTMLTag):
+    def _register_tag(cls, tag: _tags.ExtendedHTMLTag):
         if tag.name in cls.__html_tags:
             raise ValueError(f'attempt to register two tags with the same name "{tag.name}"')
         cls.__html_tags[tag.name] = tag
 
     @classmethod
-    def registered_tags(cls) -> typ.List[HTMLTag]:
+    def registered_tags(cls) -> typ.List[_tags.ExtendedHTMLTag]:
         return sorted(cls.__html_tags.values(), key=lambda t: t.name)
 
     @classmethod

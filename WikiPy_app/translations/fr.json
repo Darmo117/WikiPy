@@ -878,6 +878,7 @@
         "display_title": "Ma page"
       },
       "install_info": {
+        "display_title": "Informations sur l’installation",
         "general": {
           "title": "Informations générales",
           "table": {
@@ -907,7 +908,9 @@
               "label": "Description"
             },
             "authors": {
-              "label": "Auteurs et autrices"
+              "label": "Auteurs et autrices",
+              "and": "et",
+              "and_others": "autres"
             }
           },
           "extensions": {
@@ -960,6 +963,19 @@
                 "label": "Extension"
               }
             }
+          }
+        },
+        "license": {
+          "not_found": "Aucune information de licence n’a été trouvée pour «\u00a0$name\u00a0».",
+          "resource_error": "Identifiant de ressource invalide.",
+          "error": {
+            "title": "Erreur"
+          },
+          "skins": {
+            "title": "Licence pour l’habillage $name"
+          },
+          "extensions": {
+            "title": "Licence pour l’extension $name"
           }
         }
       },

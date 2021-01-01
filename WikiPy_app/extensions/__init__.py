@@ -69,8 +69,8 @@ def load_extension(name: str) -> bool:
     return True
 
 
-def get_extension(name: str) -> typ.Optional[Extension]:
-    return _extensions.get(name)
+def get_extension(ident: str) -> typ.Optional[Extension]:
+    return _extensions.get(ident)
 
 
 def get_loaded_extensions() -> typ.List[Extension]:
