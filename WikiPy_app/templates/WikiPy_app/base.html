@@ -71,6 +71,10 @@
           -->{{ wpy_context.display_title }}<!--
         {% elif wpy_context.mode == 'read' or wpy_context.mode == 'special' and not wpy_context.page_exists %}
           -->{{ wpy_context.page.full_title }}<!--
+          {% if wpy_context.page.is_category_hidden %}
+            --> <span id="wpy-hidden-category-icon" class="mdi mdi-eye-off"
+                      title="{% wpy_translate 'title.hidden_category.tooltip' %}"></span><!--
+          -->{% endif %}<!--
         {% elif wpy_context.mode == 'edit' %}
           {% if wpy_context.page_exists %}
             {% if wpy_context.user_can_edit %}

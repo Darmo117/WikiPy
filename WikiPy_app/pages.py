@@ -375,10 +375,14 @@ def submit_page_content(
         comment: str,
         minor: bool,
         language: settings.i18n.Language,
-        section_id: int = None
+        section_id: int = None,
+        hidden_category: bool = False
 ) -> typ.Tuple[typ.Tuple[page_context.PageContext, int], bool]:
+    context = get_page_context(request, namespace_id, title, user, language, user.data.skin,
+                               redirect_enabled=False)
     try:
-        api.submit_page_content(namespace_id, title, user, wikicode, comment, minor, section_id=section_id)
+        api.submit_page_content(context, namespace_id, title, user, wikicode, comment, minor, section_id=section_id,
+                                hidden_category=hidden_category)
     except api.PageEditForbidden:
         return get_page_context(request, namespace_id, title, user, language, user.data.skin, action=EDIT), False
     except api.PageEditConflit:
@@ -442,7 +446,8 @@ def _get_read_page_context(
         base_context,
         wikicode=wikicode,
         revision=revision,
-        archived=archived
+        archived=archived,
+        page_categories=api.get_page_categories(page, get_hidden=user.data.display_hidden_categories)
     )
 
     if not raw:
@@ -460,7 +465,7 @@ def _get_read_page_context(
                 def _wrap_code(self, source):
                     yield 0, '<pre class="wpy-code-highlight"><code>'
                     for i, t in source:
-                        yield i, t.replace('linenos', 'wpy-code-highlight-line-number')
+                        yield i, t
                     yield 0, '</code></pre>'
 
             lexer_type = {
@@ -536,11 +541,20 @@ def _get_edit_page_context(
     else:
         code = wikicode
         error_notice = ''
+    initial = {
+        'content': wikicode,
+    }
+
+    if page_exists and page.is_category:
+        category_data = api.get_category_metadata(page.title)
+        if category_data:
+            initial['hidden_category'] = category_data.hidden
+
     form = form or forms.EditPageForm(
         language=base_context.language,
         disabled=not base_context.user_can_edit,
         warn_unsaved_changes=base_context.user.data.unsaved_changes_warning,
-        initial={'content': wikicode}
+        initial=initial
     )
 
     return page_context.EditPageContext(

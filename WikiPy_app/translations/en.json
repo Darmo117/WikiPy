@@ -143,6 +143,7 @@
         }
       },
       "language_select": {
+        "label": "Language selector",
         "tooltip": "Language selector"
       }
     },
@@ -154,7 +155,10 @@
       "edit": "Editing “$page_title”",
       "create": "Creating “$page_title”",
       "source": "Sources of “$page_title”",
-      "history": "Revision history of “$page_title”"
+      "history": "Revision history of “$page_title”",
+      "hidden_category": {
+        "tooltip": "This category is hidden"
+      }
     },
     "redirection_info": {
       "is_redirection": "Redirection page",
@@ -337,6 +341,10 @@
         "follow_page": {
           "label": "Follow this page",
           "tooltip": "Click to follow this page"
+        },
+        "hidden_category": {
+          "label": "Hidden",
+          "tooltip": "Mark this category as hidden"
         },
         "submit": {
           "label": "Submit changes",

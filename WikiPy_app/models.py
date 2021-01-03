@@ -14,17 +14,14 @@ import pytz
 from . import settings
 
 
-# TODO categories
-
-
 def _namespace_id_validator(value):
     if value not in settings.NAMESPACES:
         raise dj_exc.ValidationError('invalid namespace ID', params={'value': value}, code='invalid')
 
 
 def _page_title_validator(value):
-    if value not in settings.NAMESPACES:
-        raise dj_exc.ValidationError('invalid namespace ID', params={'value': value}, code='invalid')
+    if settings.INVALID_TITLE_REGEX.search(value):
+        raise dj_exc.ValidationError('invalid page title', params={'value': value}, code='invalid')
 
 
 def _group_id_validator(value):
@@ -68,12 +65,14 @@ class LockableModel:
     def lock(self):
         self.__locked = True
 
+    # noinspection PyUnresolvedReferences
     def save(self, *args, **kwargs):
         if self.__locked:
             raise RuntimeError('object is locked')
         else:
-            # All subclasses should also inherit Django’s Model class, so save() method should be defined.
-            # noinspection PyUnresolvedReferences
+            # All subclasses should also inherit Django’s Model class,
+            # so save() and full_clean() methods should be defined.
+            self.full_clean()
             super().save(*args, **kwargs)
 
 
@@ -117,6 +116,14 @@ class Page(LockableModel, dj_models.Model):
         return settings.NAMESPACES[self.namespace_id]
 
     @property
+    def is_category(self) -> bool:
+        return self.namespace_id == settings.CATEGORY_NS.id
+
+    @property
+    def is_category_hidden(self):
+        return self.is_category and CategoryData.objects.get(page=self).hidden
+
+    @property
     def latest_revision(self) -> typ.Optional[PageRevision]:
         try:
             return PageRevision.objects.filter(page=self).latest('date')
@@ -129,8 +136,27 @@ class Page(LockableModel, dj_models.Model):
         except PageRevision.DoesNotExist:
             return None
 
+    def get_categories(self) -> typ.Iterable[str]:
+        return list(map(lambda pc: pc.category_name, PageCategory.objects.filter(page=self).order_by('category_name')))
+
     class Meta:
         unique_together = ('namespace_id', 'title')
+
+
+class CategoryData(LockableModel, dj_models.Model):
+    page = dj_models.OneToOneField(Page, dj_models.CASCADE)
+    hidden = dj_models.BooleanField(default=False)
+
+
+class PageCategory(LockableModel, dj_models.Model):
+    page = dj_models.ForeignKey(Page, on_delete=dj_models.CASCADE)
+    # Do not link to Category object as pages might be associated to non-existant categories
+    category_name = dj_models.CharField(max_length=Page._meta.get_field('title').max_length,
+                                        validators=[_page_title_validator])
+    sort_key = dj_models.CharField(max_length=100, blank=True, null=True, default=None)
+
+    class Meta:
+        unique_together = ('page', 'category_name')
 
 
 class PageRevision(LockableModel, dj_models.Model):
@@ -141,10 +167,10 @@ class PageRevision(LockableModel, dj_models.Model):
     author_hidden = dj_models.BooleanField(default=False)
     comment_hidden = dj_models.BooleanField(default=False)
     content = dj_models.TextField()
-    comment = dj_models.CharField(max_length=200, null=True, default=None)
+    comment = dj_models.CharField(max_length=200, blank=True, null=True, default=None)
     minor = dj_models.BooleanField(default=False)
     diff_size = dj_models.IntegerField()
-    reverted_to = dj_models.IntegerField(null=True, default=None)
+    reverted_to = dj_models.IntegerField(blank=True, null=True, default=None)
 
     def get_previous(self, ignore_hidden: bool = True) -> typ.Optional[PageRevision]:
         try:
@@ -201,15 +227,15 @@ GENDERS = {gender.code: gender for gender in (NEUTRAL_GENDER, FEMALE_GENDER, MAL
 # TODO make data accessible from JS API (read-only)
 class UserData(LockableModel, dj_models.Model):
     user = dj_models.OneToOneField(dj_auth.get_user_model(), on_delete=dj_models.CASCADE)
-    ip_address = dj_models.CharField(max_length=50, null=True, default=None)
+    ip_address = dj_models.CharField(max_length=50, blank=True, null=True, default=None)
 
     # True = female, False = Male, None = Undefined
-    _gender = dj_models.BooleanField(null=True, default=None)
+    _gender = dj_models.BooleanField(blank=True, null=True, default=None)
     lang_code = dj_models.CharField(max_length=10, default=settings.DEFAULT_LANGUAGE_CODE)
     signature = dj_models.CharField(max_length=100)
-    email_confirmation_date = dj_models.DateTimeField(null=True, default=None)
-    email_confirmation_code = dj_models.CharField(max_length=50, null=True, default=None)
-    email_pending_confirmation = dj_models.CharField(max_length=100, null=True, default=None)
+    email_confirmation_date = dj_models.DateTimeField(blank=True, null=True, default=None)
+    email_confirmation_code = dj_models.CharField(max_length=50, blank=True, null=True, default=None)
+    email_pending_confirmation = dj_models.CharField(max_length=100, blank=True, null=True, default=None)
     users_can_send_emails = dj_models.BooleanField(default=True)
     send_copy_of_sent_emails = dj_models.BooleanField(default=False)
     send_watchlist_emails = dj_models.BooleanField(default=False)
@@ -217,7 +243,7 @@ class UserData(LockableModel, dj_models.Model):
 
     skin = dj_models.CharField(max_length=50, default='default')
     timezone = dj_models.CharField(max_length=50)
-    datetime_format_id = dj_models.IntegerField(null=True, default=None)
+    datetime_format_id = dj_models.IntegerField(blank=True, null=True, default=None)
     max_image_file_preview_size = dj_models.IntegerField()  # Pixels
     max_image_thumbnail_size = dj_models.IntegerField()  # Pixels
     enable_media_viewer = dj_models.BooleanField(default=True)
@@ -325,7 +351,7 @@ class UserBlock(LockableModel, dj_models.Model):
     namespaces = dj_models.TextField()
     on_own_talk_page = dj_models.BooleanField()
     duration = dj_models.IntegerField()
-    reason = dj_models.TextField(null=True, default=None)
+    reason = dj_models.TextField(blank=True, null=True, default=None)
 
     def get_page_titles(self) -> typ.Iterable[str]:
         return self.pages.split(',')

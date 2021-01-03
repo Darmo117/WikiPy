@@ -3,9 +3,10 @@ import os
 
 import django.conf as dj_conf
 import django.contrib.auth as dj_auth
+import django.core.handlers.wsgi as dj_wsgi
 import django.utils.crypto as dj_crypto
 
-from . import api, settings, apps
+from . import api, settings, apps, pages, models
 
 WIKI_USER_NAME = 'WikiPy'
 _COMMENT = 'Wiki setup.'
@@ -32,7 +33,14 @@ def generate_secret_key_file() -> bool:
     return False
 
 
-def setup(username: str, password: str, email: str, secret_key: str) -> str:
+def create_page(request: dj_wsgi.WSGIRequest, namespace_id: int, title: str, user: models.User, content: str):
+    context, _ = pages.get_page_context(request, namespace_id, title, user,
+                                        settings.i18n.get_language(settings.DEFAULT_LANGUAGE_CODE), user.data.skin,
+                                        redirect_enabled=False)
+    api.submit_page_content(context, namespace_id, title, user, content, _COMMENT, False)
+
+
+def setup(request: dj_wsgi.WSGIRequest, username: str, password: str, email: str, secret_key: str) -> str:
     main_page = api.get_full_page_title(settings.MAIN_PAGE_NAMESPACE_ID, settings.MAIN_PAGE_TITLE)
     project_name = settings.PROJECT_NAME
 
@@ -69,106 +77,96 @@ def setup(username: str, password: str, email: str, secret_key: str) -> str:
     api.add_user_to_group(wiki_user, settings.GROUP_ADMINISTRATORS, auto=True)
     api.add_user_to_group(wiki_user, settings.GROUP_BOTS, auto=True)
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-BadTitle', wiki_user,
-                            'The requested page title contains invalid characters: “$invalid_char”.\n\n'
-                            f'Return to the [[{main_page}|main page]].', _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-BadTitle', wiki_user,
+                'The requested page title contains invalid characters: “$invalid_char”.\n\n'
+                f'Return to the [[{main_page}|main page]].')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-EmptyTitle', wiki_user,
-                            'The requested page title is empty or contains only the name of a namespace.\n\n'
-                            f'Return to the [[{main_page}|main page]].', _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-EmptyTitle', wiki_user,
+                'The requested page title is empty or contains only the name of a namespace.\n\n'
+                f'Return to the [[{main_page}|main page]].')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-ReadForbidden', wiki_user,
-                            'You do not have the permisson to view this page.\n\n'
-                            f'Return to the [[{main_page}|main page]].', _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-ReadForbidden', wiki_user,
+                'You do not have the permisson to view this page.\n\n'
+                f'Return to the [[{main_page}|main page]].')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-EditForbidden', wiki_user,
-                            'You do not have the permisson to edit this page.',
-                            _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-EditForbidden', wiki_user,
+                'You do not have the permisson to edit this page.')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-EditForbidden-4', wiki_user,
-                            'You do not have the permisson to edit this page for the following reasons:\n'
-                            '* This page provides interface text for the software on this wiki, '
-                            'and is protected to prevent abuse.', _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-EditForbidden-4', wiki_user,
+                'You do not have the permisson to edit this page for the following reasons:\n'
+                '* This page provides interface text for the software on this wiki, '
+                'and is protected to prevent abuse.')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-EditForbidden-16', wiki_user,
-                            'You do not have the permisson to edit this page for the following reasons:\n'
-                            '* This page provides interface text for the software on this wiki, '
-                            'and is protected to prevent abuse.', _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-EditForbidden-16', wiki_user,
+                'You do not have the permisson to edit this page for the following reasons:\n'
+                '* This page provides interface text for the software on this wiki, '
+                'and is protected to prevent abuse.')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-CreateForbidden', wiki_user,
-                            'You do not have the permisson to create this page.\n\n'
-                            f'Return to the [[{main_page}|main page]].', _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-CreateForbidden', wiki_user,
+                'You do not have the permisson to create this page.\n\n'
+                f'Return to the [[{main_page}|main page]].')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-CreateForbidden-4', wiki_user,
-                            'You do not have the permisson to create this page for the following reasons:\n'
-                            '* This page provides interface text for the software on this wiki, '
-                            'and is protected to prevent abuse.\n\n'
-                            f'Return to the [[{main_page}|main page]].', _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-CreateForbidden-4', wiki_user,
+                'You do not have the permisson to create this page for the following reasons:\n'
+                '* This page provides interface text for the software on this wiki, '
+                'and is protected to prevent abuse.\n\n'
+                f'Return to the [[{main_page}|main page]].')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-CreateForbidden-16', wiki_user,
-                            'You do not have the permisson to create this page for the following reasons:\n'
-                            '* This page provides interface text for the software on this wiki, '
-                            'and is protected to prevent abuse.\n\n'
-                            f'Return to the [[{main_page}|main page]].', _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-CreateForbidden-16', wiki_user,
+                'You do not have the permisson to create this page for the following reasons:\n'
+                '* This page provides interface text for the software on this wiki, '
+                'and is protected to prevent abuse.\n\n'
+                f'Return to the [[{main_page}|main page]].')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-NoPage', wiki_user,
-                            f'{project_name} does not have a {{{{NAMESPACE_NAME}}}} page with this name.\n\n'
-                            f'Return to the [[{main_page}|main page]].', _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-NoPage', wiki_user,
+                f'{project_name} does not have a {{{{NAMESPACE_NAME}}}} page with this name.\n\n'
+                f'Return to the [[{main_page}|main page]].')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-NoSpecialPage', wiki_user,
-                            f'**This special page does not exist.**\n\n'
-                            f'A list of valid special pages can be found at [[Special:Special pages]].\n\n'
-                            f'Go back to [[TestWiki:Main Page]].', _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-NoSpecialPage', wiki_user,
+                f'**This special page does not exist.**\n\n'
+                f'A list of valid special pages can be found at [[Special:Special pages]].\n\n'
+                f'Go back to [[TestWiki:Main Page]].')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-EditNotice-0', wiki_user,
-                            'This is the edit notice for main namespace.',
-                            _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-EditNotice-0', wiki_user,
+                'This is the edit notice for main namespace.')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-EditNotice-4', wiki_user,
-                            '<div class="alert alert-warning text-center" role="alert">'
-                            'Be carefull as changes made to this page will impact all users.'
-                            '</div>',
-                            _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-EditNotice-4', wiki_user,
+                '<div class="alert alert-warning text-center" role="alert">'
+                'Be carefull as changes made to this page will impact all users.'
+                '</div>')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-EditNotice-16', wiki_user,
-                            '<div class="alert alert-warning text-center" role="alert">'
-                            'Be carefull as changes made to this page will impact all users.'
-                            '</div>',
-                            _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-EditNotice-16', wiki_user,
+                '<div class="alert alert-warning text-center" role="alert">'
+                'Be carefull as changes made to this page will impact all users.'
+                '</div>')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-InvalidRevisionID', wiki_user,
-                            'Revision #$revision_id of page “{{FULL_PAGE_TITLE}}” does not exist.\n\n'
-                            'This usually happens when following a link to a deleted revision. '
-                            'You can find more information in the '
-                            '[[Special:Journals/deleted revisions|deletion journal]].',
-                            _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-InvalidRevisionID', wiki_user,
+                'Revision #$revision_id of page “{{FULL_PAGE_TITLE}}” does not exist.\n\n'
+                'This usually happens when following a link to a deleted revision. '
+                'You can find more information in the '
+                '[[Special:Journals/deleted revisions|deletion journal]].')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-LoginDisclaimer', wiki_user,
-                            f'You must have cookies enabled to log in to {project_name}.', _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-LoginDisclaimer', wiki_user,
+                f'You must have cookies enabled to log in to {project_name}.')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-AlreadyLoggedIn', wiki_user,
-                            'You are already logged in as {{USERNAME}}. '
-                            'If you want to connect as another user, please first log out.',
-                            _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-AlreadyLoggedIn', wiki_user,
+                'You are already logged in as {{USERNAME}}. '
+                'If you want to connect as another user, please first log out.')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-LogoutConfirm', wiki_user, 'Do you want to log out?',
-                            _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-LogoutConfirm', wiki_user, 'Do you want to log out?')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Message-LoggedOut', wiki_user,
-                            '**You are now logged out.**\n\n'
-                            'Note that some pages may continue to be displayed as if you were still logged in, '
-                            'until you clear your browser cache.\n\n'
-                            f'Return to the [[{main_page}|main page]].',
-                            _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Message-LoggedOut', wiki_user,
+                '**You are now logged out.**\n\n'
+                'Note that some pages may continue to be displayed as if you were still logged in, '
+                'until you clear your browser cache.\n\n'
+                f'Return to the [[{main_page}|main page]].')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Common.css', wiki_user, '/* Put custom CSS in here. */', _COMMENT,
-                            False)
+    create_page(request, settings.WIKIPY_NS.id, 'Common.css', wiki_user, '/* Put custom CSS in here. */')
 
-    api.submit_page_content(settings.WIKIPY_NS.id, 'Common.js', wiki_user, '/* Put custom JavaScript in here. */',
-                            _COMMENT, False)
+    create_page(request, settings.WIKIPY_NS.id, 'Common.js', wiki_user, '/* Put custom JavaScript in here. */')
 
-    api.submit_page_content(settings.MAIN_PAGE_NAMESPACE_ID, settings.MAIN_PAGE_TITLE, wiki_user,
-                            f'This is the main page of {settings.PROJECT_NAME}.', _COMMENT, False)
+    create_page(request, settings.MAIN_PAGE_NAMESPACE_ID, settings.MAIN_PAGE_TITLE, wiki_user,
+                f'This is the main page of {settings.PROJECT_NAME}.')
 
     logging.info('Done.')
 

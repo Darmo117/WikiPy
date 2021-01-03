@@ -85,22 +85,31 @@ class NonHTMLTag(Tag, abc.ABC):
         return self.__multiline
 
 
-class InternalLinkTag(NonHTMLTag):
+class InternalLinkOrCategoryTag(NonHTMLTag):
     def __init__(self):
         super().__init__('internal_link', '[[', ']]', multiline=False, auto_recursive=False)
 
     def parse_wikicode(self, wikicode: str):
-        parts = wikicode.split('|', maxsplit=1)
+        parts = list(map(str.strip, wikicode.split('|', maxsplit=1)))
         text = None
+        anchor = None
 
         if len(parts) == 2:
-            target, text = map(str.strip, parts)
+            target, text = parts
         else:
-            target = parts[0].strip()
-        title, anchor = self._split_title(target)
+            target = parts[0]
+
+        is_category = target[0] == '@'
+
+        if is_category:
+            title = target[1:]
+        else:
+            title, anchor = self._split_title(target)
 
         if not self._check_title(title):
             return _nodes.TextNode(text=f'{self.open_delimiter}{wikicode}{self.close_delimiter}')
+        if is_category:
+            return _nodes.CategoryNode(title=title, sort_key=text)
         return _nodes.InternalLinkNode(page_title=title, anchor=anchor, text=text)
 
     @staticmethod

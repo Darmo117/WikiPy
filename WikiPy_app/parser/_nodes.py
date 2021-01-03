@@ -42,6 +42,9 @@ class WikicodeNode(abc.ABC):
         """
         pass
 
+    def get_categories(self) -> typ.List[CategoryNode]:
+        return [category for node in self._internal_nodes for category in node.get_categories()]
+
     def _render_internal_nodes(self, skin, context):
         """
         Renders the internal nodes as HTML.
@@ -138,6 +141,32 @@ class ParagraphNode(TopLevelNode):
 
     def __repr__(self):
         return 'ParagraphNode[' + ', '.join([repr(node) for node in self.nodes]) + ']'
+
+
+class CategoryNode(InlineNode):
+    def __init__(self, title: str, sort_key: str = None):
+        from .. import api
+
+        super().__init__()
+        self.__title = api.get_actual_page_title(title)
+        self.__sort_key = sort_key
+
+    @property
+    def title(self) -> str:
+        return self.__title
+
+    @property
+    def sort_key(self) -> str:
+        return self.__sort_key
+
+    def render(self, skin, context) -> str:
+        return ''
+
+    def get_categories(self) -> typ.List[CategoryNode]:
+        return [self]
+
+    def __repr__(self):
+        return f'CategoryNode[title={self.__title!r},sort_key={self.__sort_key!r}]'
 
 
 class TextNode(InlineNode):

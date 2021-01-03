@@ -57,6 +57,16 @@
               {% wpy_translate trans_prefix|add:'follow_page.label' %}
             </label>
           </div>
+
+          {% if wpy_context.page.is_category %}
+            <div class="custom-control custom-checkbox custom-control-inline">
+              {{ form.hidden_category }}
+              <label for="{{ form.hidden_category.id_for_label }}" class="custom-control-label"
+                     title="{% wpy_translate trans_prefix|add:'hidden_category.tooltip' %}">
+                {% wpy_translate trans_prefix|add:'hidden_category.label' %}
+              </label>
+            </div>
+          {% endif %}
         </div>
 
         <div class=" text-center">

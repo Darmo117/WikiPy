@@ -422,7 +422,7 @@ def init(base_dir: str):
             SPECIAL_PAGES_LOCAL_NAMES[k] = str(v)
 
     INVALID_TITLE_REGEX = _re.compile(
-        r'([<>_#|{}\[\]\x00-\x1f\x7f]|%[0-9A-Fa-f]{2}|&[A-Za-z0-9\x80-\xff]+;|&#[0-9]+;|&#x[0-9A-Fa-f]+;)')
+        r'([@<>_#|{}\[\]\x00-\x1f\x7f]|%[0-9A-Fa-f]{2}|&[A-Za-z0-9\x80-\xff]+;|&#[0-9]+;|&#x[0-9A-Fa-f]+;)')
 
     #################
     # Rights/Groups #

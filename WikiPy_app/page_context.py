@@ -93,14 +93,17 @@ class ReadPageContext(RevisionPageContext):
     rendered_page_content: str
     is_redirection: bool
     redirected_from: typ.Optional[typ.Tuple[int, str]]
+    page_categories: typ.List[typ.Tuple[models.Page, models.CategoryData]]
 
     def __init__(self, context: PageContext, /, wikicode: str = None, is_redirection: bool = None,
                  revision: typ.Optional[object] = None, archived: bool = False, rendered_page_content: str = '',
-                 redirected_from: typ.Tuple[int, str] = None):
+                 redirected_from: typ.Tuple[int, str] = None,
+                 page_categories: typ.List[typ.Tuple[models.Page, models.CategoryData]] = None):
         super().__init__(context, wikicode=wikicode, revision=revision, archived=archived)
         self.rendered_page_content = rendered_page_content
         self.is_redirection = is_redirection
         self.redirected_from = redirected_from
+        self.page_categories = page_categories
 
 
 @dataclasses.dataclass(init=False)

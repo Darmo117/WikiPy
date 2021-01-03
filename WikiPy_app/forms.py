@@ -223,6 +223,10 @@ class EditPageForm(WikiPyForm):
         required=False,
         disabled=True  # TEMP
     )
+    hidden_category = dj_forms.BooleanField(
+        label='hidden_category',
+        required=False
+    )
     section_id = dj_forms.CharField(
         widget=dj_forms.HiddenInput(),
         required=False

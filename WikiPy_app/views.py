@@ -31,7 +31,7 @@ def setup_page(request: dj_wsgi.WSGIRequest) -> dj_http.HttpResponse:
                     password = form.cleaned_data['password']
                     email = form.cleaned_data['email']
                     secret_key = form.cleaned_data['secret_key']
-                    status = setup.setup(username, password, email, secret_key)
+                    status = setup.setup(request, username, password, email, secret_key)
 
                     if status != setup.SUCCESS:
                         errors.append(status)
@@ -55,7 +55,7 @@ def _setup(
         errors: typ.List[str] = None
 ) -> dj_http.HttpResponse:
     user = api.get_user_from_request(request)
-    context = page_context.SetupPageContext(pages.get_setup_page_context(user, language, skin), form=form,
+    context = page_context.SetupPageContext(pages.get_setup_page_context(request, user, language, skin), form=form,
                                             global_errors=errors)
     return _render(request, context, pages.FOUND, skin)
 
@@ -124,8 +124,19 @@ def _get_page(
             minor = form.cleaned_data['minor_edit']
             # noinspection PyUnusedLocal
             follow_page = form.cleaned_data['follow_page']  # TODO
-            (context, status), redirect = pages.submit_page_content(request, namespace_id, title, user, wikicode,
-                                                                    comment, minor, language, section_id=section_id)
+            hidden_category = form.cleaned_data['hidden_category']
+            (context, status), redirect = pages.submit_page_content(
+                request,
+                namespace_id,
+                title,
+                user,
+                wikicode,
+                comment,
+                minor,
+                language,
+                section_id=section_id,
+                hidden_category=hidden_category
+            )
             if status == pages.FOUND and redirect:
                 request.session[SESSION_NO_REDIRECT] = True
                 return _redirect('page', api.get_full_page_title(namespace_id, title))

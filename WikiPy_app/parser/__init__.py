@@ -47,7 +47,7 @@ def load_functions():
 
 def _init_special_tags() -> typ.Dict[str, _tags.NonHTMLTag]:
     tags = [
-        _tags.InternalLinkTag(),
+        _tags.InternalLinkOrCategoryTag(),
         _tags.ExternalLinkTag(),
         _tags.BoldTextTag(),
         _tags.ItalicTextTag(),
@@ -147,6 +147,7 @@ class WikicodeParser:
         self.__called_non_existant_template = False
         self.__delimiters_starts = {t.open_delimiter[0] for t in self.__special_tags.values()}
         self.__placeholders = {}
+        self.__categories = {}  # TODO
 
     @property
     def max_depth_reached(self) -> bool:
@@ -163,6 +164,10 @@ class WikicodeParser:
     @property
     def called_non_existant_template(self) -> bool:
         return self.__called_non_existant_template
+
+    @property
+    def categories(self) -> typ.Dict[str, str]:
+        return dict(self.__categories)
 
     def parse_wikicode(self, wikicode: str, context, no_redirect: bool = False) \
             -> typ.Union[_nodes.DocumentNode, _nodes.RedirectNode]:
@@ -622,6 +627,10 @@ class WikicodeParser:
         if top:
             for node in nodes:
                 node.substitute_placeholders(self.__placeholders)
+                self.__categories.update({
+                    category_node.title: category_node.sort_key
+                    for category_node in node.get_categories()
+                })
 
         print('Parser nodes:', nodes)  # DEBUG
 

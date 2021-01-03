@@ -139,6 +139,7 @@
         }
       },
       "language_select": {
+        "label": "Sélecteur de langue",
         "tooltip": "Sélecteur de langue"
       }
     },
@@ -150,7 +151,10 @@
       "edit": "Modification de «\u00a0$page_title\u00a0»",
       "create": "Création de «\u00a0$page_title\u00a0»",
       "source": "Sources de «\u00a0$page_title\u00a0»",
-      "history": "Historique des versions de «\u00a0$page_title\u00a0»"
+      "history": "Historique des versions de «\u00a0$page_title\u00a0»",
+      "hidden_category": {
+        "tooltip": "Cette catégorie est cachée"
+      }
     },
     "menu": {
       "navigation": "Navigation",
@@ -333,6 +337,10 @@
         "follow_page": {
           "label": "Suivre cette page",
           "tooltip": "Cliquez pour suivre cette page"
+        },
+        "hidden_category": {
+          "label": "Cachée",
+          "tooltip": "Marquer cette catégorie comme cachée"
         },
         "submit": {
           "label": "Publier les modifications",

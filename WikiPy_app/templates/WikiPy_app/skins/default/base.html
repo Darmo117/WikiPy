@@ -38,7 +38,9 @@
                     <span class="mdi mdi-translate"></span>
                   </div>
                 </div>
-                <!--suppress HtmlFormInputWithoutLabel -->
+                <label for="wpy-language-select" class="sr-only">
+                  {% wpy_translate 'header.language_select.label' %}
+                </label>
                 <select id="wpy-language-select" class="custom-select">
                   {% for lang in wpy_context.languages %}
                     <option {% if lang.code == wpy_context.language.code %}selected{% endif %} value="{{ lang.code }}"
@@ -147,7 +149,7 @@
           </ul>
         </div>
       </div>
-      {% if wpy_context.categories %}
+      {% if wpy_context.page_categories %}
         <div id="wpy-nav-bar-categories" class="card bg-light mb-3">
           <div class="card-header">{% wpy_skin_render 'menu.side.categories.title' %}</div>
           <div class="card-body">

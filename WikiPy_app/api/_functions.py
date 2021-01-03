@@ -11,7 +11,8 @@ import django.core.mail as dj_mail
 import django.core.mail.backends.dummy as dj_mail_dummy
 import django.core.paginator as dj_page
 import django.core.validators as dj_valid
-import django.db.models as dj_db
+import django.db.models as dj_db_models
+import django.db.transaction as dj_db_trans
 import django.shortcuts as dj_scut
 import django.utils.crypto as dj_crypto
 import django.utils.timezone as dj_tz
@@ -132,6 +133,7 @@ def email_validator(value):
     dj_valid.EmailValidator()(value)
 
 
+@dj_db_trans.atomic
 def create_user(username: str, email: str = None, password: str = None, ip: str = None,
                 ignore_email: bool = False) -> models.User:
     anonymous = ip is not None
@@ -187,6 +189,7 @@ def create_user(username: str, email: str = None, password: str = None, ip: str 
     return user
 
 
+@dj_db_trans.atomic
 def update_user_data(user: models.User, **kwargs) -> models.User:
     allowed_fields = (
         'lang_code',
@@ -302,6 +305,7 @@ def ip_exists(ip: str) -> bool:
     return models.UserData.objects.filter(ip_address=ip).count() != 0
 
 
+@dj_db_trans.atomic
 def block_user(user: models.User, duration: int, reason: str, *, pages: typ.Iterable[str] = None,
                namespaces: typ.Iterable[int] = None):
     # TODO check rights
@@ -337,9 +341,11 @@ def get_user_contributions(current_user: models.User, username: str, namespace: 
         if to_date:
             kwargs['date__lte'] = datetime.datetime(to_date.year, to_date.month, to_date.day, hour=23, minute=59,
                                                     second=59)
-        query = dj_db.Q(**kwargs)
+        query = dj_db_models.Q(**kwargs)
         if only_hidden_revisions:
-            query = query & (dj_db.Q(text_hidden=True) | dj_db.Q(author_hidden=True) | dj_db.Q(comment_hidden=True))
+            query = query & (dj_db_models.Q(text_hidden=True) |
+                             dj_db_models.Q(author_hidden=True) |
+                             dj_db_models.Q(comment_hidden=True))
 
         query_set = models.PageRevision.objects.filter(query).order_by('-date')
         results = []
@@ -355,6 +361,7 @@ def get_user_contributions(current_user: models.User, username: str, namespace: 
     return []
 
 
+@dj_db_trans.atomic
 def add_user_to_group(user: models.User, group_id: str, performer: models.User = None, auto: bool = False) \
         -> bool:
     if group_exists(group_id) and ((performer and performer.has_right(settings.RIGHT_EDIT_USERS_GROUPS)) or auto):
@@ -464,14 +471,6 @@ def get_special_page_sub_title(title: str) -> str:
     return s[1] if len(s) > 1 else ''
 
 
-def get_page_content_type(content_model: str) -> str:
-    return {
-        settings.PAGE_TYPE_WIKI: 'text/plain',
-        settings.PAGE_TYPE_STYLESHEET: 'text/css',
-        settings.PAGE_TYPE_JAVASCRIPT: 'application/javascript',
-    }.get(content_model, 'text/plain')
-
-
 def check_title(page_title: str):
     if page_title == '':
         raise _errors.EmptyPageTitleException()
@@ -510,6 +509,14 @@ def get_api_url_path() -> str:
 #########
 # Pages #
 #########
+
+
+def get_page_content_type(content_model: str) -> str:
+    return {
+        settings.PAGE_TYPE_WIKI: 'text/plain',
+        settings.PAGE_TYPE_STYLESHEET: 'text/css',
+        settings.PAGE_TYPE_JAVASCRIPT: 'application/javascript',
+    }.get(content_model, 'text/plain')
 
 
 def get_diff(revision_id1: int, revision_id2: int, current_user: models.User, escape_html: bool, keep_lines: int) \
@@ -619,9 +626,12 @@ def get_talk_page_namespace(namespace_id: int) -> typ.Optional[int]:
 
 def page_exists(namespace_id: int, title: str) -> bool:
     if namespace_id != settings.SPECIAL_NS.id:
-        return models.Page.objects.filter(namespace_id=namespace_id, title=title).count() != 0
-    else:
-        return special_pages.get_special_page(get_special_page_title(title)) is not None
+        try:
+            page = models.Page.objects.get(namespace_id=namespace_id, title=title)
+        except models.Page.DoesNotExist:
+            return False
+        return not page.deleted
+    return special_pages.get_special_page(get_special_page_title(title)) is not None
 
 
 def get_page_revision(namespace_id: int, title: str, *, revision_id: int = None) \
@@ -649,6 +659,27 @@ def get_page_revisions(page: models.Page, current_user: models.User) -> typ.List
             r.lock()
         return list(revisions)
     return []
+
+
+def get_page_categories(page: models.Page, get_hidden: bool) -> typ.List[typ.Tuple[models.Page, models.CategoryData]]:
+    categories = []
+
+    for c_name in page.get_categories():
+        category_page, _ = get_page(settings.CATEGORY_NS.id, c_name)
+        try:
+            category_data = models.CategoryData.objects.get(page=category_page)
+        except models.CategoryData.DoesNotExist:
+            category_data = models.CategoryData(
+                page=category_page
+            )
+            category_data.lock()
+            categories.append((category_page, category_data))
+        else:
+            if get_hidden or not category_data.hidden:
+                category_data.lock()
+                categories.append((category_page, category_data))
+
+    return categories
 
 
 def get_random_page(namespaces: typ.Iterable[int] = None) -> typ.Optional[models.Page]:
@@ -686,10 +717,6 @@ def render_wikicode(wikicode: str, context, no_redirect: bool = False, enable_co
     """
     p = parser.WikicodeParser()
     parsed_wikicode = p.parse_wikicode(wikicode, context, no_redirect=no_redirect)
-    if p.max_depth_reached:
-        # TODO catégoriser (permettre de spécifier le nom depuis une page du ns WikiPy)
-        # cf. https://en.wikipedia.org/wiki/Category:Pages_where_template_include_size_is_exceeded
-        pass
     render = context.skin.render_wikicode(parsed_wikicode, context, enable_comment=enable_comment)
 
     if no_redirect:
@@ -710,9 +737,10 @@ def get_default_content_model(namespace_id: int, title: str):
     return content_model
 
 
-# TODO gérer les conflits
-def submit_page_content(namespace_id: int, title: str, current_user: models.User, wikicode: str,
-                        comment: typ.Optional[str], minor: bool, section_id: int = None):
+# TODO handle conflicts
+@dj_db_trans.atomic
+def submit_page_content(context, namespace_id: int, title: str, current_user: models.User, wikicode: str,
+                        comment: typ.Optional[str], minor: bool, section_id: int = None, hidden_category: bool = False):
     exists = page_exists(namespace_id, title)
     if exists:
         page = _get_page(namespace_id, title)
@@ -720,7 +748,8 @@ def submit_page_content(namespace_id: int, title: str, current_user: models.User
         page = models.Page(
             namespace_id=namespace_id,
             title=title,
-            content_model=get_default_content_model(namespace_id, title)
+            content_model=get_default_content_model(namespace_id, title),
+            protection_level=settings.GROUP_ALL
         )
 
     if not can_edit_page(current_user, namespace_id, title):
@@ -728,6 +757,33 @@ def submit_page_content(namespace_id: int, title: str, current_user: models.User
 
     if not exists:
         page.save()
+        if namespace_id == settings.CATEGORY_NS.id:
+            models.CategoryData(
+                page=page,
+                hidden=hidden_category
+            ).save()
+    elif namespace_id == settings.CATEGORY_NS.id:
+        cd = models.CategoryData.objects.get(page=page)
+        cd.hidden = hidden_category
+        cd.save()
+
+    def _set_page_categories(categories: typ.Dict[str, str]):
+        # Add/update categories
+        for category_name, sort_key in categories.items():
+            pc, created = models.PageCategory.objects.get_or_create(
+                page=page,
+                category_name=category_name,
+                defaults={
+                    'sort_key': sort_key,
+                }
+            )
+            if not created:
+                pc.sort_key = sort_key
+            pc.save()
+        # Delete all categories that were removed
+        for pc in models.PageCategory.objects.filter(page=page):
+            if pc.category_name not in categories:
+                pc.delete()
 
     def _edit_size(old_text: str, new_text: str) -> int:
         return len(new_text.encode('UTF-8')) - len(old_text.encode('UTF-8'))
@@ -743,11 +799,31 @@ def submit_page_content(namespace_id: int, title: str, current_user: models.User
     else:
         new_content = wikicode
 
+    parser_ = parser.WikicodeParser()
+    parser_.parse_wikicode(wikicode, context, no_redirect=True)
+    # TODO categorize errors
+    # cf. https://en.wikipedia.org/wiki/Category:Pages_where_template_include_size_is_exceeded
+    too_many_transclusions = parser_.max_depth_reached
+    too_many_redirects = parser_.too_many_redirects
+    circular_transclusion = parser_.circular_transclusion_detected
+    called_missing_template = parser_.called_non_existant_template
+    _set_page_categories(parser_.categories)
+
     if prev_content != new_content:
         size = _edit_size(prev_content, wikicode)
         revision = models.PageRevision(page=page, author=current_user.django_user, content=wikicode, comment=comment,
                                        minor=minor, diff_size=size)
         revision.save()
+
+
+def get_category_metadata(category_title: str) -> typ.Optional[models.CategoryData]:
+    page, exists = get_page(settings.CATEGORY_NS.id, category_title)
+    if exists and page.is_category:
+        try:
+            return models.CategoryData.objects.get(page__title=category_title)
+        except models.CategoryData.DoesNotExist:
+            return None
+    return None
 
 
 def get_page(namespace_id: int, title: str) -> typ.Tuple[models.Page, bool]:
@@ -761,7 +837,7 @@ def get_page(namespace_id: int, title: str) -> typ.Tuple[models.Page, bool]:
     """
     if namespace_id != settings.SPECIAL_NS.id:
         page = _get_page(namespace_id, title)
-        exists = page is not None
+        exists = page is not None and not page.deleted
         if not exists:
             page = models.Page(
                 namespace_id=namespace_id,

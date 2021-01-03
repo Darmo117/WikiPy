@@ -127,83 +127,96 @@ class Skin(settings.resource_loader.ExternalResource, abc.ABC):
         rendered_items = []
         c: page_context.PageContext = context['wpy_context']
 
-        for item in _PAGE_TEMPLATE.get_menu_items(menu_id, c):
-            args = {}
+        if menu_id == 'categories' and hasattr(c, 'page_categories'):
+            for category_page, category_data in c.page_categories:
+                tooltip = c.language.translate('title.hidden_category.tooltip')
+                icon = (f'<span class="mdi mdi-eye-off" title="{tooltip}"></span> ' if category_data.hidden else '')
+                rendered_items.append(icon + self.format_internal_link(
+                    language=c.language,
+                    current_page_title=c.page.full_title,
+                    page_title=api.get_full_page_title(settings.CATEGORY_NS.id, category_page.title),
+                    text=category_page.title,
+                    css_classes=link_classes
+                ))
 
-            if item.is_special:
-                page = special_pages.get_special_page_for_id(item.item_id)
-                ns_id = settings.SPECIAL_NS.id
-                title = page.get_title()
-                icon = page.icon
-                access_key = page.access_key
-                text = page.display_title(c.language)
-                tooltip = c.language.translate(f'special.{page.id}.tooltip', none_if_undefined=True) or text
+        else:
+            for item in _PAGE_TEMPLATE.get_menu_items(menu_id, c):
+                args = {}
 
-            else:
-                item_id = item.item_id
-                ns_id = c.page.namespace.id
-                title = c.page.title
-                icon = item.icon
-                access_key = item.access_key
-                text = c.language.translate(f'link.menu.{item_id}.label')
-                tooltip = c.language.translate(f'link.menu.{item_id}.tooltip')
+                if item.is_special:
+                    page = special_pages.get_special_page_for_id(item.item_id)
+                    ns_id = settings.SPECIAL_NS.id
+                    title = page.get_title()
+                    icon = page.icon
+                    access_key = page.access_key
+                    text = page.display_title(c.language)
+                    tooltip = c.language.translate(f'special.{page.id}.tooltip', none_if_undefined=True) or text
 
-                if item_id == 'permalink':
-                    args['revision_id'] = c.page.latest_revision.id
+                else:
+                    item_id = item.item_id
+                    ns_id = c.page.namespace.id
+                    title = c.page.title
+                    icon = item.icon
+                    access_key = item.access_key
+                    text = c.language.translate(f'link.menu.{item_id}.label')
+                    tooltip = c.language.translate(f'link.menu.{item_id}.tooltip')
 
-                elif item_id == 'read':
-                    ns_id = api.get_base_page_namespace(ns_id)
-                    if context.request.GET.get('revision_id'):
-                        args['revision_id'] = context.request.GET['revision_id']
+                    if item_id == 'permalink':
+                        args['revision_id'] = c.page.latest_revision.id
 
-                elif item_id == 'talk':
-                    ns_id = api.get_talk_page_namespace(ns_id)
+                    elif item_id == 'read':
+                        ns_id = api.get_base_page_namespace(ns_id)
+                        if context.request.GET.get('revision_id'):
+                            args['revision_id'] = context.request.GET['revision_id']
 
-                elif item_id == 'edit':
-                    args['action'] = 'edit'
-                    if context.request.GET.get('revision_id'):
-                        args['revision_id'] = context.request.GET['revision_id']
-                    if c.user_can_edit:
-                        if not c.page_exists:
-                            text = c.language.translate(f'link.menu.create.label')
-                            tooltip = c.language.translate(f'link.menu.create.tooltip')
-                    else:
-                        text = c.language.translate(f'link.menu.source.label')
-                        tooltip = c.language.translate(f'link.menu.source.tooltip')
+                    elif item_id == 'talk':
+                        ns_id = api.get_talk_page_namespace(ns_id)
 
-                elif item_id == 'history':
-                    args['action'] = 'history'
+                    elif item_id == 'edit':
+                        args['action'] = 'edit'
+                        if context.request.GET.get('revision_id'):
+                            args['revision_id'] = context.request.GET['revision_id']
+                        if c.user_can_edit:
+                            if not c.page_exists:
+                                text = c.language.translate(f'link.menu.create.label')
+                                tooltip = c.language.translate(f'link.menu.create.tooltip')
+                        else:
+                            text = c.language.translate(f'link.menu.source.label')
+                            tooltip = c.language.translate(f'link.menu.source.tooltip')
 
-                elif item_id == 'user_page':
-                    ns_id = settings.USER_NS.id
-                    title = c.user.username
+                    elif item_id == 'history':
+                        args['action'] = 'history'
 
-                elif item_id == 'user_talk':
-                    ns_id = settings.USER_TALK_NS.id
-                    title = c.user.username
+                    elif item_id == 'user_page':
+                        ns_id = settings.USER_NS.id
+                        title = c.user.username
 
-            if item.add_page_title:
-                title += '/' + c.page.full_title
-            if item.add_base_page_title:
-                title += '/' + c.page.title.split('/')[0]
-            if item.add_user_name:
-                title += '/' + c.user.username
-            if item.add_return_to:
-                args['return_to'] = context.request.get_full_path()
-                args['is_path'] = 1
-            if icon:
-                text = f'<span class="mdi mdi-{icon}"></span> ' + text
+                    elif item_id == 'user_talk':
+                        ns_id = settings.USER_TALK_NS.id
+                        title = c.user.username
 
-            rendered_items.append(self.format_internal_link(
-                language=c.language,
-                current_page_title='',
-                page_title=api.get_full_page_title(ns_id, title),
-                text=text,
-                tooltip=tooltip,
-                access_key=access_key if not item.disable_access_key else None,
-                css_classes=link_classes,
-                **args
-            ))
+                if item.add_page_title:
+                    title += '/' + c.page.full_title
+                if item.add_base_page_title:
+                    title += '/' + c.page.title.split('/')[0]
+                if item.add_user_name:
+                    title += '/' + c.user.username
+                if item.add_return_to:
+                    args['return_to'] = context.request.get_full_path()
+                    args['is_path'] = 1
+                if icon:
+                    text = f'<span class="mdi mdi-{icon}"></span> ' + text
+
+                rendered_items.append(self.format_internal_link(
+                    language=c.language,
+                    current_page_title='',
+                    page_title=api.get_full_page_title(ns_id, title),
+                    text=text,
+                    tooltip=tooltip,
+                    access_key=access_key if not item.disable_access_key else None,
+                    css_classes=link_classes,
+                    **args
+                ))
 
         return rendered_items
 

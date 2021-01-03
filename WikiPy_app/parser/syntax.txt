@@ -37,7 +37,10 @@ internal links
 external links
 [(url|text)]
 
-images/videos
+categories
+[[@category_title|sort_key]]
+
+média
 [{file name|width|legend}]
 
 variables
@@ -50,4 +53,4 @@ function
 {(name|args)}
 
 magic keywords
-{{name}}
+{{NAME}}
