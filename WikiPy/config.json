@@ -1,0 +1,34 @@
+{
+  "hosts": [
+    "127.0.0.1",
+    "::1",
+    "localhost"
+  ],
+  "app_name": "WikiPy_main",
+  "project_name": "TestWiki",
+  "default_language": "en",
+  "time_zone": "UTC",
+  "main_page_namespace_id": -2,
+  "main_page_title": "Main Page",
+  "main_namespace_allows_subpages": false,
+  "hide_title_on_main_page": true,
+  "case_sensitive_titles": false,
+  "rights": {},
+  "additional_groups": {},
+  "skins": [
+    "default"
+  ],
+  "media_backend": "wikimedia_commons",
+  "email_server": {
+    "host": "",
+    "port": 25,
+    "user": "",
+    "password": "",
+    "use_tls": false,
+    "use_ssl": false,
+    "ssl_keyfile": null,
+    "ssl_certfile": null,
+    "timeout": null,
+    "from": "noreply@example.com"
+  }
+}

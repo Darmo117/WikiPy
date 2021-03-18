@@ -1,0 +1,37 @@
+{% extends 'WikiPy/api/base.html' %}
+
+{% block page_title %}WikiPy API result{% endblock %}
+
+{% block head %}
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/styles/default.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.3.1/highlight.min.js"></script>
+  <style>
+    pre {
+      border: gray solid 1px;
+      border-radius: 3px;
+    }
+  </style>
+{% endblock %}
+
+{% block main_title %}WikiPy API result{% endblock %}
+
+{% block content %}
+  <p>
+    Voici la représentation HTML du format JSON. HTML est bien pour le débogage, mais inapproprié pour être utilisé
+    dans une application.
+  </p>
+  <p>
+    Spécifiez le paramètre format pour modifier le format de sortie. Pour voir la représentation non HTML du format
+    JSON, mettez <code>format=json</code>.
+  </p>
+  <p>
+    Voir la documentation complète, ou l’aide de l’API pour plus d’information.
+  </p>
+  <pre><code class="wpy-code-highlight">{{ content }}</code></pre>
+  <!--suppress JSUnresolvedVariable -->
+  <script>
+    for (let element of document.getElementsByClassName("wpy-code-highlight")) {
+      hljs.highlightBlock(element);
+    }
+  </script>
+{% endblock %}

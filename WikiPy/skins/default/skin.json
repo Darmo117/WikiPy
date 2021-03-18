@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "build_date": "2021-03-01T00:32:35",
+  "home_url": "http://example.com",
+  "license": "GPL-3.0-or-later",
+  "authors": [
+    {
+      "name": "Damien Vergnet",
+      "url": "http://www.darmo-creations.net"
+    }
+  ],
+  "fallback_language": "en"
+}

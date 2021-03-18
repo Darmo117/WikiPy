@@ -1,0 +1,675 @@
+body {
+  background-color: #f1f1f1;
+}
+
+#wpy-center-col {
+  background-color: white;
+}
+
+/*****************
+ * Bottom footer *
+ *****************/
+
+html, body {
+  height: 100%;
+}
+
+#main-container {
+  flex: 1 0 auto;
+  margin-bottom: 1rem;
+}
+
+/**************
+ * Paragraphs *
+ **************/
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+/*********
+ * Links *
+ *********/
+
+a:not([class]):active, a[class=""]:active, a:not([data-toggle="collapse"]):active, a:visited:active {
+  color: goldenrod;
+}
+
+a[data-toggle="collapse"] {
+  text-decoration: none;
+}
+
+/*a:visited:not([class]), a[class=""]:visited {*/
+/*  color: #51a9ff;*/
+/*}*/
+
+a.wpy-redlink {
+  color: #ed0000;
+}
+
+/**************************
+ * Columns and menu sizes *
+ **************************/
+
+@media only screen and (max-width: 1400px) {
+  #wpy-left-col {
+    margin-left: 0 !important;
+  }
+
+  #wpy-right-col {
+    margin-right: 0 !important;
+  }
+}
+
+@media only screen and (max-width: 1224px) {
+  #wpy-right-col {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 900px) {
+  #wpy-left-col {
+    display: none;
+  }
+}
+
+#wpy-left-col,
+#wpy-right-col {
+  min-width: 16rem;
+  max-width: 16rem;
+  padding-top: 1rem;
+  font-size: 0.9rem;
+}
+
+#wpy-left-col {
+  margin-left: 4rem;
+}
+
+#wpy-right-col {
+  margin-right: 4rem;
+}
+
+#wpy-center-col {
+  width: 100%;
+}
+
+#wpy-article-nav-bar {
+  top: 56px; /* navbar height */
+  background-color: #fafafa;
+}
+
+#wpy-main-title {
+  text-align: center;
+  border-bottom: gray solid 4px;
+  margin-top: 0.25em;
+}
+
+#wpy-article {
+  padding: 0 1em;
+}
+
+#wpy-content {
+  margin-top: 2em;
+}
+
+#wpy-content {
+  margin-bottom: 1em;
+}
+
+#wpy-content h1:not(:first-child),
+#wpy-content h2:not(:first-child),
+#wpy-content h3:not(:first-child),
+#wpy-content h4:not(:first-child),
+#wpy-content h5:not(:first-child),
+#wpy-content h6:not(:first-child) {
+  margin-top: 1em;
+}
+
+#wpy-content p {
+  text-align: justify;
+}
+
+/*****************
+ * Parser output *
+ *****************/
+
+.wpy-parser-error {
+  color: darkred;
+}
+
+/**********
+ * Toasts *
+ **********/
+
+#wpy-toasts-area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 1rem;
+  z-index: 9999;
+}
+
+.toast {
+  background-color: white;
+}
+
+/****************************
+ * Fix search bar centering *
+ ****************************/
+
+#wpy-header-search-form {
+  max-width: 40em;
+}
+
+html[dir="ltr"] #wpy-header-search-form {
+  margin-right: 0 !important;
+}
+
+html[dir="rtl"] #wpy-header-search-form {
+  margin-left: 0 !important;
+}
+
+#wpy-header-search-form-button {
+  border-top-right-radius: 0.25rem;
+  border-bottom-right-radius: 0.25rem;
+}
+
+/*********
+ * Lists *
+ *********/
+
+ul {
+  margin-bottom: 0;
+}
+
+/***********
+ * Shadows *
+ ***********/
+
+.card,
+#wpy-center-col {
+  -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
+}
+
+/******************
+ * Revision lists *
+ ******************/
+
+.badge.wpy-diff-size-tag,
+.badge.wpy-tag,
+.badge.wpy-page-size-tag {
+  font-weight: normal;
+  font-size: 1em;
+}
+
+.badge.wpy-diff-size-tag {
+  font-weight: normal;
+}
+
+.badge.wpy-diff-size-tag.wpy-diff-size-tag-important {
+  font-weight: bold;
+}
+
+#wpy-revisions-list {
+  margin-top: 1em;
+}
+
+.wpy-hidden-revision-author,
+.wpy-hidden-revision-comment,
+.wpy-hidden-revision-link {
+  color: gray;
+  font-style: italic;
+  text-decoration: line-through;
+}
+
+#wpy-redirect-info {
+  font-size: 0.8em;
+}
+
+/**************
+ * Categories *
+ **************/
+
+.wpy-empty-category-message {
+  font-style: italic;
+}
+
+/*******************
+ * User link popup *
+ *******************/
+
+.wpy-user-link-tooltip-btn {
+  cursor: pointer;
+  padding: 0;
+}
+
+.wpy-popover-username {
+  font-weight: bold;
+}
+
+.popover-body ul.wpy-user-pages {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+/**************
+ * Ace editor *
+ **************/
+
+#wpy-ace-editor {
+  width: 100%;
+  border: #ced4da solid 1px;
+  border-radius: 0.25em;
+}
+
+/********
+ * Code *
+ ********/
+
+.wpy-code-highlight,
+.wpy-code-block {
+  border: gray solid 1px;
+  border-radius: 0.25em;
+  padding: 0.5em;
+  background-color: #eee;
+}
+
+.wpy-code-highlight-table tr,
+.wpy-code-highlight-table .linenos {
+  height: 100%;
+}
+
+.wpy-code-highlight-table .linenos .linenodiv {
+  height: 100%;
+  border: gray solid 1px;
+  border-bottom-left-radius: 0.25em;
+  border-top-left-radius: 0.25em;
+  background-color: #e6e6e6;
+}
+
+.wpy-code-highlight-table .linenos .linenodiv pre {
+  height: 100%;
+  padding: 0.5em;
+  color: gray;
+}
+
+.wpy-code-highlight-table .code {
+  width: 100%;
+}
+
+.wpy-code-highlight-table .code .wpy-code-highlight {
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+  margin-left: -3px; /* Fix line numbers borders */
+}
+
+code {
+  color: inherit;
+}
+
+pre {
+  margin-bottom: 0;
+}
+
+/************
+ * Pygments *
+ ************/
+
+/* Comment */
+.wpy-code-highlight-c {
+  color: #408080;
+  font-style: italic;
+}
+
+/* Error */
+.wpy-code-highlight-err {
+  text-decoration: underline wavy #FF0000;
+}
+
+/* Keyword */
+.wpy-code-highlight-k {
+  color: #008000;
+  font-weight: bold;
+}
+
+/* Operator */
+.wpy-code-highlight-o {
+  color: #666666;
+}
+
+/* Comment.Hashbang */
+.wpy-code-highlight-ch {
+  color: #408080;
+  font-style: italic;
+}
+
+/* Comment.Multiline */
+.wpy-code-highlight-cm {
+  color: #408080;
+  font-style: italic;
+}
+
+/* Comment.Preproc */
+.wpy-code-highlight-cp {
+  color: #BC7A00;
+}
+
+/* Comment.PreprocFile */
+.wpy-code-highlight-cpf {
+  color: #408080;
+  font-style: italic;
+}
+
+/* Comment.Single */
+.wpy-code-highlight-c1 {
+  color: #408080;
+  font-style: italic;
+}
+
+/* Comment.Special */
+.wpy-code-highlight-cs {
+  color: #408080;
+  font-style: italic;
+}
+
+/* Generic.Deleted */
+.wpy-code-highlight-gd {
+  color: #A00000;
+}
+
+/* Generic.Emph */
+.wpy-code-highlight-ge {
+  font-style: italic;
+}
+
+/* Generic.Error */
+.wpy-code-highlight-gr {
+  color: #FF0000;
+}
+
+/* Generic.Heading */
+.wpy-code-highlight-gh {
+  color: #000080;
+  font-weight: bold;
+}
+
+/* Generic.Inserted */
+.wpy-code-highlight-gi {
+  color: #00A000;
+}
+
+/* Generic.Output */
+.wpy-code-highlight-go {
+  color: #888888;
+}
+
+/* Generic.Prompt */
+.wpy-code-highlight-gp {
+  color: #000080;
+  font-weight: bold;
+}
+
+/* Generic.Strong */
+.wpy-code-highlight-gs {
+  font-weight: bold;
+}
+
+/* Generic.Subheading */
+.wpy-code-highlight-gu {
+  color: #800080;
+  font-weight: bold;
+}
+
+/* Generic.Traceback */
+.wpy-code-highlight-gt {
+  color: #0044DD;
+}
+
+/* Keyword.Constant */
+.wpy-code-highlight-kc {
+  color: #008000;
+  font-weight: bold;
+}
+
+/* Keyword.Declaration */
+.wpy-code-highlight-kd {
+  color: #008000;
+  font-weight: bold;
+}
+
+/* Keyword.Namespace */
+.wpy-code-highlight-kn {
+  color: #008000;
+  font-weight: bold;
+}
+
+/* Keyword.Pseudo */
+.wpy-code-highlight-kp {
+  color: #008000;
+}
+
+/* Keyword.Reserved */
+.wpy-code-highlight-kr {
+  color: #008000;
+  font-weight: bold;
+}
+
+/* Keyword.Type */
+.wpy-code-highlight-kt {
+  color: #B00040;
+}
+
+/* Literal.Number */
+.wpy-code-highlight-m {
+  color: #666666;
+}
+
+/* Literal.String */
+.wpy-code-highlight-s {
+  color: #BA2121;
+}
+
+/* Name.Attribute */
+.wpy-code-highlight-na {
+  color: #7D9029;
+}
+
+/* Name.Builtin */
+.wpy-code-highlight-nb {
+  color: #008000;
+}
+
+/* Name.Class */
+.wpy-code-highlight-nc {
+  color: #0000FF;
+  font-weight: bold;
+}
+
+/* Name.Constant */
+.wpy-code-highlight-no {
+  color: #880000;
+}
+
+/* Name.Decorator */
+.wpy-code-highlight-nd {
+  color: #AA22FF;
+}
+
+/* Name.Entity */
+.wpy-code-highlight-ni {
+  color: #999999;
+  font-weight: bold;
+}
+
+/* Name.Exception */
+.wpy-code-highlight-ne {
+  color: #D2413A;
+  font-weight: bold;
+}
+
+/* Name.Function */
+.wpy-code-highlight-nf {
+  color: #0000FF;
+}
+
+/* Name.Label */
+.wpy-code-highlight-nl {
+  color: #A0A000;
+}
+
+/* Name.Namespace */
+.wpy-code-highlight-nn {
+  color: #0000FF;
+  font-weight: bold;
+}
+
+/* Name.Tag */
+.wpy-code-highlight-nt {
+  color: #008000;
+  font-weight: bold;
+}
+
+/* Name.Variable */
+.wpy-code-highlight-nv {
+  color: #19177C;
+}
+
+/* Operator.Word */
+.wpy-code-highlight-ow {
+  color: #AA22FF;
+  font-weight: bold;
+}
+
+/* Text.Whitespace */
+.wpy-code-highlight-w {
+  color: #bbbbbb;
+}
+
+/* Literal.Number.Bin */
+.wpy-code-highlight-mb {
+  color: #666666;
+}
+
+/* Literal.Number.Float */
+.wpy-code-highlight-mf {
+  color: #666666;
+}
+
+/* Literal.Number.Hex */
+.wpy-code-highlight-mh {
+  color: #666666;
+}
+
+/* Literal.Number.Integer */
+.wpy-code-highlight-mi {
+  color: #666666;
+}
+
+/* Literal.Number.Oct */
+.wpy-code-highlight-mo {
+  color: #666666;
+}
+
+/* Literal.String.Affix */
+.wpy-code-highlight-sa {
+  color: #BA2121;
+}
+
+/* Literal.String.Backtick */
+.wpy-code-highlight-sb {
+  color: #BA2121;
+}
+
+/* Literal.String.Char */
+.wpy-code-highlight-sc {
+  color: #BA2121;
+}
+
+/* Literal.String.Delimiter */
+.wpy-code-highlight-dl {
+  color: #BA2121;
+}
+
+/* Literal.String.Doc */
+.wpy-code-highlight-sd {
+  color: #BA2121;
+  font-style: italic;
+}
+
+/* Literal.String.Double */
+.wpy-code-highlight-s2 {
+  color: #BA2121;
+}
+
+/* Literal.String.Escape */
+.wpy-code-highlight-se {
+  color: #BB6622;
+  font-weight: bold;
+}
+
+/* Literal.String.Heredoc */
+.wpy-code-highlight-sh {
+  color: #BA2121;
+}
+
+/* Literal.String.Interpol */
+.wpy-code-highlight-si {
+  color: #BB6688;
+  font-weight: bold;
+}
+
+/* Literal.String.Other */
+.wpy-code-highlight-sx {
+  color: #008000;
+}
+
+/* Literal.String.Regex */
+.wpy-code-highlight-sr {
+  color: #BB6688;
+}
+
+/* Literal.String.Single */
+.wpy-code-highlight-s1 {
+  color: #BA2121;
+}
+
+/* Literal.String.Symbol */
+.wpy-code-highlight-ss {
+  color: #19177C;
+}
+
+/* Name.Builtin.Pseudo */
+.wpy-code-highlight-bp {
+  color: #008000;
+}
+
+/* Name.Function.Magic */
+.wpy-code-highlight-fm {
+  color: #0000FF;
+}
+
+/* Name.Variable.Class */
+.wpy-code-highlight-vc {
+  color: #19177C;
+}
+
+/* Name.Variable.Global */
+.wpy-code-highlight-vg {
+  color: #19177C;
+}
+
+/* Name.Variable.Instance */
+.wpy-code-highlight-vi {
+  color: #19177C;
+}
+
+/* Name.Variable.Magic */
+.wpy-code-highlight-vm {
+  color: #19177C;
+}
+
+/* Literal.Number.Integer.Long */
+.wpy-code-highlight-il {
+  color: #666666;
+}

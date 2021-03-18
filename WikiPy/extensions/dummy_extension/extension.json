@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "build_date": "2020-12-26T23:41:12",
+  "home_url": "http://example.com",
+  "license": "Dummy-license",
+  "authors": [
+    {
+      "name": "Darmo",
+      "url": "http://www.darmo-creations.net"
+    },
+    {
+      "name": "Billy"
+    },
+    {
+      "name": "..."
+    }
+  ],
+  "fallback_language": "en"
+}

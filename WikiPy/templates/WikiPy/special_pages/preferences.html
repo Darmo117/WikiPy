@@ -1,0 +1,98 @@
+{% load wpy_tags %}
+
+<form id="wpy-prefs-form" method="post">
+  <input type="hidden" name="warn-unsaved" value="1">
+
+  {% with form=wpy_context.prefs_form trans_prefix='special.preferences.form.' %}
+    <div class="card">
+      <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <a class="nav-link active" href="#wpy-prefs-form-personal-info-tab-content"
+               id="wpy-prefs-form-personal-info-tab" data-toggle="tab"
+               aria-controls="wpy-prefs-form-personal-info-tab-content" aria-selected="true">
+              {% wpy_translate trans_prefix|add:'tab.personal_information' %}
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" href="#wpy-prefs-form-appearance-tab-content" id="wpy-prefs-form-appearance-tab"
+               data-toggle="tab" aria-controls="wpy-prefs-form-appearance-tab-content" aria-selected="false">
+              {% wpy_translate trans_prefix|add:'tab.appearance' %}
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" href="#wpy-prefs-form-editing-tab-content" id="wpy-prefs-form-editing-tab"
+               data-toggle="tab" aria-controls="wpy-prefs-form-editing-tab-content" aria-selected="false">
+              {% wpy_translate trans_prefix|add:'tab.editing' %}
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" href="#wpy-prefs-form-recent-changes-tab-content" id="wpy-prefs-form-recent-changes-tab"
+               data-toggle="tab" aria-controls="wpy-prefs-form-recent-changes-tab-content" aria-selected="false">
+              {% wpy_translate trans_prefix|add:'tab.recent_changes' %}
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" href="#wpy-prefs-form-watchlist-tab-content" id="wpy-prefs-form-watchlist-tab"
+               data-toggle="tab" aria-controls="wpy-prefs-form-watchlist-tab-content" aria-selected="false">
+              {% wpy_translate trans_prefix|add:'tab.watchlist' %}
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" href="#wpy-prefs-form-gadgets-tab-content" id="wpy-prefs-form-gadgets-tab"
+               data-toggle="tab" aria-controls="wpy-prefs-form-gadgets-tab-content" aria-selected="false">
+              {% wpy_translate trans_prefix|add:'tab.gadgets' %}
+            </a>
+          </li>
+          <li class="nav-item" role="presentation">
+            <a class="nav-link" href="#wpy-prefs-form-notifications-tab-content" id="wpy-prefs-form-notifications-tab"
+               data-toggle="tab" aria-controls="wpy-prefs-form-notifications-tab-content" aria-selected="false">
+              {% wpy_translate trans_prefix|add:'tab.notifications' %}
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="tab-content">
+        <div id="wpy-prefs-form-personal-info-tab-content" class="card-body tab-pane show active"
+             aria-labelledby="wpy-prefs-form-personal-info-tab" role="tabpanel">
+          {% include 'WikiPy/special_pages/include/preferences-personal-info.html' %}
+        </div>
+
+        <div id="wpy-prefs-form-appearance-tab-content" class="card-body tab-pane"
+             aria-labelledby="wpy-prefs-form-appearance-tab" role="tabpanel">
+          {% include 'WikiPy/special_pages/include/preferences-appearance.html' %}
+        </div>
+
+        <div id="wpy-prefs-form-editing-tab-content" class="card-body tab-pane"
+             aria-labelledby="wpy-prefs-form-editing-tab" role="tabpanel">
+          {% include 'WikiPy/special_pages/include/preferences-editing.html' %}
+        </div>
+
+        <div id="wpy-prefs-form-recent-changes-tab-content" class="card-body tab-pane"
+             aria-labelledby="wpy-prefs-form-recent-changes-tab" role="tabpanel">
+          {% include 'WikiPy/special_pages/include/preferences-recent-changes.html' %}
+        </div>
+
+        <div id="wpy-prefs-form-watchlist-tab-content" class="card-body tab-pane"
+             aria-labelledby="wpy-prefs-form-watchlist-tab" role="tabpanel">
+        </div>
+
+        <div id="wpy-prefs-form-gadgets-tab-content" class="card-body tab-pane"
+             aria-labelledby="wpy-prefs-form-gadgets-tab" role="tabpanel">
+        </div>
+
+        <div id="wpy-prefs-form-notifications-tab-content" class="card-body tab-pane"
+             aria-labelledby="wpy-prefs-form-notifications-tab" role="tabpanel">
+        </div>
+      </div>
+    </div>
+
+    {% csrf_token %}
+
+    <div class="text-center">
+      <input type="submit" id="wpy-prefs-form-submit" class="btn btn-primary"
+             value="{% wpy_translate trans_prefix|add:'submit.label' %}"/>
+    </div>
+  {% endwith %}
+</form>

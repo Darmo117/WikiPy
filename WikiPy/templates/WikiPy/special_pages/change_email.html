@@ -1,0 +1,26 @@
+{% load wpy_tags %}
+
+<div class="alert alert-info" role="alert">
+  <p>{% wpy_translate 'special.change_email.notice' %}</p>
+</div>
+{% if request.GET.success %}
+<div class="alert alert-success" role="alert">
+  <p>{% wpy_translate 'special.change_email.success' %}</p>
+  {% include 'WikiPy/special_pages/include/resend-email-button.html' %}
+</div>
+{% endif %}
+{% if request.GET.confirm_success %}
+  <div class="alert alert-success" role="alert">
+    <p>{% wpy_translate 'special.change_email.confirm_success' %}</p>
+  </div>
+{% endif %}
+
+<div class="row">
+  <div class="col"></div>
+  <div class="col">
+    <label>{% wpy_translate 'special.change_email.form.current_email.label' %}</label>
+    <p>{{ wpy_context.user.django_user.email }}</p>
+    {% include 'WikiPy/special_pages/include/form.html' with form=wpy_context.change_email_form %}
+  </div>
+  <div class="col"></div>
+</div>

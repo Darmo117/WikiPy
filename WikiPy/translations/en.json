@@ -1,0 +1,1422 @@
+{
+  "code": "en",
+  "name": "English",
+  "writing_direction": "ltr",
+  "main_namespace_name": "Main",
+  "month_names": [
+    [
+      "January",
+      "Jan."
+    ],
+    [
+      "February",
+      "Feb."
+    ],
+    [
+      "March",
+      "Mar."
+    ],
+    [
+      "April",
+      "Apr."
+    ],
+    [
+      "May",
+      "May"
+    ],
+    [
+      "June",
+      "Jun."
+    ],
+    [
+      "July",
+      "Jul."
+    ],
+    [
+      "August",
+      "Aug."
+    ],
+    [
+      "September",
+      "Sep."
+    ],
+    [
+      "October",
+      "Oct."
+    ],
+    [
+      "November",
+      "Nov."
+    ],
+    [
+      "December",
+      "Dec."
+    ]
+  ],
+  "day_names": [
+    [
+      "Monday",
+      "Mon"
+    ],
+    [
+      "Tuesday",
+      "Tue"
+    ],
+    [
+      "Wednesday",
+      "Wed"
+    ],
+    [
+      "Thursday",
+      "Thu"
+    ],
+    [
+      "Friday",
+      "Fri"
+    ],
+    [
+      "Saturday",
+      "Sat"
+    ],
+    [
+      "Sunday",
+      "Sun"
+    ]
+  ],
+  "datetime_formats": [
+    "%B %d, %Y at %H:%M",
+    "%d %B %Y at %H:%M",
+    "%Y %B %d at %H:%M",
+    "%Y-%m-%dT%H:%M:%S",
+    "%B %d, %Y at %I:%M %p",
+    "%d %B, %Y at %I:%M %p",
+    "%Y %B %d at %I:%M %p",
+    "%Y-%m-%dT%H:%M:%S %p"
+  ],
+  "default_datetime_format": 0,
+  "mappings": {
+    "parser": {
+      "error": {
+        "circular_transclusion": "Circular transclusion detected!",
+        "too_many_redirects": "Too many redirects for template “$template_name”!"
+      }
+    },
+    "email": {
+      "confirm_email": {
+        "subject": "Email address change confirmation",
+        "message": "<p>Hello, $username!</p><p>A request has been made to change your email address. Please click the following link to confirm the action.</p><p>$link</p><p>If you received this email by mistake, please do not click the link and delete it immediatly.</p>"
+      }
+    },
+    "javascript": {
+      "redlink_tooltip": "page does not exist",
+      "toast": {
+        "close": {
+          "tooltip": "Close"
+        },
+        "email_sent": {
+          "title": "Email sent",
+          "message": "A new confirmation email has been sent. The previous code is no longer valid."
+        }
+      },
+      "popover": {
+        "user": {
+          "title.female": "User <bdi class=\"wpy-popover-username\">${username}</bdi>",
+          "title.male": "User <bdi class=\"wpy-popover-username\">${username}</bdi>",
+          "title.neutral": "User <bdi class=\"wpy-popover-username\">${username}</bdi>",
+          "tooltip": "Click to show options",
+          "page": "Page",
+          "talk_page": "Talk page",
+          "contributions_page": "Contributions",
+          "block": "Block",
+          "blocks_log": "Blocks",
+          "all_logs": "All logs",
+          "deleted_contributions": "Deleted contributions",
+          "permissions": "Permissions",
+          "mass_deletion": "Mass deletion",
+          "uploads": "Uploads"
+        }
+      }
+    },
+    "duration": {
+      "days": {
+        "<=1": "$duration day",
+        ">1": "$duration days"
+      },
+      "weeks": {
+        "<=1": "$duration week",
+        ">1": "$duration weeks"
+      },
+      "months": {
+        "<=1": "$duration month",
+        ">1": "$duration months"
+      },
+      "years": {
+        "<=1": "$duration year",
+        ">1": "$duration years"
+      }
+    },
+    "group": {
+      "all": "All",
+      "users": "Users",
+      "email_confirmed": "Email confirmed",
+      "autopatrolled": "Autoconfirmed users",
+      "patrollers": "Patrollers",
+      "administrators": "Administrators",
+      "rights_managers": "Rights managers",
+      "bots": "Bots"
+    },
+    "log": {
+      "all": {
+        "title": "All logs"
+      },
+      "user_creation": {
+        "title": "User account creation log",
+        "entry": "The account ${author:user} has been created.",
+        "entry_automatic": "The account ${author:user} has been created automatically.",
+        "reason": "Account creation."
+      },
+      "user_rename": {
+        "title": "User rename log",
+        "entry": {
+          "feminine": "${author:user} has renamed user ${target_user:link} to ${subject_new_username:user}. (${reason})",
+          "masculine": "${author:user} has renamed user ${target_user:link} to ${subject_new_username:user}. (${reason})",
+          "neutral": "${author:user} has renamed user ${target_user:link} to ${subject_new_username:user}. (${reason})"
+        }
+      },
+      "user_block": {
+        "title": "User block log",
+        "entry": {
+          "feminine": "${author:user} has blocked user ${target_user:link} until ${expiration_date:date}. (${reason})",
+          "masculine": "${author:user} has blocked user ${target_user:link} until ${expiration_date:date}. (${reason})",
+          "neutral": "${author:user} has blocked user ${target_user:link} until ${expiration_date:date}. (${reason})"
+        }
+      },
+      "user_group_change": {
+        "title": "User group change log",
+        "entry": {
+          "added": "${target_user:user} was added to the group “${group:group}” by ${author:user}. (${reason})",
+          "added_until": "${target_user:user} was added to the group “${group:group}” by ${author:user} until ${expiration_date:date}. (${reason})",
+          "removed": "${target_user:user} was removed from the group “${group:group}” by ${author:user}. (${reason})"
+        },
+        "entry_automatic": {
+          "added": "${target_user:user} was added to the group “${group:group}”. (${reason})",
+          "added_until": "${target_user:user} was added to the group “${group:group}” until ${expiration_date:date}. (${reason})",
+          "removed": "${target_user:user} was removed from the group “${group:group}”. (${reason})"
+        }
+      },
+      "page_protection": {
+        "title": "Page protection log",
+        "entry": "${author:user} has set the protection level of ${full_page_title:link} to “${protection_level:group}” until ${expiration_date:date}. (${reason})",
+        "entry_no_date": "${author:user} has set the protection level of ${full_page_title:link} to “${protection_level:group}” indefinitely. (${reason})"
+      },
+      "page_creation": {
+        "title": "Page creation log",
+        "entry": "${author:user} has created the page ${full_page_title:link}. (${reason})"
+      },
+      "page_deletion": {
+        "title": "Page deletion log",
+        "entry": ""
+      },
+      "page_rename": {
+        "title": "Page rename log",
+        "entry": "${author:user} has renamed the page ${full_page_title:link} to ${new_full_page_title:link} without creating a redirection. (${reason})",
+        "entry_redirect": "${author:user} has renamed the page ${full_page_title:link} to ${new_full_page_title:link} and created a redirection. (${reason})"
+      }
+    },
+    "header": {
+      "brand": {
+        "tooltip": "Visit the main page"
+      },
+      "menu_button": "Menu",
+      "search": {
+        "input": {
+          "placeholder": "Search for a page on $project_name"
+        },
+        "button": {
+          "label": "Search",
+          "tooltip": "Go to the page with the same name if it exists"
+        }
+      },
+      "language_select": {
+        "label": "Language selector",
+        "tooltip": "Language selector"
+      }
+    },
+    "footer": {
+      "last_edit": "Page last edited on $date.",
+      "license": "Text is available under the <a href=\"https://creativecommons.org/licenses/by-sa/3.0/\">Creative Commons Attribution-ShareAlike License</a> unless otherwise noted. Other licenses may apply to multimedia content (click on each file for more details)."
+    },
+    "title": {
+      "edit": "Editing “$page_title”",
+      "create": "Creating “$page_title”",
+      "source": "Sources of “$page_title”",
+      "history": "Revision history of “$page_title”",
+      "maintenance_category": {
+        "tooltip": "This is a maintenance category"
+      }
+    },
+    "redirection_info": {
+      "is_redirection": "Redirection page",
+      "redirected_from": "Redirected from $link"
+    },
+    "menu": {
+      "navigation": "Navigation",
+      "wiki_tools": "Wiki tools",
+      "page_tools": "Page tools",
+      "more_tools": "More tools",
+      "categories": "Categories"
+    },
+    "media": {
+      "button": {
+        "size_up": {
+          "tooltip": "Enlarge"
+        }
+      },
+      "format": {
+        "not_supported": "Media type “$media_type” is not supported.",
+        "video": {
+          "not_supported": "Your browser does not support embedded videos."
+        },
+        "audio": {
+          "not_supported": "Your browser does not support embedded audio files."
+        }
+      }
+    },
+    "tag": {
+      "page_size": {
+        "label": "$content_size\u00a0B"
+      },
+      "diff_size": {
+        "tooltip": "$content_size bytes after edit"
+      },
+      "page_creation": {
+        "label": "N",
+        "tooltip": "This edit created a new page."
+      },
+      "minor_edit": {
+        "label": "m",
+        "tooltip": "This is a minor edit."
+      },
+      "bot_edit": {
+        "label": "b",
+        "tooltip": "This edit was made by a bot."
+      },
+      "current_revision": {
+        "label": "c",
+        "tooltip": "This is the current edit for the page."
+      }
+    },
+    "link": {
+      "talk": "talk",
+      "contributions": "contributions",
+      "uploads": "uploads",
+      "blocks_log": "blocks",
+      "all_logs": "logs",
+      "block": "block",
+      "deleted_contributions": "deleted contributions",
+      "permissions": "permissions",
+      "mass_deletion": "mass deletion",
+      "difference": {
+        "tooltip": "Show differences with previous revision"
+      },
+      "current": {
+        "tooltip": "Show differences with current revision"
+      },
+      "history": {
+        "tooltip": "Show history"
+      },
+      "show_hide": {
+        "tooltip": "Show/hide"
+      },
+      "edit": {
+        "tooltip": "Edit page"
+      },
+      "previous_revision": "← Previous revision",
+      "current_revision": "Current revision",
+      "next_revision": "Next revision →",
+      "redlink": {
+        "tooltip": "page does not exist"
+      },
+      "menu": {
+        "user_page": {
+          "label": "My page",
+          "tooltip": "Your user page"
+        },
+        "user_talk": {
+          "label": "Talk page",
+          "tooltip": "Your talk page"
+        },
+        "read": {
+          "label": "Read",
+          "tooltip": "See the content of this page"
+        },
+        "talk": {
+          "label": "Talk",
+          "tooltip": "Talk about the content of this page"
+        },
+        "edit": {
+          "label": "Edit",
+          "tooltip": "Edit the wikicode of this page"
+        },
+        "create": {
+          "label": "Create",
+          "tooltip": "Create this page"
+        },
+        "source": {
+          "label": "View source",
+          "tooltip": "See the wikicode of this page"
+        },
+        "history": {
+          "label": "History",
+          "tooltip": "See the revision history of this page"
+        },
+        "permalink": {
+          "label": "Permanent link",
+          "tooltip": "Permanent link to the current version of this page"
+        }
+      },
+      "main_page": {
+        "tooltip": "Go to main page"
+      }
+    },
+    "pagination": {
+      "first": "First $nb_per_page",
+      "previous": "Previous $nb_per_page",
+      "next": "Next $nb_per_page",
+      "last": "Last $nb_per_page",
+      "position": "Page $page of $total",
+      "count": "Result(s) <strong>$start</strong> to <strong>$end</strong> of <strong>$total</strong>"
+    },
+    "revisions_table": {
+      "header": {
+        "actions": "Actions",
+        "revision": "Revision",
+        "page_or_message": "Page or message",
+        "size": "Size",
+        "size_diff": "Diff",
+        "author": "Author",
+        "tags": "Tags",
+        "comment": "Comment"
+      }
+    },
+    "revision": {
+      "nav_box": {
+        "label": "Archived revision by $user_link as of $date."
+      },
+      "hidden_revision": {
+        "tooltip": "This revision is hidden"
+      },
+      "hidden_username": {
+        "label": "Hidden username",
+        "tooltip": "This username is hidden"
+      },
+      "hidden_comment": {
+        "tooltip": "This revision comment is hidden"
+      },
+      "tag_box": {
+        "title": "Tags legend",
+        "diff_size_tag": "Indicates the number of bytes the edit added/removed."
+      }
+    },
+    "form": {
+      "all_namespaces": "All",
+      "edit": {
+        "revision_warning": "<strong>Warning: You are currently editing an older version of this page.</strong> If you publish it, all edits made since this version will be lost.",
+        "interface_warning": "<strong>Warning</strong>: You are editing a page that is used for the site’s interface. Changes made on this page will affect the interface for all users on this wiki.",
+        "protection_warning": "<strong>WARNING: This page is protected.</strong> Only users belonging to the group “$group_name” can edit it for the following reason: <i>$reason</i>",
+        "deleted_warning": "<strong>WARNING</strong>: You are trying create a page that was deleted previously.",
+        "content": {
+          "label": "Edit zone:"
+        },
+        "comment": {
+          "label": "Comment",
+          "tooltip": "Enter a short summary"
+        },
+        "minor_edit": {
+          "label": "Minor edit",
+          "tooltip": "Mark as a minor edit"
+        },
+        "follow_page": {
+          "label": "Follow this page",
+          "tooltip": "Click to follow this page"
+        },
+        "maintenance_category": {
+          "label": "Maintenance category",
+          "tooltip": "Mark this page as a maintenance category"
+        },
+        "submit": {
+          "label": "Submit changes",
+          "tooltip": "Submit your changes"
+        },
+        "preview": {
+          "label": "Preview",
+          "tooltip": "Please preview your changes before submitting"
+        },
+        "diff": {
+          "label": "Show edits",
+          "tooltip": "Show edits you made"
+        },
+        "cancel": {
+          "label": "Cancel",
+          "tooltip": "Discard all changes"
+        }
+      }
+    },
+    "error": {
+      "no_results": "There are no results for the given criteria.",
+      "no_history": "There is no revision history for this page.",
+      "no_talks": "There are no discussions for this page.",
+      "undefined_revision": "The requested revision ID “$revision_id” does not exist for this page."
+    },
+    "category": {
+      "empty": "There are no pages in this category.",
+      "subcategories": {
+        "title": "Subcategories"
+      },
+      "pages": {
+        "title": "Pages in category “$category_name”"
+      }
+    },
+    "special": {
+      "error": {
+        "permission_required": "You cannot access this special page because it requires the following right(s): $rights.",
+        "go_to_main_page_message": {
+          "text": "Go back to the $main_page_link.",
+          "main_page_link_text": "main page"
+        }
+      },
+      "empty_title": {
+        "content": "The requested page title is empty or contains only the name of a namespace."
+      },
+      "bad_title": {
+        "content": "The requested page title contains an invalid character: “$invalid_char”."
+      },
+      "setup": {
+        "display_title": "Wiki setup",
+        "notice": "Enter the information to create the initial administrator and setup the wiki.",
+        "form": {
+          "error": {
+            "passwords_mismatch": "Passwords do not match.",
+            "invalid_secret_key": "Invalid secret key."
+          },
+          "username": {
+            "label": "Username",
+            "help": "Required. Unauthorized characters: <em>/</em>, <em>&lt;</em>, <em>></em>, <em>_</em>, <em>#</em>, <em>|</em>, <em>{</em>, <em>}</em>, <em>[</em> and <em>]</em>. Cannot start with <em>Anonymous-</em>",
+            "error": {
+              "invalid": "The provided username is invalid.",
+              "duplicate": "The provided username already exists or is too similar to an existing one.",
+              "required": "Please provide a username."
+            }
+          },
+          "email": {
+            "label": "Email address",
+            "help": "Required.",
+            "error": {
+              "invalid": "Invalid email address.",
+              "required": "Please provide an email address."
+            }
+          },
+          "password": {
+            "label": "Password",
+            "help": "Required.",
+            "error": {
+              "invalid": "Invalid password.",
+              "required": "Please provide a password."
+            }
+          },
+          "password_confirm": {
+            "label": "Confirm password",
+            "help": "Required.",
+            "error": {
+              "required": "Please confirm the password."
+            }
+          },
+          "secret_key": {
+            "label": "Secret key",
+            "help": "Required. It is located in the “SETUP_SECRET_KEY” file.",
+            "error": {
+              "required": "Please enter the secret key."
+            }
+          },
+          "submit": {
+            "label": "Setup"
+          }
+        }
+      },
+      "create_account": {
+        "display_title": "Create an account",
+        "form": {
+          "error": {
+            "passwords_mismatch": "Passwords do not match."
+          },
+          "username": {
+            "label": "Username",
+            "help": "Required. Unauthorized characters: <em>/</em>, <em>&lt;</em>, <em>></em>, <em>_</em>, <em>#</em>, <em>|</em>, <em>{</em>, <em>}</em>, <em>[</em> and <em>]</em>. Cannot start with <em>Anonymous-</em>",
+            "error": {
+              "invalid": "The provided username is invalid.",
+              "duplicate": "The provided username already exists or is too similar to an existing one."
+            }
+          },
+          "email": {
+            "label": "Email address",
+            "help": "Required.",
+            "error": {
+              "invalid": "Invalid email address.",
+              "required": "Please provide an email address."
+            }
+          },
+          "password": {
+            "label": "Password",
+            "help": "Required.",
+            "error": {
+              "invalid": "Invalid password.",
+              "required": "Please provide a password."
+            }
+          },
+          "password_confirm": {
+            "label": "Confirm password",
+            "help": "Required.",
+            "error": {
+              "required": "Please confirm the password."
+            }
+          },
+          "submit": {
+            "label": "Create account"
+          }
+        }
+      },
+      "login": {
+        "display_title": "Log in",
+        "form": {
+          "error": {
+            "invalid_credentials": "Invalid credentials."
+          },
+          "username": {
+            "label": "Username",
+            "help": "Required.",
+            "error": {
+              "required": "This field is required.",
+              "not_exists": "No account registered with this username."
+            }
+          },
+          "password": {
+            "label": "Password",
+            "help": "Required.",
+            "error": {
+              "required": "This field is required."
+            }
+          },
+          "submit": {
+            "label": "Log in"
+          }
+        }
+      },
+      "logout": {
+        "display_title": "Log out",
+        "form": {
+          "submit": {
+            "label": "Log out"
+          }
+        }
+      },
+      "contributions": {
+        "display_title": "Contributions",
+        "title_user": "Contributions of user “$username”",
+        "tooltip": "See the list of contributions",
+        "form": {
+          "target_user": {
+            "label": "Username",
+            "error": {
+              "not_exists": "No account registered with this name."
+            }
+          },
+          "namespace": {
+            "label": "Namespace",
+            "error": {
+              "invalid_choice": "Invalid namespace ID."
+            }
+          },
+          "from_date": {
+            "label": "From",
+            "error": {
+              "invalid": "Invalid date."
+            }
+          },
+          "to_date": {
+            "label": "To",
+            "error": {
+              "invalid": "Invalid date."
+            }
+          },
+          "only_hidden_revisions": {
+            "label": "Show only hidden revisions"
+          },
+          "only_last_edits": {
+            "label": "Show only edits that are current"
+          },
+          "only_page_creations": {
+            "label": "Show only page creations"
+          },
+          "hide_minor": {
+            "label": "Hide minor revisions"
+          },
+          "submit": {
+            "label": "Search"
+          }
+        }
+      },
+      "preferences": {
+        "display_title": "Your preferences",
+        "tooltip": "Your preferences",
+        "form": {
+          "tab": {
+            "personal_information": "Personal information",
+            "appearance": "Appearance",
+            "editing": "Editing",
+            "recent_changes": "Recent changes",
+            "watchlist": "Watchlist",
+            "gadgets": "Gadgets",
+            "notifications": "Notifications"
+          },
+          "section": {
+            "general_info": "General information",
+            "language_info": "Language information",
+            "signature": "Signature",
+            "email": "Email settings",
+            "skin": "Skin and custom style",
+            "date_info": "Date information",
+            "files": "Files",
+            "other_options": "Other options",
+            "editor": "Editor",
+            "preview": "Preview",
+            "display": "Display",
+            "hidden_edits": "Hidden edits"
+          },
+          "username": {
+            "label": "Username"
+          },
+          "groups": {
+            "label": "Belongs to group(s)"
+          },
+          "creation_date": {
+            "label": "Sign up date"
+          },
+          "edits_count": {
+            "label": "Number of edits"
+          },
+          "prefered_language": {
+            "label": "Prefered language",
+            "error": {
+              "invalid_choice": "Please select a valid language.",
+              "required": "Please select a language."
+            }
+          },
+          "gender": {
+            "label": "How do you prefer to be described as?",
+            "neutral": "They (When mentioning you, the software will use gender neutral words whenever possible)",
+            "feminine": "She",
+            "masculine": "He",
+            "help": "The software uses this setting to address you and to mention you to others using the appropriate grammatical gender. <strong>This information is public.</strong>",
+            "error": {
+              "invalid_choice": "Please select a valid gender.",
+              "required": "Please select a gender."
+            }
+          },
+          "signature_preview": {
+            "label": "Your current signature"
+          },
+          "signature": {
+            "label": "New signature",
+            "help": "Comments on talk pages should be signed with “~~~~”, which will be converted into your signature and a timestamp.",
+            "error": {
+              "required": "Signature cannot be empty.",
+              "max_length": "Signature cannot have more than 100 characters."
+            }
+          },
+          "current_email": {
+            "label": "Current email address",
+            "change": {
+              "label": "Change email address"
+            },
+            "help": "You can choose to let others contact you by email through a link on your user or talk page. Your email address is <em>not</em> revealed when other users contact you."
+          },
+          "email_confirmation_date": {
+            "label": "Email confirmation date",
+            "not_confirmed": "You have not yet confirmed your email address."
+          },
+          "users_can_send_emails": {
+            "label": "Let other users send me emails"
+          },
+          "send_copy_of_sent_emails": {
+            "label": "Send me a copy of emails I send to others"
+          },
+          "send_watchlist_emails": {
+            "label": "Send me an email whenever a page from my watchlist is edited"
+          },
+          "send_minor_watchlist_emails": {
+            "label": "Send me an email even if the edit is minor"
+          },
+          "users_email_blacklist": {
+            "label": "Prevent these users from sending me emails",
+            "error": {
+              "invalid": "One or more usernames are invalid."
+            }
+          },
+          "skin": {
+            "label": "Skin",
+            "preview": "Preview",
+            "custom_css": "Custom CSS",
+            "custom_js": "Custom JavaScript",
+            "error": {
+              "invalid_choice": "Invalid skin name.",
+              "required": "Please select a skin."
+            }
+          },
+          "custom_style": {
+            "label": "Custom CSS and JavaScript"
+          },
+          "datetime_format": {
+            "label": "Date format",
+            "auto": "No preference",
+            "error": {
+              "invalid_choice": "Invalid format.",
+              "required": "Please select a format."
+            }
+          },
+          "server_time": {
+            "label": "Server time"
+          },
+          "local_time": {
+            "label": "Local time"
+          },
+          "timezone": {
+            "label": "Timezone",
+            "error": {
+              "invalid_choice": "Invalid timezone.",
+              "required": "Please select a timezone."
+            }
+          },
+          "max_image_preview_size": {
+            "label": "Image size limit on file description pages",
+            "error": {
+              "invalid_choice": "Invalid size.",
+              "required": "Please select a size."
+            }
+          },
+          "max_image_thumbnail_size": {
+            "label": "Thumbnails size",
+            "error": {
+              "invalid_choice": "Invalid size.",
+              "required": "Please select a size."
+            }
+          },
+          "enable_media_viewer": {
+            "label": "Enable media viewer"
+          },
+          "display_maintenance_categories": {
+            "label": "Display maintenance categories"
+          },
+          "numbered_section_titles": {
+            "label": "Number section headings"
+          },
+          "confirm_rollback": {
+            "label": "Ask for confirmation when I click a rollback link"
+          },
+          "default_revisions_list_size": {
+            "label": "Default number of revisions to show per page in history pages and contributions",
+            "help": "Value must be between $min and $max inclusive.",
+            "error": {
+              "min_value": "Value should be greater than or equal to $min.",
+              "max_value": "Value should be less than or equal to $max.",
+              "required": "Please enter a value."
+            }
+          },
+          "all_edits_minor": {
+            "label": "Mark all my edits as minor"
+          },
+          "blank_comment_prompt": {
+            "label": "Prompt me when I publish without an edit comment"
+          },
+          "unsaved_changes_warning": {
+            "label": "Warn me when I exit a page with unsaved changes"
+          },
+          "show_preview_first_edit": {
+            "label": "Show preview on first edit"
+          },
+          "preview_above_edit_box": {
+            "label": "Show preview above edit box"
+          },
+          "rc_max_days": {
+            "label": "Maximum number of days to show in recent changes",
+            "help": "Value must be between $min and $max inclusive.",
+            "error": {
+              "min_value": "Value should be greater than or equal to $min.",
+              "max_value": "Value should be less than or equal to $max.",
+              "required": "Please enter a value."
+            }
+          },
+          "rc_max_revisions": {
+            "label": "Maximum number of revisions to show in recent changes",
+            "help": "Value must be between $min and $max inclusive.",
+            "error": {
+              "min_value": "Value should be greater than or equal to $min.",
+              "max_value": "Value should be less than or equal to $max.",
+              "required": "Please enter a value."
+            }
+          },
+          "rc_group_by_page": {
+            "label": "Group edits by page"
+          },
+          "rc_hide_minor": {
+            "label": "Hide minor edits"
+          },
+          "rc_hide_categories": {
+            "label": "Hide pages categorization"
+          },
+          "rc_hide_patrolled": {
+            "label": "Hide patrolled edits"
+          },
+          "rc_hide_patrolled_new_pages": {
+            "label": "Hide patrolled page creations"
+          },
+          "submit": {
+            "label": "Save changes"
+          }
+        }
+      },
+      "change_email": {
+        "display_title": "Change your email address",
+        "confirm_title": "Confirm your email address",
+        "notice": "Fill in this form to change your email address. You will receive an email on the new address to confirm it is valid.",
+        "success": "A confirmation email with a clickable link has been sent at this address. If you haven’t received anything within some minutes, click the button below to send a new one.",
+        "confirm_success": "Email address successfully changed!",
+        "resend": "Resend email",
+        "form": {
+          "error": {
+            "invalid_code": "Invalid confirmation code."
+          },
+          "current_email": {
+            "label": "Current email address"
+          },
+          "email": {
+            "label": "New email address",
+            "error": {
+              "invalid": "Invalid address"
+            }
+          },
+          "submit": {
+            "label": "Change address"
+          }
+        }
+      },
+      "page_differences": {
+        "display_title": "Page differences",
+        "title_same_page": "Differences between revisions of “$page_title”",
+        "title_two_pages": "Differences between revisions of “$page_title1” and “$page_title2”",
+        "nb_not_shown": "$nb intermediate revision(s) not shown",
+        "no_differences": "No differences",
+        "line_number": "Line $line_nb:",
+        "form": {
+          "revision_id1": {
+            "label": "Revision ID 1"
+          },
+          "revision_id2": {
+            "label": "Revision ID 2"
+          },
+          "submit": {
+            "label": "Show differences"
+          }
+        },
+        "diff_header": {
+          "previous_diff": "← Previous edit",
+          "next_diff": "Next edit →"
+        },
+        "error": {
+          "undefined_revision_id": "The requested revision ID “$revision_id” does not exist.",
+          "invalid_revision_id": "Invalid revision ID “$revision_id”.",
+          "missing_revision_id": "Missing revision ID.",
+          "read_forbidden": "You are not allowed to access one of the requested revisions."
+        }
+      },
+      "empty_page": {
+        "notice": "This page is left (almost) empty on purpose."
+      },
+      "search": {
+        "title_results": "Search results for “$query”",
+        "form": {
+          "query": {
+            "label": "Query"
+          },
+          "submit": {
+            "label": "Search"
+          },
+          "namespaces": {
+            "label": "Namespaces"
+          },
+          "default_ns_chk": {
+            "label": "Default"
+          },
+          "help_ns_chk": {
+            "label": "General help"
+          },
+          "all_ns_chk": {
+            "label": "All namespaces"
+          },
+          "search_in_talks": {
+            "label": "Search in talks"
+          }
+        }
+      },
+      "delete_page": {
+        "display_title": "Delete",
+        "tooltip": "Delete this page"
+      },
+      "rename_page": {
+        "display_title": "Rename",
+        "title_no_page": "Rename a page",
+        "title_page": "Rename page “$page_title”",
+        "tooltip": "Rename this page",
+        "notice": "From this page you can rename a page. The page to rename must exist and the new title must not.",
+        "form": {
+          "current_namespace": {
+            "label": "Namespace of the page to rename",
+            "error": {
+              "required": "Please select the namespace.",
+              "invalid_choice": "Invalid namespace."
+            }
+          },
+          "current_title": {
+            "label": "Title of the page to rename",
+            "help": "Required.",
+            "error": {
+              "required": "Please provide the page title.",
+              "invalid": "Invalid page title."
+            }
+          },
+          "new_namespace": {
+            "label": "New namespace",
+            "error": {
+              "required": "Please select the new namespace.",
+              "invalid_choice": "Invalid namespace."
+            }
+          },
+          "new_title": {
+            "label": "New title",
+            "help": "Required.",
+            "error": {
+              "required": "Please provide the new page title.",
+              "invalid": "Invalid page title."
+            }
+          },
+          "reason": {
+            "label": "Reason",
+            "help": "Required.",
+            "error": {
+              "required": "Please provide a reason."
+            }
+          },
+          "create_redirection": {
+            "label": "Leave a redirection to the new title"
+          },
+          "submit": {
+            "label": "Rename"
+          },
+          "error": {
+            "cannot_rename": "You cannot rename the page because you do not have the required rights.",
+            "cannot_edit_target_page": "You cannot edit the target page because you do not have the required rights.",
+            "origin_page_does_not_exist": "The page to rename does not exist.",
+            "target_page_already_exists": "Target page already exists.",
+            "same_old_and_new_titles": "Current and new titles are the exact same."
+          }
+        }
+      },
+      "protect_page": {
+        "display_title": "Protect",
+        "title_no_page": "Protect a page",
+        "title_page": "Protect page “$page_title”",
+        "tooltip": "Protect this page",
+        "notice": "From this page you can restrict editing and renaming of a given page to a specific user group.",
+        "form": {
+          "namespace": {
+            "label": "Page namespace",
+            "error": {
+              "required": "Please provide a namespace.",
+              "invalid_choice": "Invalid namespace."
+            }
+          },
+          "title": {
+            "label": "Page title",
+            "help": "Required.",
+            "error": {
+              "required": "Please provide the page title.",
+              "invalid": "Invalid page title."
+            }
+          },
+          "level": {
+            "label": "Protection level",
+            "error": {
+              "required": "Please select a protection level.",
+              "invalid_choice": "Invalid protection level."
+            }
+          },
+          "predefined_expiration_date": {
+            "label": "Predefined expiration dates",
+            "custom_date": "Other date",
+            "infinite": "Infinite",
+            "help": "You can select a date from this list.",
+            "error": {
+              "invalid_choice": "Invalid choice."
+            }
+          },
+          "expiration_date": {
+            "label": "Expiration date",
+            "help": "Empty for infinite duration.",
+            "error": {
+              "invalid": "Invalid date."
+            }
+          },
+          "reason": {
+            "label": "Reason",
+            "help": "Required.",
+            "error": {
+              "required": "Please provide a reason."
+            }
+          },
+          "apply_to_subpages": {
+            "label": "Apply to subpages"
+          },
+          "submit": {
+            "label": "Apply"
+          },
+          "error": {
+            "protect_forbidden": "You do not have the right to change page protection level."
+          }
+        }
+      },
+      "linked_pages": {
+        "display_title": "Linked pages",
+        "tooltip": "See which pages link to this one"
+      },
+      "random_page": {
+        "display_title": "Random page",
+        "tooltip": "Go to a random page"
+      },
+      "page_information": {
+        "display_title": "Page information",
+        "tooltip": "More information about this page"
+      },
+      "logs": {
+        "tooltip": "See logs for this page",
+        "form": {
+          "type": {
+            "label": "Log"
+          },
+          "performer": {
+            "label": "Author"
+          },
+          "target": {
+            "label": "Target page or user"
+          },
+          "from_date": {
+            "label": "After"
+          },
+          "to_date": {
+            "label": "Before"
+          },
+          "submit": {
+            "label": "List"
+          }
+        }
+      },
+      "install_info": {
+        "display_title": "Installation information",
+        "general": {
+          "title": "General information",
+          "table": {
+            "version": {
+              "label": "Version"
+            },
+            "wiki_url_path": {
+              "label": "Wiki URL path"
+            },
+            "api_url_path": {
+              "label": "API URL path"
+            }
+          }
+        },
+        "resources": {
+          "table": {
+            "name": {
+              "label": "Name"
+            },
+            "version": {
+              "label": "Version"
+            },
+            "license": {
+              "label": "License"
+            },
+            "description": {
+              "label": "Description"
+            },
+            "authors": {
+              "label": "Authors",
+              "and": "and",
+              "and_others": "others"
+            }
+          },
+          "extensions": {
+            "empty": "There are no installed extensions."
+          }
+        },
+        "skins": {
+          "title": "Installed skins"
+        },
+        "extensions": {
+          "title": "Installed extensions"
+        },
+        "parser": {
+          "title": "Parser information",
+          "tags": {
+            "title": "Loaded tags",
+            "empty": "No tags.",
+            "table": {
+              "built_in": "Built-in",
+              "name": {
+                "label": "Name"
+              },
+              "extension": {
+                "label": "Extension"
+              }
+            }
+          },
+          "functions": {
+            "title": "Loaded functions",
+            "empty": "No functions.",
+            "table": {
+              "built_in": "Built-in",
+              "name": {
+                "label": "Name"
+              },
+              "extension": {
+                "label": "Extension"
+              }
+            }
+          },
+          "magic_keywords": {
+            "title": "Loaded magic keywords",
+            "empty": "No magic keywords.",
+            "table": {
+              "built_in": "Built-in",
+              "name": {
+                "label": "Name"
+              },
+              "extension": {
+                "label": "Extension"
+              }
+            }
+          }
+        },
+        "license": {
+          "not_found": "No license information was found for “$name”.",
+          "resource_error": "Invalid resource ID.",
+          "error": {
+            "title": "Error"
+          },
+          "skins": {
+            "title": "License for skin $name"
+          },
+          "extensions": {
+            "title": "License for extension $name"
+          }
+        }
+      },
+      "special_pages": {
+        "display_title": "Special pages",
+        "tooltip": "List of all special pages",
+        "legend": "Pages marked with this icon require specific rights.",
+        "requires_rights": {
+          "tooltip": "This special page requires specific rights"
+        },
+        "category": {
+          "page_lists": "Page lists",
+          "connection": "Connection and account creation",
+          "users_and_rights": "Users and rights management",
+          "logs": "Logs",
+          "redirections": "Redirection pages",
+          "page_tools": "Page tools",
+          "misc": "Other special pages"
+        }
+      }
+    },
+    "timezone": {
+      "Africa": {
+        "label": "Africa",
+        "timezones": {
+          "Africa/Addis_Ababa": "Addis Ababa",
+          "Africa/Dar_es_Salaam": "Dar es Salaam",
+          "Africa/El_Aaiun": "El Aaiún",
+          "Lome": "Lomé",
+          "Ndjamena": "N’Djamena",
+          "Sao_Tome": "São Tomé"
+        }
+      },
+      "America": {
+        "label": "America",
+        "timezones": {
+          "Araguaina": "Araguaína",
+          "Argentina/Buenos_Aires": "Argentina/Buenos Aires",
+          "Argentina/Cordoba": "Argentine/Córdoba",
+          "Argentina/La_Rioja": "Argentina/La Rioja",
+          "Argentina/Rio_Gallegos": "Argentina/Río Gallegos",
+          "Argentina/San_Juan": "Argentina/San Juan",
+          "Argentina/San_Luis": "Argentina/San Luis",
+          "Argentina/Tucuman": "Argentine/Tucumán",
+          "Asuncion": "Asunción",
+          "Bahia_Banderas": "Bahía de Banderas",
+          "Belem": "Belém",
+          "Boa_Vista": "Boa Vista",
+          "Bogota": "Bogotá",
+          "Cambridge_Bay": "Cambridge Bay",
+          "Campo_Grande": "Campo Grande",
+          "Cancun": "Cancún",
+          "Cayman": "Cayman Islands",
+          "Costa_Rica": "Costa Rica",
+          "Cuiaba": "Cuiabá",
+          "Curacao": "Curaçao",
+          "Dawson_Creek": "Dawson Creek",
+          "Eirunepe": "Eirunepé",
+          "El_Salvador": "El Salvador",
+          "Fort_Nelson": "Fort Nelson",
+          "Glace_Bay": "Glace Bay",
+          "Goose_Bay": "Goose Bay",
+          "Grand_Turk": "Grand Turk Island",
+          "Indiana/Tell_City": "Indiana/Tell City",
+          "La_Paz": "La Paz",
+          "Los_Angeles": "Los Angeles",
+          "Lower_Princes": "Lower Prince’s Quarter",
+          "Maceio": "Maceió",
+          "Mazatlan": "Mazatlán",
+          "Merida": "Mérida",
+          "Mexico_City": "Mexico City",
+          "New_York": "New York",
+          "North_Dakota/Beulah": "North Dakota/Beulah",
+          "North_Dakota/Center": "North Dakota/Center",
+          "North_Dakota/New_Salem": "North Dakota/New Salem",
+          "Port_of_Spain": "Port of Spain",
+          "Porto_Velho": "Porto Velho",
+          "Puerto_Rico": "Puerto Rico",
+          "Punta_Arenas": "Punta Arenas",
+          "Rainy_River": "Rainy River",
+          "Rankin_Inlet": "Rankin Inlet",
+          "Rio_Branco": "Rio Branco",
+          "Santarem": "Santarém",
+          "Santo_Domingo": "Santo Domingo",
+          "Sao_Paulo": "São Paulo",
+          "Scoresbysund": "Ittoqqortoormiit",
+          "St_Barthelemy": "Saint Barthélemy",
+          "St_Johns": "St. John’s",
+          "St_Kitts": "Saint Kitts",
+          "St_Lucia": "Saint Lucia",
+          "St_Thomas": "Saint Thomas",
+          "St_Vincent": "Saint Vincent",
+          "Swift_Current": "Swift Current",
+          "Thule": "Qaanaaq (Thule)",
+          "Thunder_Bay": "Thunder Bay"
+        }
+      },
+      "Antarctica": {
+        "label": "Antarctica",
+        "timezones": {
+          "DumontDUrville": "Dumont D’Urville"
+        }
+      },
+      "Arctic": {
+        "label": "Arctic",
+        "timezones": {}
+      },
+      "Asia": {
+        "label": "Asia",
+        "timezones": {
+          "Aqtau": "Aktaw",
+          "Aqtobe": "Aktobe",
+          "Ho_Chi_Minh": "Ho Chi Minh",
+          "Hong_Kong": "Hong Kong",
+          "Hovd": "Khovd",
+          "Kuala_Lumpur": "Kuala Lumpur",
+          "Phnom_Penh": "Phnom Penh",
+          "Qostanay": "Kostanay",
+          "Qyzylorda": "Kyzylorda",
+          "Urumqi": "Ürümqi"
+        }
+      },
+      "Atlantic": {
+        "label": "Atlantic Ocean",
+        "timezones": {
+          "Canary": "Canary Islands",
+          "Cape_Verde": "Cape Verde",
+          "Faroe": "Faroe Islands",
+          "Reykjavik": "Reykjavík",
+          "South_Georgia": "South Georgia",
+          "St_Helena": "Saint Helena"
+        }
+      },
+      "Australia": {
+        "label": "Australia",
+        "timezones": {
+          "Broken_Hill": "Broken Hill",
+          "Lord_Howe": "Lord Howe"
+        }
+      },
+      "Canada": {
+        "label": "Canada",
+        "timezones": {}
+      },
+      "Europe": {
+        "label": "Europe",
+        "timezones": {
+          "Busingen": "Büsingen am Hochrhein",
+          "Chisinau": "Chișinău",
+          "Isle_of_Man": "Isle of Man",
+          "San_Marino": "San Marino",
+          "Tirane": "Tirana",
+          "Zurich": "Zürich"
+        }
+      },
+      "Indian": {
+        "label": "Indian Ocean",
+        "timezones": {
+          "Christmas": "Christmas Island",
+          "Cocos": "Cocos Island",
+          "Comoro": "Comoro Islands",
+          "Kerguelen": "Kerguelen Islands",
+          "Mahe": "Mahé",
+          "Reunion": "Réunion"
+        }
+      },
+      "International": {
+        "label": "International",
+        "timezones": {}
+      },
+      "Pacific": {
+        "label": "Pacific Ocean",
+        "timezones": {
+          "Chatham": "Chatham Islands",
+          "Easter": "Easter Island",
+          "Galapagos": "Galápagos",
+          "Marquesas": "Marquesas Islands",
+          "Midway": "Midway Islands",
+          "Norfolk": "Norfolk Island",
+          "Noumea": "Nouméa",
+          "Pago_Pago": "Pago Pago",
+          "Pitcairn": "Pitcairn Islands",
+          "Port_Moresby": "Port Moresby",
+          "Wake": "Wake Island"
+        }
+      },
+      "US": {
+        "label": "United States of America",
+        "timezones": {}
+      }
+    }
+  }
+}

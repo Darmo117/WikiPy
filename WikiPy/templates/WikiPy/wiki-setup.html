@@ -1,0 +1,8 @@
+{% load wpy_tags %}
+
+<div class="alert alert-primary text-center" role="alert">
+  {% wpy_translate 'special.setup.notice' %}
+</div>
+
+{% url 'wikipy:setup' as action %}
+{% include 'WikiPy/special_pages/include/form.html' with form=wpy_context.setup_form %}

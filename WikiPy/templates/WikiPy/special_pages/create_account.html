@@ -1,0 +1,15 @@
+{% load wpy_tags %}
+
+{% if wpy_context.create_account_notice %}
+  <div class="alert alert-info" role="alert">
+    {{ wpy_context.create_account_notice }}
+  </div>
+{% endif %}
+
+<div class="row">
+  <div class="col"></div>
+  <div class="col">
+    {% include 'WikiPy/special_pages/include/form.html' with form=wpy_context.create_account_form %}
+  </div>
+  <div class="col"></div>
+</div>

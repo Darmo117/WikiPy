@@ -1,0 +1,215 @@
+{% load wpy_tags %}
+
+<span class="wpy-prefs-form-section-title row" id="wpy-prefs-form-skin-section">
+  {% wpy_translate trans_prefix|add:'section.skin' %}
+</span>
+
+{% wpy_translate trans_prefix|add:'skin.preview' as preview_str %}
+{% wpy_translate trans_prefix|add:'skin.custom_css' as custom_css_str %}
+{% wpy_translate trans_prefix|add:'skin.custom_js' as custom_js_str %}
+<div class="form-group row">
+  <label class="col-sm-2 col-form-label">
+    {% wpy_translate trans_prefix|add:'skin.label' %}
+  </label>
+  <div class="col-sm-8">
+    <ul class="list-unstyled">
+      {% for s in form.skin %}
+        <li class="custom-control custom-radio">
+          {{ s.tag }}
+          <label class="custom-control-label" for="{{ form.skin.id_for_label|slice:':-2' }}_{{ forloop.counter0 }}">
+            {{ s.choice_label }}
+          </label>
+          ({% wpy_inner_link wpy_context.main_page_namespace.id wpy_context.main_page_title text=preview_str tooltip='' new_tab=True use_skin=s.data.value %}
+          | {% wpy_inner_link NS_USER wpy_context.user.username|add:'/'|add:s.data.value|add:'.css' text=custom_css_str %}
+          | {% wpy_inner_link NS_USER wpy_context.user.username|add:'/'|add:s.data.value|add:'.js' text=custom_js_str %})
+        </li>
+      {% endfor %}
+    </ul>
+    {% if form.skin.errors %}
+      <div class="invalid-feedback" style="display: block">
+        {% for error in form.skin.errors.as_data %}
+          {% wpy_translate trans_prefix|add:'skin.error.'|add:error.code %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="form-group row">
+  <label class="col-sm-2 col-form-label">
+    {% wpy_translate trans_prefix|add:'custom_style.label' %}
+  </label>
+  <div class="col-sm-8">
+    <span class="form-control-plaintext">
+      {% wpy_inner_link NS_USER wpy_context.user.username|add:'/common.css' text=custom_css_str %}<br/>
+      {% wpy_inner_link NS_USER wpy_context.user.username|add:'/common.js' text=custom_js_str %}
+    </span>
+  </div>
+</div>
+
+<span class="wpy-prefs-form-section-title row" id="wpy-prefs-form-date-info-section">
+  {% wpy_translate trans_prefix|add:'section.date_info' %}
+</span>
+
+<div class="form-group row">
+  <label class="col-sm-2 col-form-label">
+    {% wpy_translate trans_prefix|add:'datetime_format.label' %}
+  </label>
+  <div class="col-sm-8">
+    <ul class="list-unstyled">
+      {% for f in form.datetime_format %}
+        <li class="custom-control custom-radio">
+          {{ f.tag }}
+          <label class="custom-control-label"
+                 for="{{ form.datetime_format.id_for_label|slice:':-2' }}_{{ forloop.counter0 }}">
+            {% if forloop.counter0 == 0 %}
+              {% wpy_translate trans_prefix|add:'datetime_format.'|add:f.choice_label %}
+            {% else %}
+              {% wpy_format_date wpy_context.date_time f.choice_label %}
+            {% endif %}
+          </label>
+        </li>
+      {% endfor %}
+    </ul>
+    {% if form.datetime_format.errors %}
+      <div class="invalid-feedback" style="display: block">
+        {% for error in form.datetime_format.errors.as_data %}
+          {% wpy_translate trans_prefix|add:'datetime_format.error.'|add:error.code %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="form-group row">
+  <label class="col-sm-2 col-form-label">
+    {% wpy_translate trans_prefix|add:'server_time.label' %}
+  </label>
+  <div class="col-sm-8">
+    <span class="form-control-plaintext">
+      {{ wpy_context.time.hour|stringformat:'02d' }}:{{ wpy_context.time.minute|stringformat:'02d' }}
+    </span>
+  </div>
+</div>
+
+<div class="form-group row">
+  <label class="col-sm-2 col-form-label">
+    {% wpy_translate trans_prefix|add:'local_time.label' %}
+  </label>
+  <div class="col-sm-8">
+    <span class="form-control-plaintext">
+      {{ wpy_context.user_time.hour|stringformat:'02d' }}:{{ wpy_context.user_time.minute|stringformat:'02d' }}
+    </span>
+  </div>
+</div>
+
+<div class="form-group row">
+  <label class="col-sm-2 col-form-label">
+    {% wpy_translate trans_prefix|add:'timezone.label' %}
+  </label>
+  <div class="col-sm-8">
+    {{ form.timezone }}
+    {% if form.timezone.errors %}
+      <div class="invalid-feedback" style="display: block">
+        {% for error in form.timezone.errors.as_data %}
+          {% wpy_translate trans_prefix|add:'timezone.error.'|add:error.code %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<span class="wpy-prefs-form-section-title row" id="wpy-prefs-form-files-section">
+  {% wpy_translate trans_prefix|add:'section.files' %}
+</span>
+
+<div class="form-group row">
+  <label class="col-sm-2 col-form-label">
+    {% wpy_translate trans_prefix|add:'max_image_preview_size.label' %}
+  </label>
+  <div class="col-sm-8">
+    {{ form.max_image_preview_size }}
+    {% if form.max_image_preview_size.errors %}
+      <div class="invalid-feedback" style="display: block">
+        {% for error in form.max_image_preview_size.errors.as_data %}
+          {% wpy_translate trans_prefix|add:'max_image_preview_size.error.'|add:error.code %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="form-group row">
+  <label class="col-sm-2 col-form-label">
+    {% wpy_translate trans_prefix|add:'max_image_thumbnail_size.label' %}
+  </label>
+  <div class="col-sm-8">
+    {{ form.max_image_thumbnail_size }}
+    {% if form.max_image_thumbnail_size.errors %}
+      <div class="invalid-feedback" style="display: block">
+        {% for error in form.max_image_thumbnail_size.errors.as_data %}
+          {% wpy_translate trans_prefix|add:'max_image_thumbnail_size.error.'|add:error.code %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="form-group custom-control custom-checkbox row">
+  <div class="col-sm-10">
+    {{ form.enable_media_viewer }}
+    <label class="custom-control-label" for="{{ form.enable_media_viewer.id_for_label }}">
+      {% wpy_translate trans_prefix|add:'enable_media_viewer.label' %}
+    </label>
+  </div>
+</div>
+
+<span class="wpy-prefs-form-section-title row" id="wpy-prefs-form-other-options-section">
+  {% wpy_translate trans_prefix|add:'section.other_options' %}
+</span>
+
+<div class="form-group custom-control custom-checkbox row">
+  <div class="col-sm-10">
+    {{ form.display_maintenance_categories }}
+    <label class="custom-control-label" for="{{ form.display_maintenance_categories.id_for_label }}">
+      {% wpy_translate trans_prefix|add:'display_maintenance_categories.label' %}
+    </label>
+  </div>
+</div>
+
+<div class="form-group custom-control custom-checkbox row">
+  <div class="col-sm-10">
+    {{ form.numbered_section_titles }}
+    <label class="custom-control-label" for="{{ form.numbered_section_titles.id_for_label }}">
+      {% wpy_translate trans_prefix|add:'numbered_section_titles.label' %}
+    </label>
+  </div>
+</div>
+
+<div class="form-group custom-control custom-checkbox row">
+  <div class="col-sm-10">
+    {{ form.confirm_rollback }}
+    <label class="custom-control-label" for="{{ form.confirm_rollback.id_for_label }}">
+      {% wpy_translate trans_prefix|add:'confirm_rollback.label' %}
+    </label>
+  </div>
+</div>
+
+<div class="form-group row">
+  <label for="{{ form.default_revisions_list_size.id_for_label }}" class="col-sm-2 col-form-label">
+    {% wpy_translate trans_prefix|add:'default_revisions_list_size.label' %}
+  </label>
+  <div class="col-sm-8">
+    {{ form.default_revisions_list_size }}
+    {% if form.default_revisions_list_size.errors %}
+      <div class="invalid-feedback" style="display: block">
+        {% for error in form.default_revisions_list_size.errors.as_data %}
+          {% wpy_translate trans_prefix|add:'default_revisions_list_size.error.'|add:error.code min=wpy_context.revisions_list_page_min max=wpy_context.revisions_list_page_max %}
+        {% endfor %}
+      </div>
+    {% endif %}
+    <small class="form-text text-muted">
+      {% wpy_translate trans_prefix|add:'default_revisions_list_size.help' min=wpy_context.revisions_list_page_min max=wpy_context.revisions_list_page_max %}
+    </small>
+  </div>
+</div>

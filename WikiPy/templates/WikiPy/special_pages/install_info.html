@@ -1,0 +1,52 @@
+{% load wpy_tags %}
+
+{% if wpy_context.install_info_skins %}
+  {% load install_info_tags %}
+
+  <h2>{% wpy_translate 'special.install_info.general.title' %}</h2>
+  <table class="table table-striped table-hover">
+    <colgroup>
+      <col style="width: 50%"/>
+      <col style="width: 50%"/>
+    </colgroup>
+    <tbody>
+      <tr>
+        <th>{% wpy_translate 'special.install_info.general.table.version.label' %}</th>
+        <td>{{ wpy_context.install_info_wikipy_version }}</td>
+      </tr>
+      <tr>
+        <th>{% wpy_translate 'special.install_info.general.table.wiki_url_path.label' %}</th>
+        <td>
+          <code>{% wpy_external_link url=wpy_context.install_info_wiki_url_path %}</code>
+        </td>
+      </tr>
+      <tr>
+        <th>{% wpy_translate 'special.install_info.general.table.api_url_path.label' %}</th>
+        <td><code>{% wpy_external_link url=wpy_context.install_info_api_url_path %}</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>{% wpy_translate 'special.install_info.skins.title' %}</h2>
+  {% generate_resource_table wpy_context.install_info_skins 'skins' %}
+
+  <h2>{% wpy_translate 'special.install_info.extensions.title' %}</h2>
+  {% generate_resource_table wpy_context.install_info_extensions 'extensions' %}
+
+  <h2>{% wpy_translate 'special.install_info.parser.title' %}</h2>
+
+  <h3>{% wpy_translate 'special.install_info.parser.tags.title' %}</h3>
+  {% generate_parser_feature_table wpy_context.install_info_parser_tags 'tags' %}
+
+  <h3>{% wpy_translate 'special.install_info.parser.functions.title' %}</h3>
+  {% generate_parser_feature_table wpy_context.install_info_parser_functions 'functions' %}
+
+  <h3>{% wpy_translate 'special.install_info.parser.magic_keywords.title' %}</h3>
+  {% generate_parser_feature_table wpy_context.install_info_parser_magic_keywords 'magic_keywords' %}
+{% elif wpy_context.install_info_resource_error %}
+  <p>{% wpy_translate 'special.install_info.license.resource_error' name=wpy_context.install_info_resource_name %}</p>
+{% elif wpy_context.install_info_no_license %}
+  <p>{% wpy_translate 'special.install_info.license.not_found' name=wpy_context.install_info_resource_name %}</p>
+{% else %}
+  <pre class="wpy-code-block"><code>{{ wpy_context.install_info_license_text }}</code></pre>
+{% endif %}

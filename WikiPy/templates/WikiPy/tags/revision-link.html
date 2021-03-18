@@ -1,0 +1,14 @@
+{% load wpy_tags %}
+{% wpy_format_date revision.date as revision_date %}
+{% wpy_inner_link namespace_id=revision.page.namespace_id page_title=revision.page.title text=revision_date revision_id=revision.id as revision_link %}
+{% if revision.text_hidden %}
+  <span class="wpy-hidden-revision-link" title="{% wpy_translate 'revision.hidden_revision.tooltip' %}">
+    {% if wpy_context.user_can_hide %}
+      {{ revision_link }}
+    {% else %}
+      {{ revision_date }}
+    {% endif %}
+  </span>
+{% else %}
+  {{ revision_link }}
+{% endif %}

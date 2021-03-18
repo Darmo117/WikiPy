@@ -1,0 +1,23 @@
+{% load wpy_tags %}
+
+<p>
+  <span class="mdi mdi-account-alert"></span> {% wpy_translate 'special.special_pages.legend' %}
+</p>
+{% for category, pages in wpy_context.special_pages.items %}
+  {% if pages %}
+    <h2>{% wpy_translate 'special.special_pages.category.'|add:category %}</h2>
+    <div class="wpy-special-pages-list">
+      <ul>
+        {% for page in pages %}
+          <li>
+            {% wpy_inner_link namespace_id=NS_SPECIAL page_title=page.id %}
+            {% if page.requires_rights %}
+              <span class="mdi mdi-account-alert"
+                    title="{% wpy_translate 'special.special_pages.requires_rights.tooltip' %}"></span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+{% endfor %}

@@ -1,0 +1,198 @@
+{% load static %}
+{% load wpy_tags %}
+<!DOCTYPE html>
+<html class="no-js" lang="{{ wpy_context.language.code }}"
+      dir="{{ wpy_context.language.writing_direction }}">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+    {% if wpy_context.show_title %}
+      {% if wpy_context.mode == 'special' and wpy_context.page_exists %}
+        {{ wpy_context.display_title }}
+      {% else %}
+        {{ wpy_context.page.full_title }}
+      {% endif %}
+      &mdash;
+    {% endif %}
+    {{ wpy_context.project_name }}
+  </title>
+  <link rel="icon" href="{% static 'WikiPy/icons/favicon.png' %}">
+
+  {# CSS #}
+
+  {% if wpy_context.language.writing_direction == 'ltr' %}
+    <link rel="stylesheet" href="{% static 'WikiPy/libs/bootstrap/bootstrap.min.css' %}">
+  {% else %}
+    <!-- https://bootstrap.rtlcss.com -->
+    <link rel="stylesheet" href="{% static 'WikiPy/libs/bootstrap/bootstrap-rtl.min.css' %}">
+  {% endif %}
+
+  <link href="{% static 'WikiPy/css/common.css' %}" rel="stylesheet"/>
+  {# Using "with" to avoid warning #}
+  {% with path='WikiPy/skins/'|add:wpy_context.skin.id|add:'/style.css' %}
+    <link href="{% static path %}" rel="stylesheet"/>
+  {% endwith %}
+  {% if wpy_context.mode == 'special' and wpy_context.load_special_page_css %}
+    {# Using "with" to avoid warning #}
+    {% with path='WikiPy/css/special_pages/'|add:wpy_context.special_page_id|add:'.css' %}
+      <link href="{% static path %}" rel="stylesheet"/>
+    {% endwith %}
+  {% endif %}
+  {% if wpy_context.mode != 'setup' %}
+    {% wpy_static NS_WIKIPY 'Common.css' %}
+    {% wpy_static NS_WIKIPY wpy_context.skin.id|add:'.css' %}
+    {% if not wpy_context.user.is_anonymous %}
+      {% wpy_static NS_USER wpy_context.user.username|add:'/common.css' %}
+      {% wpy_static NS_USER wpy_context.user.username|add:'/'|add:wpy_context.skin.id|add:'.css' %}
+    {% endif %}
+  {% endif %}
+
+  <link rel="stylesheet" href="{% static 'WikiPy/libs/MaterialDesignIcons/css/materialdesignicons.min.css' %}"/>
+
+  {% block head %}{% endblock %}
+  {% if wpy_context.noindex %}
+    <meta name="robots" content="noindex"/>
+  {% endif %}
+
+  <noscript>
+    <!--suppress CssUnusedSymbol -->
+    <style>
+      .js-only {
+        display: none !important;
+      }
+    </style>
+  </noscript>
+</head>
+<body {{ wpy_context.skin.body_attrs }}>
+  <div aria-live="polite" aria-atomic="true">
+    <div id="wpy-toasts-area"></div>
+  </div>
+  {% block pre-content %}{% endblock %}
+  <main id="wpy-article">
+
+    {% if wpy_context.show_title %}
+      <h1 id="wpy-main-title" {% block title_attr %}{% endblock %}><!--
+        {% if wpy_context.mode == 'setup' %}
+          -->{% wpy_translate 'special.setup.display_title' %}<!--
+        {% elif wpy_context.mode == 'special' and wpy_context.page_exists %}
+          -->{{ wpy_context.display_title }}<!--
+        {% elif wpy_context.mode == 'read' or wpy_context.mode == 'special' and not wpy_context.page_exists %}
+          -->{{ wpy_context.page.full_title }}<!--
+          {% if wpy_context.page.is_category_hidden %}
+            --> <span id="wpy-maintenance-category-icon" class="mdi mdi-tools"
+                      title="{% wpy_translate 'title.maintenance_category.tooltip' %}"></span><!--
+          -->{% endif %}<!--
+        {% elif wpy_context.mode == 'edit' %}
+          {% if wpy_context.page_exists %}
+            {% if wpy_context.user_can_edit %}
+              -->{% wpy_translate 'title.edit' page_title=wpy_context.page.full_title %}<!--
+            {% else %}
+              -->{% wpy_translate 'title.source' page_title=wpy_context.page.full_title %}<!--
+            {% endif %}
+          {% else %}
+            -->{% wpy_translate 'title.create' page_title=wpy_context.page.full_title %}<!--
+          {% endif %}
+        {% elif wpy_context.mode == 'history' %}
+          -->{% wpy_translate 'title.history' page_title=wpy_context.page.full_title %}<!--
+        {% endif %}
+      --></h1>
+    {% endif %}
+
+    {% if wpy_context.suppages %}
+      <div id="wpy-suppages-info" class="text-muted">
+        <span class="mdi mdi-chevron-up"></span>
+        {% for suppage in wpy_context.suppages %}
+          {% wpy_inner_link namespace_id=suppage.namespace_id page_title=suppage.title text=suppage.subpage_title.1 %}
+          {% if not forloop.last %}|{% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if wpy_context.is_redirection or wpy_context.redirected_from %}
+      <div id="wpy-redirect-info" class="text-muted">
+        {% if wpy_context.is_redirection %}
+          {% wpy_translate 'redirection_info.is_redirection' %}
+        {% endif %}
+        {% if wpy_context.is_redirection and wpy_context.redirected_from %}
+          <br/>
+        {% endif %}
+        {% if wpy_context.redirected_from %}
+          {% wpy_inner_link namespace_id=wpy_context.redirected_from.0 page_title=wpy_context.redirected_from.1 no_redirect=1 as link %}
+          {% wpy_translate 'redirection_info.redirected_from' link=link %}
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <article id="wpy-content" lang="{{ wpy_context.content_language.code }}">
+      {% if wpy_context.mode == 'setup' %}
+        {% include 'WikiPy/wiki-setup.html' %}
+      {% elif wpy_context.mode == 'special' %}
+        {% if not wpy_context.page_exists %}
+          {{ wpy_context.rendered_page_content }}
+        {% elif wpy_context.user_can_read %}
+          {# Using "with" to avoid warning #}
+          {% with path='WikiPy/special_pages/'|add:wpy_context.special_page_id|add:'.html' %}
+            {% include path %}
+          {% endwith %}
+        {% else %}
+          {% wpy_translate 'special.error.permission_required' rights=wpy_context.required_rights|join:', ' %}
+        {% endif %}
+      {% elif wpy_context.mode == 'read' %}
+        {% include 'WikiPy/read-component.html' %}
+      {% elif wpy_context.mode == 'edit' %}
+        {% include 'WikiPy/editor-component.html' %}
+      {% elif wpy_context.mode == 'history' %}
+        {% include 'WikiPy/history-component.html' %}
+      {% endif %}
+    </article>
+  </main>
+  {% block post-content %}{% endblock %}
+
+  {# JS #}
+
+  <script>{{ js_data }}</script>
+  <script src="{% static 'WikiPy/libs/jquery-3.5.1.min.js' %}"></script>
+  <script src="{% static 'WikiPy/libs/popper.min.js' %}"></script>
+  {% if wpy_context.language.writing_direction == 'ltr' %}
+    <script src="{% static 'WikiPy/libs/bootstrap/bootstrap.min.js' %}"></script>
+  {% else %}
+    <!-- https://bootstrap.rtlcss.com -->
+    <script src="{% static 'WikiPy/libs/bootstrap/bootstrap-rtl.min.js' %}"></script>
+  {% endif %}
+
+  <script src="{% static 'WikiPy/js/common.js' %}"></script>
+  {# Using "with" to avoid warning #}
+  {% with path='WikiPy/skins/'|add:wpy_context.skin.id|add:'/script.js' %}
+    <script src="{% static path %}"></script>
+  {% endwith %}
+  {% if wpy_context.mode == 'special' and wpy_context.page_exists %}
+    {% if wpy_context.load_special_page_js %}
+      {# Using "with" to avoid warning #}
+      {% with p='WikiPy/js/special_pages/'|add:wpy_context.special_page_id|add:'.js' %}
+        <script src="{% static p %}"></script>
+      {% endwith %}
+    {% endif %}
+    {% if wpy_context.load_special_page_form %}
+      <script src="{% static 'WikiPy/js/forms.js' %}"></script>
+    {% endif %}
+  {% endif %}
+
+  {% if wpy_context.mode != 'setup' %}
+    {% wpy_static NS_WIKIPY 'Common.js' %}
+    {% wpy_static NS_WIKIPY wpy_context.skin.id|add:'.js' %}
+    {% if not wpy_context.user.is_anonymous %}
+      {% wpy_static NS_USER wpy_context.user.username|add:'/common.js' %}
+      {% wpy_static NS_USER wpy_context.user.username|add:'/'|add:wpy_context.skin.id|add:'.js' %}
+    {% endif %}
+    {% if wpy_context.mode == 'edit' %}
+      <script src="{% static 'WikiPy/js/ace-editor/ace.js' %}"></script>
+      <script src="{% static 'WikiPy/js/editor.js' %}"></script>
+      <script src="{% static 'WikiPy/js/forms.js' %}"></script>
+    {% endif %}
+  {% else %}
+    <script src="{% static 'WikiPy/js/forms.js' %}"></script>
+  {% endif %}
+</body>
+</html>

@@ -1,0 +1,44 @@
+{% load wpy_tags %}
+
+<div id="wpy-revision-tags-legend-box" class="card">
+  <div class="card-header">
+    <a data-toggle="collapse" href="#wpy-revision-collapse-body" aria-expanded="true"
+       aria-controls="wpy-revision-collapse-body" id="wpy-revision-collapse-title" class="collapsed">
+      {% wpy_translate 'revision.tag_box.title' %}
+      <span class="mdi mdi-chevron-down pull-right"></span>
+    </a>
+  </div>
+  <div id="wpy-revision-collapse-body" class="collapse" aria-labelledby="wpy-revision-collapse-title">
+    <div class="card-body">
+      <ul class="list-unstyled">
+        <li>{% wpy_revision_tags None get_tag='new' %} - {% wpy_translate 'tag.page_creation.tooltip' %}</li>
+        <li>{% wpy_revision_tags None get_tag='minor' %} - {% wpy_translate 'tag.minor_edit.tooltip' %}</li>
+        <li>{% wpy_revision_tags None get_tag='bot' %} - {% wpy_translate 'tag.bot_edit.tooltip' %}</li>
+        <li>{% wpy_revision_tags None get_tag='current' %} - {% wpy_translate 'tag.current_revision.tooltip' %}</li>
+        <li>{% wpy_diff_size_tag 123 %} - {% wpy_translate 'revision.tag_box.diff_size_tag' %}</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+{% wpy_paginator top=True %}
+<table id="wpy-revisions-list" class="table table-striped table-hover text-center">
+  <tbody>
+    <tr class="thead-light">
+      <td>{% wpy_translate 'revisions_table.header.actions' %}</td>
+      {% block table_header %}{% endblock %}
+    </tr>
+    {% for revision, revision_link, user_link in revisions %}
+      <tr class="wpy-revision-item">
+        <td>
+          {% if wpy_context.user_can_hide %}
+            {% wpy_show_hide_revision_link revision %}
+          {% endif %}
+          {% block revision_actions %}{% endblock %}
+        </td>
+        {% block table_item %}{% endblock %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% wpy_paginator top=False %}

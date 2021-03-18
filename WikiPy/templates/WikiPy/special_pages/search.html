@@ -1,0 +1,72 @@
+{% load wpy_tags %}
+{% load wpy_utils %}
+{% load search_tags %}
+
+<form id="wpy-search-form" method="get"
+      action="{% wpy_inner_link namespace_id=NS_SPECIAL page_title='search' ignore_current_title=True only_url=True %}">
+  {% with form=wpy_context.search_form trans_prefix='special.search.form.' %}
+    <div class="form-group input-group">
+      <label for="{{ form.query.id_for_label }}" class="sr-only">
+        {% wpy_translate trans_prefix|add:'query.label' %}
+      </label>
+      {{ form.query }}
+      <div class="input-group-append">
+        <button type="submit" id="wpy-search-form-submit" class="btn btn-primary">
+          <span class="mdi mdi-magnify"></span> {% wpy_translate trans_prefix|add:'submit.label' %}
+        </button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.namespaces.id_for_label }}">
+        {% wpy_translate trans_prefix|add:'namespaces.label' %}
+      </label>
+      <div class="row">
+        <div class="col">
+          {{ form.namespaces }}
+        </div>
+        <div class="col">
+          <div class="custom-control custom-checkbox">
+            <input id="wpy-search-form-default-ns" type="checkbox" class="custom-control-input"/>
+            <label for="wpy-search-form-default-ns" class="custom-control-label">
+              {% wpy_translate trans_prefix|add:'default_ns_chk.label' %}
+            </label>
+          </div>
+
+          <div class="custom-control custom-checkbox">
+            <input id="wpy-search-form-help-ns" type="checkbox" class="custom-control-input"/>
+            <label for="wpy-search-form-help-ns" class="custom-control-label">
+              {% wpy_translate trans_prefix|add:'help_ns_chk.label' %}
+            </label>
+          </div>
+
+          <div class="custom-control custom-checkbox">
+            <input id="wpy-search-form-all-ns" type="checkbox" class="custom-control-input"/>
+            <label for="wpy-search-form-all-ns" class="custom-control-label">
+              {% wpy_translate trans_prefix|add:'all_ns_chk.label' %}
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group custom-control custom-checkbox">
+      {{ form.search_in_talks }}
+      <label class="custom-control-label" for="{{ form.search_in_talks.id_for_label }}">
+        {% wpy_translate trans_prefix|add:'search_in_talks.label' %}
+      </label>
+    </div>
+  {% endwith %}
+</form>
+
+<hr/>
+
+{% if wpy_context.search_has_query %}
+  {% if wpy_context.search_results_found %}
+    {% search_results %}
+  {% else %}
+    <div id="wpy-contributions-no-result" class="alert alert-info text-center" role="alert">
+      {% wpy_translate 'error.no_results' %}
+    </div>
+  {% endif %}
+{% endif %}

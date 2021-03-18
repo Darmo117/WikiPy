@@ -1,0 +1,6 @@
+{% load wpy_tags %}
+
+<div class="alert alert-secondary">
+  {% wpy_translate 'special.rename_page.notice' %}
+</div>
+{% include 'WikiPy/special_pages/include/form.html' with form=wpy_context.rename_page_form %}

@@ -1,0 +1,1150 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.3.0">
+  <zoom_level>9</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1278</x>
+      <y>468</y>
+      <w>189</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>LockableModel
+--
+- locked: boolean
+--
++ lock(): LockableModel
++ save(*args, **kwargs): void</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1593</x>
+      <y>495</y>
+      <w>90</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>CustomUser
+--
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1278</x>
+      <y>45</y>
+      <w>495</w>
+      <h>198</h>
+    </coordinates>
+    <panel_attributes>/AbstractUser/
+--
++ username: string
++ first_name: string?
++ last_name: string?
++ email: string?
++ is_staff: boolean
++ is_active: boolean
++ date_joined: DateTime
+--
++ clean(): void
++ get_full_name(): string
++ get_short_name(): string
++ email_user(subject: string, message: string, from_email: string?, **kwargs): void
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1629</x>
+      <y>234</y>
+      <w>27</w>
+      <h>279</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;290.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1458</x>
+      <y>504</y>
+      <w>153</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;150.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1197</x>
+      <y>711</y>
+      <w>279</w>
+      <h>288</h>
+    </coordinates>
+    <panel_attributes>Page &lt;&lt;model&gt;&gt;
+--
++ namespace_id: int
++ title: string
++ deleted: boolean
++ content_model: string
++ content_language_code: string
+--
+[p] exists(): boolean
+[p] content_language(): Language
+[p] url_title(): string
+[p] full_title(): string
+[p] url_full_title(): string
+[p] namespace(): Namespace
+[p] subpage_title(): (string?, string)
+[p] is_category(): boolean
+[p] is_category_hidden(): boolean
+[p] latest_revision(): PageRevision?
++ get_revision(revision_id: int): PageRevision?
++ get_categories(): string[]
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>225</x>
+      <y>45</y>
+      <w>666</w>
+      <h>243</h>
+    </coordinates>
+    <panel_attributes>Model
+--
++ id: int
+--
+[c] from_db(db: *, field_names: string[], values: *[]): [c]
+[p] pk(meta: *?): *
+[p] pk(value: *): void
++ get_deferred_fields(): Set&lt;string&gt;
++ refresh_from_db(using: *?, fields: string[]?): void
++ serializable_value(field_name: string): *
++ save(force_insert: boolean, force_update: boolean, using: *?, update_fields: string[]?): void
++ save_base(raw: boolean, force_insert: boolean, force_update: boolean, using: *?, update_fields: string[]?): void
++ delete(using: *?, keep_parents: boolean): *
++ prepare_database_save(field: *): *
++ clean(): void
++ validate_unique(exclude: string[]?): void
+…
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>945</x>
+      <y>711</y>
+      <w>153</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>CategoryData &lt;&lt;model&gt;&gt;
+--
++ maintenance: boolean
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1089</x>
+      <y>720</y>
+      <w>126</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=+ page
+m2=0,1</panel_attributes>
+    <additional_attributes>120.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>945</x>
+      <y>810</y>
+      <w>153</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>PageCategory &lt;&lt;model&gt;&gt;
+--
++ category_name: string
++ sort_key: string?
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1089</x>
+      <y>819</y>
+      <w>126</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=+ page
+m2=*</panel_attributes>
+    <additional_attributes>120.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1593</x>
+      <y>711</y>
+      <w>333</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>PageRevision
+--
+--
+[p] object_name(): string
+[p] has_created_page(): boolean
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1467</x>
+      <y>747</y>
+      <w>144</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=+ page
+m2=1,*</panel_attributes>
+    <additional_attributes>10.0;20.0;140.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1602</x>
+      <y>558</y>
+      <w>72</w>
+      <h>171</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=+ author
+m2=*</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;170.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>0</x>
+      <y>63</y>
+      <w>162</w>
+      <h>144</h>
+    </coordinates>
+    <panel_attributes>Classes with &lt;&lt;model&gt;&gt; inherit from Model and LockableModel.
+
+Legend:
+[p] = property
+[c] = class method
+green classe are linked to the database.
+style=wordwrap
+bg=yellow</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>630</x>
+      <y>801</y>
+      <w>216</w>
+      <h>99</h>
+    </coordinates>
+    <panel_attributes>PageProtectionStatus &lt;&lt;model&gt;&gt;
+--
++ page_namespace_id: int
++ page_title: string
++ protection_level: string
++ reason: string
++ expiration_date: Date?
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLPackage</id>
+    <coordinates>
+      <x>216</x>
+      <y>0</y>
+      <w>1575</w>
+      <h>306</h>
+    </coordinates>
+    <panel_attributes>Django
+bg=cyan
+layer=-1</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>630</x>
+      <y>657</y>
+      <w>171</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>Gender &lt;&lt;frozen dataclass&gt;&gt;
+--
++ code: string
++ i18n_code: string</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1980</x>
+      <y>621</y>
+      <w>324</w>
+      <h>693</h>
+    </coordinates>
+    <panel_attributes>UserData &lt;&lt;model&gt;&gt;
+--
++ ip_address: string?
+- gender: boolean?
++ lang_code: string
++ signature: string
++ email_confirmation_date: DateTime?
++ email_confirmation_code: string?
++ email_pending_confirmation: string?
++ users_can_send_email: boolean
++ send_copy_of_sent_emails: boolean
++ send_watchlist_emails: boolean
++ send_minor_watchlist_emails: boolean
++ skin: string
++ timezone: string
++ datetime_format_id: int?
++ max_image_file_preview_size: int
++ max_image_thumbnail_size: int
++ enable_media_viewer: boolean
++ display_hidden_categories: boolean
++ numbered_section_titles: boolean
++ default_revisions_list_size: int
++ confirm_rollback: boolean
++ all_edits_minor: boolean
++ blank_comment_prompt: boolean
++ unsaved_changes_warning: boolean
++ show_preview_first_edit: boolean
++ preview_above_edit_box: boolean
++ rc_max_days: int
++ rc_max_revisions: int
++ rc_group_by_page: boolean
++ rc_hide_minor: boolean
++ rc_hide_categories: boolean
++ rc_hide_patrolled: boolean
++ rc_hide_patrolled_new_pages: boolean
+--
+[p] is_female(): boolean
+[p] is_male(): boolean
+[p] is_genderless(): boolean
+[p] gender(): Gender
+[p] gender(g: Gender): void
+[p] email_confirmed(): boolean
+[p] groups(): UserGroup[]
+[p] group_ids(): string[]
++ is_in_group(group_id: string): boolean
+[p] prefered_language(): Language
++ get_datetime_format(language: Language?): string
+[p] timezone_info(): tzinfo
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1674</x>
+      <y>540</y>
+      <w>324</w>
+      <h>153</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=user
+m2=1</panel_attributes>
+    <additional_attributes>10.0;20.0;110.0;20.0;110.0;140.0;340.0;140.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>720</x>
+      <y>333</y>
+      <w>477</w>
+      <h>288</h>
+    </coordinates>
+    <panel_attributes>UserGroup
+--
+- name: string
+- hide_rc: boolean
+- needs_validation: boolean
+- namespace_edit_rights: Dict&lt;int, string[]&gt;
+- global_rights: string[]
+- editable: boolean
+--
+[p] name(): string
++ label(language: Language): string
+[p] editable(): boolean
+[p] hide_from_recent_changes(): boolean
+[p] needs_validation(): boolean
+[p] global_rights(): string[]
+[p] namespace_edit_rights(): Dict&lt;int, string[]&gt;
++ has_right(right: string): boolean
++ has_right_on_pages_in_namespace(right: string, namespace_id: int): boolean
++ can_read_pages_in_namespace(namespace_id: int): boolean
++ can_edit_pages_in_namespace(namespace_id: int): boolean</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1899</x>
+      <y>549</y>
+      <w>153</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>UserGroupRel &lt;&lt;model&gt;&gt;
+--
++ group_id: string
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1674</x>
+      <y>513</y>
+      <w>243</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=user
+m2=*</panel_attributes>
+    <additional_attributes>10.0;20.0;150.0;20.0;150.0;70.0;250.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1899</x>
+      <y>378</y>
+      <w>189</w>
+      <h>153</h>
+    </coordinates>
+    <panel_attributes>UserBlock &lt;&lt;model&gt;&gt;
+--
++ on_whole_site: boolean
++ page: string
++ namespaces: string
++ on_own_talk_page: boolean
++ duration: int
++ reason: string?
+--
++ get_page_titles(): string[]
++ get_namespace_ids(): int[]
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1674</x>
+      <y>450</y>
+      <w>243</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=user
+m2=*</panel_attributes>
+    <additional_attributes>10.0;60.0;150.0;60.0;150.0;10.0;250.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1818</x>
+      <y>54</y>
+      <w>414</w>
+      <h>288</h>
+    </coordinates>
+    <panel_attributes>User
+--
+--
++ User(django_user: AbstractUser, data: UserData)
+[p] django_user(): AbstractUser
+[p] data(): UserData
+[p] username(): string
+[p] prefered_language: Language
+[p] groups(): UserGroup[]
+[p] group_ids(): string[]
+[p] is_bot(): boolean
+[p] is_anonymous(): boolean
+[p] is_logged_in(): boolean
++ get_datetime_format(language: Language?): string
++ is_in_group(group_id: string): boolean
++ has_right(right: string): boolean
++ has_right_on_namespace(right: string, namespace_id: int): boolean
++ can_read_page(namespace_id: int, title: string): boolean
++ can_edit_page(namespace_id: int, title: string): boolean
++ can_rename_page(namespace_id: int, title: string): boolean</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1656</x>
+      <y>333</y>
+      <w>216</w>
+      <h>180</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=- django_user
+m2=1</panel_attributes>
+    <additional_attributes>10.0;180.0;10.0;100.0;210.0;100.0;210.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2106</x>
+      <y>333</y>
+      <w>63</w>
+      <h>306</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=- data
+m2=1</panel_attributes>
+    <additional_attributes>10.0;320.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>171</x>
+      <y>333</y>
+      <w>522</w>
+      <h>288</h>
+    </coordinates>
+    <panel_attributes>Language &lt;&lt;frozen dataclass&gt;&gt;
+--
++ code: string
++ name: string
++ writing_direction: string
++ main_namespace_name: string
++ default_datetime_format_id: int
++ datetime_formats: string[]
++ month_names: (string, string)[]
++ day_names: (string, string)[]
+- mappings: Dict&lt;string, string&gt;
+- js_mappings: Dict&lt;string, string&gt;
+- ops: Dict&lt;string, Function&lt;(int, int), boolean&gt;&gt;
+--
++ get_month_name(index: int): string
++ get_month_abbreviation(index: int): string
++ get_day_name(index: int): string
++ get_day_abbreviation(index: int): string
++ translate(key: str, none_if_undefined: boolean, plural_number: int, **kwargs): string?
+[p] javascript_mappings(): Dict&lt;string, string&gt;</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1719</x>
+      <y>1440</y>
+      <w>513</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>/LogEntry &lt;&lt;model&gt;&gt;/
+--
++ date: DateTime
+--
+/[p] format_key(): string/
+[c] search(performer: string?, from_date: Date?, to_date: Date?, **kwargs): LogEntry[]
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1665</x>
+      <y>558</y>
+      <w>324</w>
+      <h>900</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=+ author
+m2=*</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;150.0;330.0;150.0;330.0;980.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>945</x>
+      <y>1602</y>
+      <w>513</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>/UserLogEntry/
+--
++ target_user: string
++ reason: string?
+--
+[c] search(performer: string?, from_date: Date?, to_date: Date?, **kwargs): LogEntry[]
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1188</x>
+      <y>1503</y>
+      <w>549</w>
+      <h>117</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>590.0;10.0;10.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1584</x>
+      <y>1602</y>
+      <w>513</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>UserCreationLogEntry
+--
++ automatic: boolean
+--
+[p] format_key(): string
+[c] search(performer: string?, from_date: Date?, to_date: Date?, **kwargs): LogEntry[]
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1818</x>
+      <y>1512</y>
+      <w>27</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;100.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>864</x>
+      <y>1746</y>
+      <w>207</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>UserRenamingLogEntry
+--
++ subject_new_username: string
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>963</x>
+      <y>1674</y>
+      <w>27</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1080</x>
+      <y>1746</y>
+      <w>207</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>UserBlockLogEntry
+--
++ expiration_date: Date?
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1170</x>
+      <y>1674</y>
+      <w>27</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1296</x>
+      <y>1746</y>
+      <w>198</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>UserGroupChangeLogEntry
+--
++ group: string
++ joined: boolean
++ expiration_date: Date?
+--
+[p] format_key(): string
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1386</x>
+      <y>1674</y>
+      <w>27</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1881</x>
+      <y>1737</y>
+      <w>513</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>/PageLogEntry/
+--
++ page_namespace_id: int
++ page_title: string
++ reason: string
+--
+[p] full_page_title(): string
+[c] search(performer: string?, from_date: Date?, to_date: Date?, **kwargs): LogEntry[]
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2124</x>
+      <y>1512</y>
+      <w>27</w>
+      <h>243</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;250.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1809</x>
+      <y>1890</y>
+      <w>162</w>
+      <h>81</h>
+    </coordinates>
+    <panel_attributes>PageProtectionLogEntry
+--
++ protection_level: string
++ expiration_date: string
+--
+[p] format_key(): string
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1881</x>
+      <y>1836</y>
+      <w>36</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>20.0;10.0;10.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1980</x>
+      <y>1890</y>
+      <w>198</w>
+      <h>117</h>
+    </coordinates>
+    <panel_attributes>PageRenamingLogEntry
+--
++ new_page_namespace_id: int
++ new_page_title: string
++ created_redirection: boolean
+--
+[p] new_full_page_title(): string
+[p] format_key(): string
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2070</x>
+      <y>1836</y>
+      <w>27</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>2187</x>
+      <y>1890</y>
+      <w>144</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>PageDeletionLogEntry
+--
++ deleted: boolean
+--
+[p] format_key(): string
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2250</x>
+      <y>1836</y>
+      <w>27</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>2340</x>
+      <y>1890</y>
+      <w>144</w>
+      <h>54</h>
+    </coordinates>
+    <panel_attributes>PageCreationLogEntry
+--
+--
+[p] format_key(): string
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>2367</x>
+      <y>1836</y>
+      <w>63</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;50.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>171</x>
+      <y>657</y>
+      <w>414</w>
+      <h>360</h>
+    </coordinates>
+    <panel_attributes>Namespace
+--
+- id: int
+- canonical_name: string
+- name: string?
+- alias: string?
+- feminine_name: string?
+- masculine_name: string?
+- is_talk: boolean
+- can_be_main: boolean
+- is_content: boolean
+- allow_subpages: boolean
+--
+[p] id(): int
+[p] canonical_name(): string
+[p] name(): string?
+[p] alias(): string?
+[p] feminine_name(): string?
+[p] masculine_name(): string?
+[p] is_talk(): boolean
+[p] can_be_main(): boolean
+[p] is_content(): boolean
+[p] allow_subpages(): boolean
++ get_name(local: boolean, gender: Gender?, as_url: boolean): string
++ matches_name(name: string): boolean</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>936</x>
+      <y>45</y>
+      <w>306</w>
+      <h>252</h>
+    </coordinates>
+    <panel_attributes>/AbstractBaseUser/
+--
++ password: string
++ last_login: DateTime?
+--
++ save(*args, **kwargs): void
++ get_username(): string
++ clean(): void
++ natural_key(): (string,)[]
+[p] is_anonymous(): boolean
+[p] is_authenticated(): boolean
++ set_password(raw_password: string): void
++ check_password(raw_password: string): boolean
++ set_unusable_password(): void
++ has_usable_password(): boolean
++ get_session_auth_hash(): string
+[c] get_email_field_name(): string
+[c] normalize_username(username: string): string
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1233</x>
+      <y>45</y>
+      <w>63</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;50.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>882</x>
+      <y>45</y>
+      <w>72</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;60.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>963</x>
+      <y>891</y>
+      <w>135</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>TalkTopic &lt;&lt;model&gt;&gt;
+--
++ title: string
++ date: DateTime
++ pinned: boolean
++ deleted: boolean
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>936</x>
+      <y>1098</y>
+      <w>180</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>Message &lt;&lt;model&gt;&gt;
+--
++ deleted: boolean
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1017</x>
+      <y>972</y>
+      <w>63</w>
+      <h>144</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=+ topic
+m2=*</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;140.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1089</x>
+      <y>918</y>
+      <w>126</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=+ page
+m2=*</panel_attributes>
+    <additional_attributes>120.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>891</x>
+      <y>531</y>
+      <w>720</w>
+      <h>612</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=+ author
+m2=*</panel_attributes>
+    <additional_attributes>780.0;20.0;670.0;20.0;670.0;140.0;10.0;140.0;10.0;650.0;50.0;650.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>972</x>
+      <y>1134</y>
+      <w>126</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=0,1
+r1=+ replied_to
+m2=*</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0;110.0;80.0;110.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1548</x>
+      <y>1854</y>
+      <w>162</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>TalkLogEntry
+--
++ date: DateTime
+--
+[p] format_key(): string
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1548</x>
+      <y>1989</y>
+      <w>162</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>TalkLogEntry
+--
++ date: DateTime
+--
+[p] format_key(): string
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1206</x>
+      <y>1098</y>
+      <w>360</w>
+      <h>63</h>
+    </coordinates>
+    <panel_attributes>MessageRevision
+--
+--
+[p] object_name(): string
+[p] has_created_topic(): boolean
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1602</x>
+      <y>1008</y>
+      <w>306</w>
+      <h>243</h>
+    </coordinates>
+    <panel_attributes>/Revision&lt;T extends Revision&gt; &lt;&lt;model&gt;&gt;/
+--
++ date: DateTime
++ comment: string?
++ hidden: boolean
++ author_hidden: boolean
++ comment_hidden: boolean
++ content: string
++ diff_size: int
++ reverted_to: int
++ minor: boolean
+--
++ get_previous(ignore_hidden: boolean): T?
++ get_next(ignore_hidden: boolean): T?
++ get_reverted_revision(): T?
+[p] size(): int
+[p] is_bot_edit(): boolean
+bg=green</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1746</x>
+      <y>774</y>
+      <w>27</w>
+      <h>252</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;260.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1557</x>
+      <y>1107</y>
+      <w>63</w>
+      <h>27</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>50.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1107</x>
+      <y>1098</y>
+      <w>117</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-
+m1=1
+r1=+ message
+m2=1,*</panel_attributes>
+    <additional_attributes>10.0;20.0;110.0;20.0</additional_attributes>
+  </element>
+</diagram>

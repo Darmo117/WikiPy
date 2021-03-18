@@ -1,0 +1,15 @@
+{% load wpy_tags %}
+
+{% if wpy_context.logout_notice %}
+  <div class="alert alert-info" role="alert">
+    {{ wpy_context.logout_notice }}
+  </div>
+{% endif %}
+
+{% if wpy_context.user.is_logged_in %}
+  <form action="{% url 'wikipy:page' wpy_context.full_page_title_url %}?return_to={{ wpy_context.full_page_title_url }}"
+        method="post">
+    <input type="submit" class="btn btn-primary" value="{% wpy_translate 'special.logout.form.submit.label' %}">
+    {% csrf_token %}
+  </form>
+{% endif %}

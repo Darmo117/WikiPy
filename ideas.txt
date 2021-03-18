@@ -1,0 +1,45 @@
+ne pas restorer l’historique des pages supprimées puis recréées sauf sur action d’un admin
+minifier le CSS et le JS
+liste de suivi
+page pour définir les éléments des menus latéraux
+
+all:
+  talk (User Talk:<username>)
+  blocks journal (Special:Journal/<username>/block)
+  uploads (Special:Uploads/<username>)
+  journals (Special:Journal/<username>)
+delete, block users, change groups:
+  block (Special:Block/<username>)
+  deleted contributions (Special:Deleted contributions/<username>)
+  permissions (Special:Permissions/<username>)
+  mass deletion (Special:Mass deletion/<username>)
+  (abuses journal (Special:Abuse filter journal/<username>))
+
+Special:Send an email/<username>
+Special:Unblock/<username>
+Special:Blocks list/<username>
+
+blocks:
+  - account creation
+  - email sending
+  - own talk page editing
+  - editing
+    - all website
+    - specific pages or namespaces
+  block user’s IP automatically
+  follow user page and talk page
+
+WikiPy:IP-block-reasons-menu
+WikiPy:Deletion-reasons-menu
+
+contribs
+(show/hide) date (diff | hist) minor/new .. (diff size) .. page (comment) (current) [revoke]
+history
+(actu | diff) radio radio chk date author (talk | contribs | block) minor/new .. (size) (diff size) .. (comment) (current) (revoke | cancel | thank)
+
+email change confirmation
+  Special:Change_email
+    submit form -> Special:Change_email (POST) -> generate code, new email pending, send email -> Special:Change_email (GET, success)
+    resend clicked (JS) -> Special:Change_email (GET, resend) -> generate code, send email
+  Mail
+    linked clicked -> Special:Change_email (GET, confirm_code & user) -> validate email -> Special:Change_email (GET, confirm_success)

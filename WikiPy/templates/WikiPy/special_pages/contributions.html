@@ -1,0 +1,118 @@
+{% load wpy_tags %}
+
+{% if wpy_context.contribs_target_username %}
+  <div class="text-center">
+    <span class="wpy-contributions-userlink">{% wpy_user_link wpy_context.contribs_target_username %}</span>
+  </div>
+  <hr/>
+{% endif %}
+<form id="wpy-contribs-form" method="get">
+  {% with form=wpy_context.contribs_form trans_prefix='special.contributions.form.' %}
+    <div class="row">
+      <div class="col form-group">
+        <label for="{{ form.target_user.id_for_label }}">
+          {% wpy_translate trans_prefix|add:'target_user.label' %}
+        </label>
+        {{ form.target_user }}
+        {% if form.target_user.errors %}
+          <div class="invalid-feedback" style="display: block">
+            {% for error in form.target_user.errors.as_data %}
+              {% wpy_translate trans_prefix|add:'target_user.error.'|add:error.code %}
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col form-group">
+        <label for="{{ form.namespace.id_for_label }}">
+          {% wpy_translate trans_prefix|add:'namespace.label' %}
+        </label>
+        {{ form.namespace }}
+        {% if form.namespace.errors %}
+          <div class="invalid-feedback" style="display: block">
+            {% for error in form.namespace.errors.as_data %}
+              {% wpy_translate trans_prefix|add:'namespace.error.'|add:error.code %}
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col form-group">
+        <label for="{{ form.from_date.id_for_label }}">
+          {% wpy_translate trans_prefix|add:'from_date.label' %}
+        </label>
+        {{ form.from_date }}
+        {% if form.from_date.errors %}
+          <div class="invalid-feedback" style="display: block">
+            {% for error in form.from_date.errors.as_data %}
+              {% wpy_translate trans_prefix|add:'from_date.error.'|add:error.code %}
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="col form-group">
+        <label for="{{ form.to_date.id_for_label }}">
+          {% wpy_translate trans_prefix|add:'to_date.label' %}
+        </label>
+        {{ form.to_date }}
+        {% if form.to_date.errors %}
+          <div class="invalid-feedback" style="display: block">
+            {% for error in form.to_date.errors.as_data %}
+              {% wpy_translate trans_prefix|add:'to_date.error.'|add:error.code %}
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="form-group text-center">
+      {% if wpy_context.user_can_hide %}
+        <div class="custom-control custom-checkbox custom-control-inline">
+          {{ form.only_hidden_revisions }}
+          <label for="{{ form.only_hidden_revisions.id_for_label }}" class="custom-control-label">
+            {% wpy_translate trans_prefix|add:'only_hidden_revisions.label' %}
+          </label>
+        </div>
+      {% endif %}
+
+      <div class="custom-control custom-checkbox custom-control-inline">
+        {{ form.only_last_edits }}
+        <label for="{{ form.only_last_edits.id_for_label }}" class="custom-control-label">
+          {% wpy_translate trans_prefix|add:'only_last_edits.label' %}
+        </label>
+      </div>
+
+      <div class="custom-control custom-checkbox custom-control-inline">
+        {{ form.only_page_creations }}
+        <label for="{{ form.only_page_creations.id_for_label }}" class="custom-control-label">
+          {% wpy_translate trans_prefix|add:'only_page_creations.label' %}
+        </label>
+      </div>
+
+      <div class="custom-control custom-checkbox custom-control-inline">
+        {{ form.hide_minor }}
+        <label for="{{ form.hide_minor.id_for_label }}" class="custom-control-label">
+          {% wpy_translate trans_prefix|add:'hide_minor.label' %}
+        </label>
+      </div>
+    </div>
+
+    <div class="text-center">
+      <input type="submit" id="wpy-contribs-form-submit" class="btn btn-primary"
+             value="{% wpy_translate trans_prefix|add:'submit.label' %}"/>
+    </div>
+  {% endwith %}
+</form>
+
+<hr/>
+
+{% if wpy_context.contribs_results_found %}
+  {% wpy_contributions_list %}
+{% else %}
+  <div id="wpy-contributions-no-result" class="alert alert-info text-center" role="alert">
+    {% wpy_translate 'error.no_results' %}
+  </div>
+{% endif %}

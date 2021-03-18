@@ -1,0 +1,1527 @@
+{
+  "code": "eo",
+  "name": "Esperanto",
+  "writing_direction": "ltr",
+  "main_namespace_name": "Ĉefa",
+  "month_names": [
+    [
+      "januaro",
+      "jan."
+    ],
+    [
+      "februaro",
+      "feb."
+    ],
+    [
+      "marto",
+      "mar."
+    ],
+    [
+      "aprilo",
+      "avr."
+    ],
+    [
+      "majo",
+      "maj."
+    ],
+    [
+      "junio",
+      "jun."
+    ],
+    [
+      "julio",
+      "jul."
+    ],
+    [
+      "aŭgusto",
+      "aŭg."
+    ],
+    [
+      "septembro",
+      "sep."
+    ],
+    [
+      "oktobro",
+      "okt."
+    ],
+    [
+      "novembro",
+      "nov."
+    ],
+    [
+      "decembro",
+      "dec."
+    ]
+  ],
+  "day_names": [
+    [
+      "lundo",
+      "lun."
+    ],
+    [
+      "mardo",
+      "mar."
+    ],
+    [
+      "merkredo",
+      "mer."
+    ],
+    [
+      "ĵaŭdo",
+      "jeu."
+    ],
+    [
+      "vendredo",
+      "ven."
+    ],
+    [
+      "sabato",
+      "sam."
+    ],
+    [
+      "dimanĉo",
+      "dim."
+    ]
+  ],
+  "datetime_formats": [
+    "%B %da, %Y, %H:%M",
+    "%da %B %Y, %H:%M",
+    "%Y %B %da, %H:%M",
+    "%Y-%m-%dT%H:%M:%S"
+  ],
+  "default_datetime_format": 1,
+  "mappings": {
+    "parser": {
+      "error": {
+        "circular_transclusion": "Transclusion circulaire détectée\u00a0!",
+        "too_many_redirects": "Trop grand nombre de redirections pour le modèle “$template_name”\u00a0!"
+      }
+    },
+    "email": {
+      "confirm_email": {
+        "subject": "Konfirmo de ŝanĝo de retadreso",
+        "message": "<p>Saluton, $username!</p><p>Ŝanĝo de via retadreso estis petita. Alklaku la ĉi-suban retligilon por konfirmi la ŝanĝon.</p><p>$link</p><p>Se vi erare ricevis ĉi tiun retmesaĝon, ne alklaku la ligilon kaj tuj forigi ĉi tiun mesaĝon.</p>"
+      }
+    },
+    "javascript": {
+      "toast": {
+        "close": {
+          "tooltip": "Malfermi"
+        },
+        "email_sent": {
+          "title": "Retmesaĝo sendita",
+          "message": "Nova retmesaĝo de konfirmo estis sendita. La antaŭa kodo ne plu estas valida."
+        }
+      },
+      "popover": {
+        "user": {
+          "title.female": "Uzantino <bdi class=\"wpy-popover-username\">${username}</bdi>",
+          "title.male": "Uzantiĉo <bdi class=\"wpy-popover-username\">${username}</bdi>",
+          "title.neutral": "Uzanto <bdi class=\"wpy-popover-username\">${username}</bdi>",
+          "tooltip": "Alklaku por montri ligilojn",
+          "page": "Paĝo",
+          "talk_page": "Diskutpaĝo",
+          "contributions_page": "Kontribuoj",
+          "block": "Forbari",
+          "blocks_log": "Forbaroj",
+          "all_logs": "Protokoloj",
+          "deleted_contributions": "Forigitaj kontribuoj",
+          "permissions": "Permesoj",
+          "mass_deletion": "Amasa forigado",
+          "uploads": "Alŝutitaj dosieroj"
+        }
+      }
+    },
+    "duration": {
+      "days": {
+        "<=1": "$duration tago",
+        ">1": "$duration tagoj"
+      },
+      "weeks": {
+        "<=1": "$duration semajno",
+        ">1": "$duration semajnoj"
+      },
+      "months": {
+        "<=1": "$duration monato",
+        ">1": "$duration monatoj"
+      },
+      "years": {
+        "<=1": "$duration jaro",
+        ">1": "$duration jaroj"
+      }
+    },
+    "group": {
+      "all": "Ĉiuj",
+      "users": "Uzantoj",
+      "email_confirmed": "Konfirmata retadreso",
+      "autopatrolled": "Aŭtokonfirmatuloj",
+      "patrollers": "Patroluloj",
+      "administrators": "Administrantoj",
+      "rights_managers": "Permesaj administrantoj",
+      "bots": "Robotoj"
+    },
+    "log": {
+      "all": {
+        "title": "Ĉiuj protokoloj"
+      },
+      "user_creation": {
+        "title": "Protokolo de kreado de uzantoj",
+        "entry": "La uzanto ${author:user} estis kreita.",
+        "entry_automatic": "La uzanto ${author:user} estis kreita aŭtomate.",
+        "reason": "Uzanto kreado."
+      },
+      "user_rename": {
+        "title": "Protokolo pri alinomigoj de uzantoj",
+        "entry": {
+          "feminine": "${author:user} alinomis uzanton ${target_user:link} al ${subject_new_username:user}. (${reason})",
+          "masculine": "${author:user} alinomis uzanton ${target_user:link} al ${subject_new_username:user}. (${reason})",
+          "neutral": "${author:user} alinomis uzanton ${target_user:link} al ${subject_new_username:user}. (${reason})"
+        }
+      },
+      "user_block": {
+        "title": "Protokolo pri forbaroj",
+        "entry": {
+          "feminine": "${author:user} forbaris la uzanton ${target_user:user} ĝis la ${expiration_date:date}. (${reason})",
+          "masculine": "${author:user} forbaris la uzanton ${target_user:user} ĝis la ${expiration_date:date}. (${reason})",
+          "neutral": "${author:user} forbaris la uzanton ${target_user:user} ĝis la ${expiration_date:date}. (${reason})"
+        }
+      },
+      "user_group_change": {
+        "title": "Protokolo pri uzanto-permesoj",
+        "entry": {
+          "added": "${author:user} aldonis ${target_user:user} al la “${group:group}” grupo. (${reason})",
+          "added_until": "${author:user} aldonis ${target_user:user} al la “${group:group}” grupo ĝis la ${expiration_date:date}. (${reason})",
+          "removed": "${author:user} forigis ${target_user:user} el la “${group:group}” grupo. (${reason})"
+        },
+        "entry_automatic": {
+          "added": "${target_user:user} estis aldonita al la “${group:group}” grupo. (${reason})",
+          "added_until": "${target_user:user} estis aldonita al la “${group:group}” grupo ĝis la ${expiration_date:date}. (${reason})",
+          "removed": "${target_user:user} estis forigita el la “${group:group}” grupo. (${reason})"
+        }
+      },
+      "page_protection": {
+        "title": "Protokolo pri paĝo-protektoj",
+        "entry": "${author:user} ŝanĝis la protekton de ${full_page_title:link} al “${protection_level:group}” ĝis la ${expiration_date:date}. (${reason})",
+        "entry_no_date": "${author:user} ŝanĝis la protekton de ${full_page_title:link} al “${protection_level:group}” senfine. (${reason})"
+      },
+      "page_creation": {
+        "title": "Protokolo pri pagô-kreadoj",
+        "entry": "${author:user} kreis la paĝon ${full_page_title:link} (${reason})"
+      },
+      "page_deletion": {
+        "title": "Protokolo pri paĝo-forigoj",
+        "entry": ""
+      },
+      "page_rename": {
+        "title": "Protokolo pri paĝ-alinomadoj",
+        "entry": "",
+        "entry_redirect": ""
+      }
+    },
+    "header": {
+      "brand": {
+        "tooltip": "Viziti la ĉefpaĝon"
+      },
+      "menu_button": "Menuo",
+      "search": {
+        "input": {
+          "placeholder": "Serĉi tra $project_name"
+        },
+        "button": {
+          "label": "Serĉi",
+          "tooltip": "Iru al paĝo kun ĉi tiu nomo se ĝi ekzistas"
+        }
+      },
+      "language_select": {
+        "label": "Lingvo-selektilo",
+        "tooltip": "Lingvo-selektilo"
+      }
+    },
+    "footer": {
+      "last_edit": "Lasta redaktita je $date.",
+      "license": "Textoj disponeblas laŭ la permesilo <a href=\"https://creativecommons.org/licenses/by-sa/3.0/deed.fr\">Krea Komunaĵo Atribuite-Samkondiĉe 3.0 Neadaptita</a>. Aldonaj kondiĉoj aplikeblus al bildoj, sonoj kaj videoj (alklaku ĉiujn dosierojn por detaloj)."
+    },
+    "title": {
+      "edit": "Redaktado de “$page_title”",
+      "create": "Kreado de “$page_title”",
+      "source": "Fonto por “$page_title”",
+      "history": "Historio de “$page_title”",
+      "maintenance_category": {
+        "tooltip": "Ĉi tiu estas bontenada kategorio"
+      }
+    },
+    "menu": {
+      "navigation": "Navigado",
+      "wiki_tools": "Vikiaj iloj",
+      "page_tools": "Paĝaj iloj",
+      "more_tools": "Aliaj iloj",
+      "categories": "Kategorioj"
+    },
+    "media": {
+      "button": {
+        "size_up": {
+          "tooltip": "Pligrandigi"
+        }
+      },
+      "format": {
+        "not_supported": "Plurmedia dosiero “$media_type” ne estas subtenata.",
+        "video": {
+          "not_supported": "Via retumilo ne subtenas integrajn videojn."
+        },
+        "audio": {
+          "not_supported": "Via retumilo ne subtenas integrajn sondosierojn."
+        }
+      }
+    },
+    "redirection_info": {
+      "is_redirection": "Alidirektiga paĝo",
+      "redirected_from": "Alidirektigita el $link"
+    },
+    "tag": {
+      "page_size": {
+        "label": "$content_size\u00a0b"
+      },
+      "diff_size": {
+        "tooltip": "$content_size bitokoj post ŝanĝo"
+      },
+      "page_creation": {
+        "label": "N",
+        "tooltip": "Ĉi tiu redakto kreis novan paĝon."
+      },
+      "minor_edit": {
+        "label": "e",
+        "tooltip": "Ĉi tiu estas eta redakto."
+      },
+      "bot_edit": {
+        "label": "r",
+        "tooltip": "Ĉi tiu ŝanĝo estis farita per roboto."
+      },
+      "current_revision": {
+        "label": "n",
+        "tooltip": "Nuna versio."
+      }
+    },
+    "link": {
+      "talk": "diskutpaĝo",
+      "contributions": "kontribuoj",
+      "uploads": "alŝutitaj dosieroj",
+      "blocks_log": "forbaroj",
+      "all_logs": "protokoloj",
+      "block": "forbari",
+      "deleted_contributions": "forigitaj kontribuoj",
+      "permissions": "permesoj",
+      "mass_deletion": "amasa forigado",
+      "difference": {
+        "tooltip": "Kompari kun la antaŭa ŝanĝo"
+      },
+      "current": {
+        "tooltip": "Kompari kun la nuna versio"
+      },
+      "history": {
+        "tooltip": "Montri historio"
+      },
+      "show_hide": {
+        "tooltip": "Montri/kaŝi"
+      },
+      "edit": {
+        "tooltip": "Redakti ĉi tiun paĝon"
+      },
+      "previous_revision": "← Antaŭa ŝanĝo",
+      "current_revision": "Nuna versio",
+      "next_revision": "Sekva ŝanĝo →",
+      "redlink": {
+        "tooltip": "paĝo ne ekzistas"
+      },
+      "menu": {
+        "user_page": {
+          "label": "Mia paĝo",
+          "tooltip": "Via uzanto-paĝo"
+        },
+        "user_talk": {
+          "label": "Mia diskutpaĝo",
+          "tooltip": "Via diskutpaĝo"
+        },
+        "read": {
+          "label": "Legi",
+          "tooltip": "Vidi ĉi tiun paĝon"
+        },
+        "talk": {
+          "label": "Diskuto",
+          "tooltip": "Diskuti pri ĉi tiu paĝo"
+        },
+        "edit": {
+          "label": "Redakti",
+          "tooltip": "Redakti ĉi tiun paĝon"
+        },
+        "create": {
+          "label": "Krei",
+          "tooltip": "Krei ĉi tiun paĝon"
+        },
+        "source": {
+          "label": "Vidi fonton",
+          "tooltip": "Vidi la vikitekston de ĉi tiu paĝo"
+        },
+        "history": {
+          "label": "Historio",
+          "tooltip": "Vidi la antaŭajn versiojn de ĉi tiu paĝo"
+        },
+        "permalink": {
+          "label": "Konstanta ligilo",
+          "tooltip": "Porĉiama ligilo al ĉi versio de la paĝo"
+        }
+      },
+      "main_page": {
+        "tooltip": "Iri al la ĉefpaĝo"
+      }
+    },
+    "pagination": {
+      "first": "$nb_per_page unuaj",
+      "previous": "$nb_per_page antaŭaj",
+      "next": "$nb_per_page sekvaj",
+      "last": "$nb_per_page lastaj",
+      "position": "Paĝo $page de $total",
+      "count": "Rezulto(j) <strong>$start</strong> al <strong>$end</strong> de <strong>$total</strong>"
+    },
+    "revisions_table": {
+      "header": {
+        "actions": "Agadoj",
+        "revision": "Versio",
+        "page": "Paĝo",
+        "size": "Grandeco",
+        "size_diff": "Malsamo",
+        "author": "Aŭtoro",
+        "tags": "Etikedoj",
+        "comment": "Resumo"
+      }
+    },
+    "revision": {
+      "nav_box": {
+        "label": "Versio je $date de $user_link."
+      },
+      "hidden_revision": {
+        "tooltip": "Tiu ŝanĝo estas kaŝita"
+      },
+      "hidden_username": {
+        "label": "Kaŝita salutnomo",
+        "tooltip": "Tiu salutnomo estas kaŝita"
+      },
+      "hidden_comment": {
+        "tooltip": "Tiu resumo estas kaŝita"
+      },
+      "tag_box": {
+        "title": "Etikadoj",
+        "diff_size_tag": "Montras kiom bitokoj estis aldonitaj/forigitaj per la ŝanĝo."
+      }
+    },
+    "form": {
+      "all_namespaces": "Ĉiuj",
+      "edit": {
+        "revision_warning": "<strong>Averto: Vi nun redaktas malnovan version de ĉi tiu paĝo.</strong> Se vi publikigos viajn ŝanĝojn, ĉiuj ŝanĝoj faritaj post tiu versio perdiĝos.",
+        "interface_warning": "<strong>Averto</strong>: Vi nun redaktas paĝon de la reteja interfaco. Se vi publikisos viajn ŝanĝojn, ĉiuj uzantoj vidos ĝin.",
+        "protection_warning": "<strong>AVERTO: Ĉi tiu paĝo estas protektita.</strong> Nur uzantoj en la grupo “$group_name” povas redakti ĝin per tiu kialo: <i>$reason</i>",
+        "deleted_warning": "<strong>AVERTO</strong>: Vi nun rekreas paĝon, kiu estis forigita.",
+        "content": {
+          "label": "Vikiteksto:"
+        },
+        "comment": {
+          "label": "Resumo",
+          "tooltip": "Enigu mallongan resumon"
+        },
+        "minor_edit": {
+          "label": "Redakteto",
+          "tooltip": "Ĉi tiu ŝanĝo estas redakteto"
+        },
+        "follow_page": {
+          "label": "Atenti",
+          "tooltip": "Aldoni ĉi tiun paĝon en via atentaro"
+        },
+        "maintenance_category": {
+          "label": "Bontenada kategorio",
+          "tooltip": "Tiu estas bontenada kategorio"
+        },
+        "submit": {
+          "label": "Publikigi la ŝanĝojn",
+          "tooltip": "Publikigi viajn ŝanĝojn"
+        },
+        "preview": {
+          "label": "Antaŭrigardi",
+          "tooltip": "Bonvolu antaŭrigardi viajn ŝanĝojn antaŭ publikigi ĝin"
+        },
+        "diff": {
+          "label": "Montri la ŝanĝojn",
+          "tooltip": "Montri la ŝanĝojn, ke vi faris al la teksto"
+        },
+        "cancel": {
+          "label": "Nuligi",
+          "tooltip": "Nuligi viajn ŝanĝojn"
+        }
+      }
+    },
+    "error": {
+      "no_results": "Neniom rezultoj por la selekitaj kriterioj.",
+      "no_history": "Ne ekzistas historio por ĉi tiu paĝo.",
+      "undefined_revision": "Versio “$revision_id” de ĉi tiu paĝo ne ekzistas."
+    },
+    "category": {
+      "empty": "Ĉi tiu kategorio nuntempe enhavas neniun paĝon.",
+      "subcategories": {
+        "title": "Subkategorioj"
+      },
+      "pages": {
+        "title": "Paĝoj en kategorio “$category_name”"
+      }
+    },
+    "special": {
+      "error": {
+        "permission_required": "Vi ne povas legi tiun paĝon ĉar ĝi bezonas ĉi tiujn specialajn rajtojn: $rights.",
+        "go_to_main_page_message": {
+          "text": "Reiri al la $main_page_link.",
+          "main_page_link_text": "ĉefpaĝo"
+        }
+      },
+      "empty_title": {
+        "display_title": "Malplena titolo",
+        "content": "La postulata paĝotitolo estas malplena aŭ enhavas nur nomon de nomspaco."
+      },
+      "bad_title": {
+        "display_title": "Fuŝa titolo",
+        "content": "La postulata paĝotitolo enhavas nevalidajn signojn: “$invalid_char”."
+      },
+      "setup": {
+        "display_title": "Vikia agordo",
+        "notice": "Enigu la informaĵojn por krei la unuan administranton kaj agordi la vikion.",
+        "form": {
+          "error": {
+            "passwords_mismatch": "La pasvortoj ne kongruas.",
+            "invalid_secret_key": "Nevalida sekreta ŝlosilo."
+          },
+          "username": {
+            "label": "Salutnomo",
+            "help": "Necesa. Nevalidaj signoj: <em>/</em>, <em>&lt;</em>, <em>></em>, <em>_</em>, <em>#</em>, <em>|</em>, <em>{</em>, <em>}</em>, <em>[</em> kaj <em>]</em>. Ne povas komenci kun <em>Anonymous-</em>",
+            "error": {
+              "invalid": "Nevalida salutnomo.",
+              "duplicate": "La enigita salutnomo jam ekzistas aŭ tro similas al alia.",
+              "required": "Bonvolu enigi salutnomon."
+            }
+          },
+          "email": {
+            "label": "Retadreso",
+            "help": "Necesa.",
+            "error": {
+              "invalid": "Nevalida retadreso.",
+              "required": "Bonvolu enigi retadreson."
+            }
+          },
+          "password": {
+            "label": "Pasvorto",
+            "help": "Necesa.",
+            "error": {
+              "invalid": "Nevalida pasvorto.",
+              "required": "Bonvolu enigi pasvorton."
+            }
+          },
+          "password_confirm": {
+            "label": "Konfirmi la pasvorton",
+            "help": "Necesa.",
+            "error": {
+              "required": "Bonvolu konfirmi la pasvorton."
+            }
+          },
+          "secret_key": {
+            "label": "Sekreta ŝlosilo",
+            "help": "Necesa. Ĝi estas en la dosiero “SETUP_SECRET_KEY”.",
+            "error": {
+              "required": "Bonvolu enigi sekretan ŝlosilon."
+            }
+          },
+          "submit": {
+            "label": "Agordi"
+          }
+        }
+      },
+      "create_account": {
+        "display_title": "Krei konton",
+        "form": {
+          "error": {
+            "passwords_mismatch": "La pasvortoj ne kongruas."
+          },
+          "username": {
+            "label": "Salutnomo",
+            "help": "Necesa. Nevalidaj signoj: <em>/</em>, <em>&lt;</em>, <em>></em>, <em>_</em>, <em>#</em>, <em>|</em>, <em>{</em>, <em>}</em>, <em>[</em> kaj <em>]</em>. Ne povas komenci kun <em>Anonymous-</em>",
+            "error": {
+              "invalid": "Nevalida salutnomo.",
+              "duplicate": "La enigita salutnomo jam ekzistas aŭ tro similas al alia.",
+              "required": "Bonvolu enigi salutnomon."
+            }
+          },
+          "email": {
+            "label": "Retadreso",
+            "help": "Necesa.",
+            "error": {
+              "invalid": "Nevalida retadreso.",
+              "required": "Bonvolu enigi retadreson."
+            }
+          },
+          "password": {
+            "label": "Pasvorto",
+            "help": "Necesa.",
+            "error": {
+              "invalid": "Nevalida pasvorto.",
+              "required": "Bonvolu enigi pasvorton."
+            }
+          },
+          "password_confirm": {
+            "label": "Konfirmi la pasvorton",
+            "help": "Necesa.",
+            "error": {
+              "required": "Bonvolu konfirmi la pasvorton."
+            }
+          },
+          "submit": {
+            "label": "Krei la konton"
+          }
+        }
+      },
+      "login": {
+        "display_title": "Ensaluti",
+        "form": {
+          "error": {
+            "invalid_credentials": "Nevalidaj ensalutiloj."
+          },
+          "username": {
+            "label": "Salutnomo",
+            "help": "Necesa.",
+            "error": {
+              "required": "Tiu kampo estas necesa.",
+              "not_exists": "Ne ekzistas koton kun tiu salutnomo."
+            }
+          },
+          "password": {
+            "label": "Pasvorto",
+            "help": "Necesa.",
+            "error": {
+              "required": "Tiu kampo estas necesa."
+            }
+          },
+          "submit": {
+            "label": "Ensaluti"
+          }
+        }
+      },
+      "logout": {
+        "display_title": "Elsaluti",
+        "form": {
+          "submit": {
+            "label": "Elsaluti"
+          }
+        }
+      },
+      "contributions": {
+        "display_title": "Kontribuoj",
+        "title_user": "Kontribuoj de “$username”",
+        "tooltip": "Iri al la listo de kontribuoj",
+        "form": {
+          "target_user": {
+            "label": "Salutnomo",
+            "error": {
+              "not_exists": "Ne ekzistas konton kun tiu salutnomo."
+            }
+          },
+          "namespace": {
+            "label": "Nomspaco",
+            "error": {
+              "invalid_choice": "Nevalida nomspaco."
+            }
+          },
+          "from_date": {
+            "label": "Post",
+            "error": {
+              "invalid": "Nevalida dato."
+            }
+          },
+          "to_date": {
+            "label": "Ĝis",
+            "error": {
+              "invalid": "Nevalida dato."
+            }
+          },
+          "only_hidden_revisions": {
+            "label": "Nur montri la kaŝitajn ŝanĝojn"
+          },
+          "only_last_edits": {
+            "label": "Nur montri la nunajn versiojn"
+          },
+          "only_page_creations": {
+            "label": "Nur montri paĝojn kreadojn"
+          },
+          "hide_minor": {
+            "label": "Kaŝi la redaketojn"
+          },
+          "submit": {
+            "label": "Serĉi"
+          }
+        }
+      },
+      "preferences": {
+        "display_title": "Viaj preferoj",
+        "tooltip": "Viaj preferoj",
+        "form": {
+          "tab": {
+            "personal_information": "Uzanto-datumoj",
+            "appearance": "Aspekto",
+            "editing": "Redaktado",
+            "recent_changes": "Lastaj ŝanĝoj",
+            "watchlist": "Atentaro",
+            "gadgets": "Aldonaĵoj",
+            "notifications": "Sciigoj"
+          },
+          "section": {
+            "general_info": "Ĝeneralaj informoj",
+            "language_info": "Lingvaj informoj",
+            "signature": "Subskribo",
+            "email": "Retadresaj opcioj",
+            "skin": "Etoso kaj personaj stiloj",
+            "date_info": "Tempaj opcioj",
+            "files": "Dosieroj",
+            "other_options": "Aliaj opcioj",
+            "editor": "Redaktilo",
+            "preview": "Antaŭrigardo",
+            "display": "Montraj opcioj",
+            "hidden_edits": "Kaŝitaj ŝanĝoj"
+          },
+          "username": {
+            "label": "Salutnomo"
+          },
+          "groups": {
+            "label": "Ano de grupo(j)"
+          },
+          "creation_date": {
+            "label": "Tempo de registrado"
+          },
+          "edits_count": {
+            "label": "Nombro de redaktoj"
+          },
+          "prefered_language": {
+            "label": "Prefera lingvo",
+            "error": {
+              "invalid_choice": "Bonvolu selekti validan lingvon.",
+              "required": "Bonvolu selekti ligvon."
+            }
+          },
+          "gender": {
+            "label": "Kiun pronomon la retejo devas uzi?",
+            "neutral": "Ri (Menciante vin, la programaro uzos seksneŭtralajn vortojn ĉiam kiam eblas)",
+            "feminine": "Ŝi",
+            "masculine": "Li",
+            "help": "Uzita por sekseca salutado de la programaro. <strong>Ĉi tiu informo montriĝos publike.</strong>",
+            "error": {
+              "invalid_choice": "Veuillez sélectionner un genre valide.",
+              "required": "Veuillez sélectionner un genre."
+            }
+          },
+          "signature_preview": {
+            "label": "Via nuna subskribo"
+          },
+          "signature": {
+            "label": "Nova subskribo",
+            "help": "Komentoj en diskutaĝoj estu subskribita kun “~~~~” kiu estos konvertita al via subskribo kaj tempindiko.",
+            "error": {
+              "required": "Subskribo ne povas esti malplenan.",
+              "max_length": "La signature doit comporter au plus 100 caractères."
+            }
+          },
+          "current_email": {
+            "label": "Adresse mail actuelle",
+            "change": {
+              "label": "Changer l’adresse mail"
+            },
+            "help": "Vous pouvez choisir de laisser les autres vous contacter par mail via un lien sur votre page de discussion ou page utilisateur. Votre adresse mail <em>n’est pas</em> révélée quand les autres utilisateurs/utilisatrices vous contactent."
+          },
+          "email_confirmation_date": {
+            "label": "Date de confirmation de l’adresse",
+            "not_confirmed": "Vous n’avez pas encore confirmé votre adresse mail."
+          },
+          "users_can_send_emails": {
+            "label": "Permettre aux autres utilisateurs et utilisatrices de m’envoyer des mails"
+          },
+          "send_copy_of_sent_emails": {
+            "label": "M’envoyer une copie des mails que j’envoie aux autres utilisateurs et utilisatrices"
+          },
+          "send_watchlist_emails": {
+            "label": "M’envoyer un mail lorsqu’une page de ma liste de suivi est modifiée"
+          },
+          "send_minor_watchlist_emails": {
+            "label": "M’envoyer un mail même pour les modifications mineures"
+          },
+          "users_email_blacklist": {
+            "label": "Empêcher ces utilisateurs de m’envoyer des mails",
+            "error": {
+              "invalid": "Un ou plusieurs noms d’utilisateur sont invalides."
+            }
+          },
+          "skin": {
+            "label": "Habillage",
+            "preview": "Prévisualiser",
+            "custom_css": "CSS personnalisé",
+            "custom_js": "JavaScript personnalisé",
+            "error": {
+              "invalid_choice": "Nom d’habillage invalide.",
+              "required": "Veuillez sélectionner un habillage."
+            }
+          },
+          "custom_style": {
+            "label": "CSS et JavaScript personnalisés"
+          },
+          "datetime_format": {
+            "label": "Format de date",
+            "auto": "Pas de préférence",
+            "error": {
+              "invalid_choice": "Format invalide.",
+              "required": "Veuillez sélectionner un format."
+            }
+          },
+          "server_time": {
+            "label": "Heure du serveur"
+          },
+          "local_time": {
+            "label": "Heure locale"
+          },
+          "timezone": {
+            "label": "Fuseau horaire",
+            "error": {
+              "invalid_choice": "Fuseau horaire invalide.",
+              "required": "Veuillez sélectionner un fuseau horaire."
+            }
+          },
+          "max_image_preview_size": {
+            "label": "Taille maximale des images sur les pages de description de fichier",
+            "error": {
+              "invalid_choice": "Taille invalide.",
+              "required": "Veuillez sélectionner une taille."
+            }
+          },
+          "max_image_thumbnail_size": {
+            "label": "Taille des vignettes",
+            "error": {
+              "invalid_choice": "Taille invalide.",
+              "required": "Veuillez sélectionner une taille."
+            }
+          },
+          "enable_media_viewer": {
+            "label": "Activer la visionneuse de médias"
+          },
+          "display_maintenance_categories": {
+            "label": "Afficher les catégories de maintenance"
+          },
+          "numbered_section_titles": {
+            "label": "Numéroter les titres de sections"
+          },
+          "confirm_rollback": {
+            "label": "Demander une confirmation quand je clique sur un lien de révocation"
+          },
+          "default_revisions_list_size": {
+            "label": "Nombre de modifications à afficher par défaut dans les historiques et contributions",
+            "help": "Doit être compris entre $min et $max inclus.",
+            "error": {
+              "min_value": "La valeur doit être supérieure ou égale à $min.",
+              "max_value": "La valeur doit être inférieure ou égale à $max.",
+              "required": "Veuillez entrer une valeur."
+            }
+          },
+          "all_edits_minor": {
+            "label": "Marquer toutes mes modifications comme mineures"
+          },
+          "blank_comment_prompt": {
+            "label": "Me demander confirmation lorsque je publie sans indiquer de commentaire"
+          },
+          "unsaved_changes_warning": {
+            "label": "Me prévenir lorsque je quitte une page avec des modifications non publiées"
+          },
+          "show_preview_first_edit": {
+            "label": "Afficher la prévisualisation à la première modification"
+          },
+          "preview_above_edit_box": {
+            "label": "Afficher la prévisualisation au-dessus de la zone d’édition"
+          },
+          "rc_max_days": {
+            "label": "Nombre maximal de jours à afficher dans les modifications récentes",
+            "help": "Doit être compris entre $min et $max inclus.",
+            "error": {
+              "min_value": "La valeur doit être supérieure ou égale à $min.",
+              "max_value": "La valeur doit être inférieure ou égale à $max.",
+              "required": "Veuillez entrer une valeur."
+            }
+          },
+          "rc_max_revisions": {
+            "label": "Nombre maximal de modifications à afficher dans les modifications récentes",
+            "help": "Doit être compris entre $min et $max inclus.",
+            "error": {
+              "min_value": "La valeur doit être supérieure ou égale à $min.",
+              "max_value": "La valeur doit être inférieure ou égale à $max.",
+              "required": "Veuillez entrer une valeur."
+            }
+          },
+          "rc_group_by_page": {
+            "label": "Grouper les modifications par page"
+          },
+          "rc_hide_minor": {
+            "label": "Masquer les modifications mineures"
+          },
+          "rc_hide_categories": {
+            "label": "Masquer les catégorisations de page"
+          },
+          "rc_hide_patrolled": {
+            "label": "Masquer les modifications patrouillées"
+          },
+          "rc_hide_patrolled_new_pages": {
+            "label": "Masquer les créations de page patrouillées"
+          },
+          "submit": {
+            "label": "Sauvegarder les changements"
+          }
+        }
+      },
+      "change_email": {
+        "display_title": "Changer votre adresse mail",
+        "confirm_title": "Confirmation de votre adresse mail",
+        "notice": "Complétez ce formulaire pour modifier votre adresse mail. Un mail vous sera envoyé à cette adresse pour confirmer sa validité.",
+        "success": "Un mail de confirmation avec un lien cliquable a été envoyé à cette adresse. Si vous n’avez rien reçu au bout de quelques minutes, cliquez sur le bouton ci-dessous pour en renvoyer un.",
+        "confirm_success": "Adresse mail changée avec succès\u00a0!",
+        "resend": "Renvoyer le mail",
+        "form": {
+          "error": {
+            "invalid_code": "Code de confirmation invalide."
+          },
+          "current_email": {
+            "label": "Adresse mail actuelle"
+          },
+          "email": {
+            "label": "Nouvelle adresse mail",
+            "error": {
+              "invalid": "Adresse invalide"
+            }
+          },
+          "submit": {
+            "label": "Changer l’adresse"
+          }
+        }
+      },
+      "page_differences": {
+        "title": "Différences de pages",
+        "display_title": "Différences de pages",
+        "title_same_page": "Différences entre versions de “$page_title”",
+        "title_two_pages": "Différences entre versions de “$page_title1” et “$page_title2”",
+        "nb_not_shown": "$nb version intermédiaires non affichées",
+        "no_differences": "Aucune différence",
+        "line_number": "Ligne $line_nb\u00a0:",
+        "form": {
+          "revision_id1": {
+            "label": "Numéro de version 1"
+          },
+          "revision_id2": {
+            "label": "Numéro de version 2"
+          },
+          "submit": {
+            "label": "Afficher les différences"
+          }
+        },
+        "diff_header": {
+          "previous_diff": "← Modification précédente",
+          "next_diff": "Modification suivante →"
+        },
+        "error": {
+          "undefined_revision_id": "Le numéro de révision “$revision_id” n’existe pas.",
+          "invalid_revision_id": "Numéro de révision “$revision_id” invalide.",
+          "missing_revision_id": "Numéro de révision manquant.",
+          "read_forbidden": "Vous n’êtes pas autorisé à visualiser une des versions demandées."
+        }
+      },
+      "empty_page": {
+        "display_title": "Page vide",
+        "notice": "Cette page est laissée intentionnellement (presque) vide."
+      },
+      "search": {
+        "display_title": "Rechercher",
+        "title_results": "Résultats de recherche pour “$query”",
+        "form": {
+          "query": {
+            "label": "Requête"
+          },
+          "submit": {
+            "label": "Rechercher"
+          },
+          "namespaces": {
+            "label": "Espaces de nom"
+          },
+          "default_ns_chk": {
+            "label": "Défaut"
+          },
+          "talk_ns_chk": {
+            "label": "Pages de discussion"
+          },
+          "help_ns_chk": {
+            "label": "Aide générale"
+          },
+          "all_ns_chk": {
+            "label": "Tous les espaces de nom"
+          }
+        }
+      },
+      "delete_page": {
+        "display_title": "Supprimer",
+        "tooltip": "Supprimer cette page"
+      },
+      "rename_page": {
+        "display_title": "Renommer",
+        "title_no_page": "Rename a page",
+        "title_page": "Rename page “$page_title”",
+        "tooltip": "Renommer cette page",
+        "notice": "",
+        "form": {
+          "current_namespace": {
+            "label": "Current page namespace",
+            "error": {
+              "required": "",
+              "invalid_choice": ""
+            }
+          },
+          "current_title": {
+            "label": "Current page title",
+            "help": "",
+            "error": {
+              "required": "",
+              "invalid": ""
+            }
+          },
+          "new_namespace": {
+            "label": "New namespace",
+            "error": {
+              "required": "",
+              "invalid_choice": ""
+            }
+          },
+          "new_title": {
+            "label": "New title",
+            "help": "",
+            "error": {
+              "required": "",
+              "invalid": ""
+            }
+          },
+          "reason": {
+            "label": "",
+            "help": "",
+            "error": {
+              "required": ""
+            }
+          },
+          "create_redirection": {
+            "label": ""
+          },
+          "submit": {
+            "label": ""
+          },
+          "error": {
+            "cannot_rename": "",
+            "cannot_edit_target_page": "",
+            "origin_page_does_not_exist": "",
+            "target_page_already_exists": "",
+            "same_old_and_new_titles": ""
+          }
+        }
+      },
+      "protect_page": {
+        "display_title": "Protéger",
+        "title_no_page": "Protéger une page",
+        "title_page": "Protéger la page “$page_title”",
+        "tooltip": "Protéger cette page",
+        "notice": "Cette page permet de restreindre l’édition et le renommage d’une page donnée à un groupe d’utilisateurices particulier",
+        "form": {
+          "namespace": {
+            "label": "Espace de nom de la page",
+            "error": {
+              "required": "Veuillez sélectionner un espace de nom.",
+              "invalid_choice": "Espace de nom invalide."
+            }
+          },
+          "title": {
+            "label": "Titre de la page",
+            "help": "Requis.",
+            "error": {
+              "required": "Veuillez renseigner le titre de la page.",
+              "invalid": "Titre de page invalide."
+            }
+          },
+          "level": {
+            "label": "Niveau de protection",
+            "error": {
+              "required": "Veuillez sélectionner un niveau de protection.",
+              "invalid_choice": "Niveau de protection invalide."
+            }
+          },
+          "predefined_expiration_date": {
+            "label": "Dates d’expiration prédéfinies",
+            "custom_date": "Alia dato",
+            "infinite": "Senfina",
+            "help": "Vous pouvez sélectionner une date dans cette liste.",
+            "error": {
+              "invalid_choice": "Nevalida opcio."
+            }
+          },
+          "expiration_date": {
+            "label": "Date d’expritation",
+            "help": "Laissez vide pour une durée infinie.",
+            "error": {
+              "invalid": "Date invalide."
+            }
+          },
+          "reason": {
+            "label": "Motif",
+            "help": "Requis.",
+            "error": {
+              "required": "Veuillez renseigner un motif."
+            }
+          },
+          "apply_to_subpages": {
+            "label": "Appliquer aux sous-pages"
+          },
+          "submit": {
+            "label": "Appliquer"
+          },
+          "error": {
+            "protect_forbidden": "Vous ne disposez pas des droits nécessaires pour modifier le niveau de protection des pages."
+          }
+        }
+      },
+      "linked_pages": {
+        "display_title": "Page liées",
+        "tooltip": "Afficher les pages qui pointent vers celle-ci"
+      },
+      "random_page": {
+        "display_title": "Page aléatoire",
+        "tooltip": "Aller sur une page aléatoire"
+      },
+      "page_information": {
+        "display_title": "Informations sur la page",
+        "tooltip": "Plus d’informations sur cette page"
+      },
+      "logs": {
+        "tooltip": "Voir les journaux de cette page",
+        "form": {
+          "type": {
+            "label": "Journal"
+          },
+          "performer": {
+            "label": "Auteur/Autrice"
+          },
+          "target": {
+            "label": "Page ou utilisateur/utilisatrice cible"
+          },
+          "from_date": {
+            "label": "Après"
+          },
+          "to_date": {
+            "label": "Avant"
+          },
+          "submit": {
+            "label": "Lister"
+          }
+        }
+      },
+      "block": {
+        "display_title": "Bloquer"
+      },
+      "hide_revisions": {
+        "display_title": "Masquer des modifications"
+      },
+      "my_page": {
+        "display_title": "Ma page"
+      },
+      "install_info": {
+        "display_title": "Informations sur l’installation",
+        "general": {
+          "title": "Informations générales",
+          "table": {
+            "version": {
+              "label": "Version"
+            },
+            "wiki_url_path": {
+              "label": "Chemin d’URL du wiki"
+            },
+            "api_url_path": {
+              "label": "Chemin d’URL de l’API"
+            }
+          }
+        },
+        "resources": {
+          "table": {
+            "name": {
+              "label": "Nom"
+            },
+            "version": {
+              "label": "Version"
+            },
+            "license": {
+              "label": "Licence"
+            },
+            "description": {
+              "label": "Description"
+            },
+            "authors": {
+              "label": "Auteurs et autrices",
+              "and": "et",
+              "and_others": "autres"
+            }
+          },
+          "extensions": {
+            "empty": "Il n’y a aucune extension installée."
+          }
+        },
+        "skins": {
+          "title": "Habillages installés"
+        },
+        "extensions": {
+          "title": "Extensions installées"
+        },
+        "parser": {
+          "title": "Informations sur l’analyseur syntaxique",
+          "tags": {
+            "title": "Balises chargées",
+            "empty": "Aucune balise.",
+            "table": {
+              "built_in": "Balise native",
+              "name": {
+                "label": "Nom"
+              },
+              "extension": {
+                "label": "Extension"
+              }
+            }
+          },
+          "functions": {
+            "title": "Fonctions chargées",
+            "empty": "Aucune fonction.",
+            "table": {
+              "built_in": "Fonction native",
+              "name": {
+                "label": "Nom"
+              },
+              "extension": {
+                "label": "Extension"
+              }
+            }
+          },
+          "magic_keywords": {
+            "title": "Mot-clés magiques chargés",
+            "empty": "Aucun mot-clé magique.",
+            "table": {
+              "built_in": "Mot-clé natif",
+              "name": {
+                "label": "Nom"
+              },
+              "extension": {
+                "label": "Extension"
+              }
+            }
+          }
+        },
+        "license": {
+          "not_found": "Aucune information de licence n’a été trouvée pour “$name”.",
+          "resource_error": "Identifiant de ressource invalide.",
+          "error": {
+            "title": "Erreur"
+          },
+          "skins": {
+            "title": "Licence pour l’habillage $name"
+          },
+          "extensions": {
+            "title": "Licence pour l’extension $name"
+          }
+        }
+      },
+      "special_pages": {
+        "display_title": "Pages spéciales",
+        "tooltip": "Liste de toutes les pages spéciales",
+        "legend": "Les pages marquées avec cette icone demandent des droits particuliers.",
+        "requires_rights": {
+          "tooltip": "Cette page nécessite des droits particuliers"
+        },
+        "category": {
+          "page_lists": "Listes de pages",
+          "connection": "Connexion et création de compte",
+          "users_and_rights": "Utilisateurs et gestion des droits",
+          "logs": "Journaux",
+          "redirections": "Pages redirigeantes",
+          "page_tools": "Outils de page",
+          "misc": "Autres pages spéciales"
+        }
+      }
+    },
+    "timezone": {
+      "Africa": {
+        "label": "Afrique",
+        "timezones": {
+          "Addis_Ababa": "Addis-Abeba",
+          "Algiers": "Alger",
+          "Cairo": "Le Caire",
+          "Dar_es_Salaam": "Dar es Salam",
+          "El_Aaiun": "Laâyoune",
+          "Johannesburg": "Johannesbourg",
+          "Juba": "Djouba",
+          "Lome": "Lomé",
+          "Mogadishu": "Mogadiscio",
+          "Ndjamena": "N’Djaména",
+          "Sao_Tome": "São Tomé"
+        }
+      },
+      "America": {
+        "label": "Amérique",
+        "timezones": {
+          "Araguaina": "Araguaína",
+          "Argentina/Buenos_Aires": "Argentine/Buenos Aires",
+          "Argentina/Catamarca": "Argentine/Catamarca",
+          "Argentina/Cordoba": "Argentine/Córdoba",
+          "Argentina/La_Rioja": "Argentine/La Rioja",
+          "Argentina/Mendoza": "Argentine/Mendoza",
+          "Argentina/Rio_Gallegos": "Argentine/Río Gallegos",
+          "Argentina/Salta": "Argentine/Salta",
+          "Argentina/San_Juan": "Argentine/San Juan",
+          "Argentina/San_Luis": "Argentine/San Luis",
+          "Argentina/Tucuman": "Argentine/Tucumán",
+          "Argentina/Ushuaia": "Argentine/Ushuaïa",
+          "Asuncion": "Asuncion",
+          "Atikokan": "Atikokan",
+          "Bahia_Banderas": "Bahía de Banderas",
+          "Barbados": "Barbade",
+          "Belem": "Belém",
+          "Boa_Vista": "Boa Vista",
+          "Cambridge_Bay": "Cambridge Bay",
+          "Campo_Grande": "Campo Grande",
+          "Cancun": "Cancún",
+          "Cayman": "Iles Caïmans",
+          "Costa_Rica": "Costa Rica",
+          "Cuiaba": "Cuiabá",
+          "Curacao": "Curaçao",
+          "Dawson_Creek": "Dawson Creek",
+          "Detroit": "Détroit",
+          "Dominica": "Dominique",
+          "Eirunepe": "Eirunepé",
+          "El_Salvador": "Salvador",
+          "Fort_Nelson": "Fort Nelson",
+          "Glace_Bay": "Glace Bay",
+          "Goose_Bay": "Goose Bay",
+          "Grand_Turk": "Grand Turk",
+          "Grenada": "Grenade",
+          "Guadeloupe": "Guadeloupe",
+          "Havana": "La Havane",
+          "Indiana/Tell_City": "Indiana/Tell City",
+          "Jamaica": "Jamaïque",
+          "La_Paz": "La Paz",
+          "Los_Angeles": "Los Angeles",
+          "Lower_Princes": "Lower Prince’s Quarter",
+          "Maceio": "Maceió",
+          "Mazatlan": "Mazatlán",
+          "Merida": "Mérida",
+          "Mexico_City": "Mexico",
+          "New_York": "New York",
+          "North_Dakota/Beulah": "Dakota du Nord/Beulah",
+          "North_Dakota/Center": "Dakota du Nord/Center",
+          "North_Dakota/New_Salem": "Dakota du Nord/New Salem",
+          "Port_of_Spain": "Port d’Espagne",
+          "Porto_Velho": "Porto Velho",
+          "Puerto_Rico": "Porto Rico",
+          "Punta_Arenas": "Punta Arenas",
+          "Rainy_River": "Rainy River",
+          "Rankin_Inlet": "Rankin Inlet",
+          "Rio_Branco": "Rio Branco",
+          "Santarem": "Santarém",
+          "Santo_Domingo": "Saint-Domingue",
+          "Sao_Paulo": "São Paulo",
+          "Scoresbysund": "Ittoqqortoormiit",
+          "St_Barthelemy": "Saint Barthélemy",
+          "St_Johns": "Saint-Jean de Terre-Neuve",
+          "St_Kitts": "Saint-Christophe",
+          "St_Lucia": "Sainte-Lucie",
+          "St_Thomas": "Saint-Thomas",
+          "St_Vincent": "Saint-Vincent",
+          "Swift_Current": "Swift Current",
+          "Thule": "Qaanaaq (Thulé)",
+          "Thunder_Bay": "Thunder Bay"
+        }
+      },
+      "Antarctica": {
+        "label": "Antarctique",
+        "timezones": {
+          "DumontDUrville": "Dumont-d’Urville"
+        }
+      },
+      "Arctic": {
+        "label": "Arctique",
+        "timezones": {}
+      },
+      "Asia": {
+        "label": "Asie",
+        "timezones": {
+          "Aqtau": "Aqtaw",
+          "Aqtobe": "Aktioubé",
+          "Ashgabat": "Achgabat",
+          "Atyrau": "Atyraou",
+          "Baghdad": "Bagdad",
+          "Bahrain": "Bahreïn",
+          "Baku": "Bakou",
+          "Barnaul": "Barnaoul",
+          "Beirut": "Beyrouth",
+          "Bishkek": "Bichkek",
+          "Chita": "Tchita",
+          "Choibalsan": "Choybalsan",
+          "Damascus": "Damas",
+          "Dhaka": "Dacca",
+          "Dubai": "Dubaï",
+          "Dushanbe": "Douchanbé",
+          "Famagusta": "Famagouste",
+          "Hebron": "Hébron",
+          "Ho_Chi_Minh": "Hô Chi Minh",
+          "Hong_Kong": "Hong Kong",
+          "Hovd": "Khovd",
+          "Irkutsk": "Irkoutsk",
+          "Jerusalem": "Jérusalem",
+          "Kabul": "Kaboul",
+          "Kamchatka": "Kamtchatka",
+          "Kathmandu": "Katmandou",
+          "Kolkata": "Calcutta",
+          "Krasnoyarsk": "Krasnoïarsk",
+          "Kuala_Lumpur": "Kuala Lumpur",
+          "Kuwait": "Koweït",
+          "Macau": "Macao",
+          "Manila": "Manille",
+          "Muscat": "Mascate",
+          "Nicosia": "Nicosie",
+          "Novokuznetsk": "Novokouznetsk",
+          "Novosibirsk": "Novossibirsk",
+          "Oral": "Oural",
+          "Phnom_Penh": "Phnom Penh",
+          "Qostanay": "Kostanaï",
+          "Qyzylorda": "Kyzylorda",
+          "Riyadh": "Riyad",
+          "Sakhalin": "Sakhaline",
+          "Samarkand": "Samarcande",
+          "Seoul": "Séoul",
+          "Shanghai": "Shanghai",
+          "Singapore": "Singapour",
+          "Tashkent": "Tachkent",
+          "Tehran": "Téhéran",
+          "Thimphu": "Thimphou",
+          "Ulaanbaatar": "Oulan-Bator",
+          "Urumqi": "Ürümqi",
+          "Ust-Nera": "Oust-Nera",
+          "Yakutsk": "Iakoutsk",
+          "Yangon": "Rangoun",
+          "Yekaterinburg": "Iekaterinbourg",
+          "Yerevan": "Erevan"
+        }
+      },
+      "Atlantic": {
+        "label": "Océan atlantique",
+        "timezones": {
+          "Azores": "Açores",
+          "Bermuda": "Bermudes",
+          "Canary": "Iles Canaries",
+          "Cape_Verde": "Cap-Vert",
+          "Faroe": "Iles Féroé",
+          "Madeira": "Madère",
+          "Reykjavik": "Reykjavik",
+          "South_Georgia": "Géorgie du Sud",
+          "St_Helena": "Saint-Hélène"
+        }
+      },
+      "Australia": {
+        "label": "Australie",
+        "timezones": {
+          "Adelaide": "Adélaïde",
+          "Broken_Hill": "Broken Hill",
+          "Lord_Howe": "Lord Howe"
+        }
+      },
+      "Canada": {
+        "label": "Canada",
+        "timezones": {
+          "Atlantic": "Atlantique",
+          "Central": "Centre",
+          "Eastern": "Est",
+          "Mountain": "Rocheuses",
+          "Newfoundland": "Terre-Neuve-et-Labrador",
+          "Pacific": "Pacifique"
+        }
+      },
+      "Europe": {
+        "label": "Europe",
+        "timezones": {
+          "Andorra": "Andorre",
+          "Athens": "Athènes",
+          "Brussels": "Bruxelles",
+          "Bucharest": "Bucarest",
+          "Busingen": "Büsingen am Hochrhein",
+          "Chisinau": "Chișinău",
+          "Copenhagen": "Copenhague",
+          "Guernsey": "Guernesey",
+          "Isle_of_Man": "Ile de Man",
+          "Lisbon": "Lisbonne",
+          "London": "Londres",
+          "Malta": "Malte",
+          "Moscow": "Moscou",
+          "San_Marino": "Saint-Marin",
+          "Tirane": "Tirana",
+          "Ulyanovsk": "Oulianovsk",
+          "Uzhgorod": "Oujgorod",
+          "Vienna": "Vienne",
+          "Warsaw": "Varsovie",
+          "Zaporozhye": "Zaporijjia"
+        }
+      },
+      "Indian": {
+        "label": "Océan indien",
+        "timezones": {
+          "Christmas": "Ile Christmas",
+          "Cocos": "Iles Cocos",
+          "Comoro": "Comores",
+          "Kerguelen": "Iles Kerguelen",
+          "Mahe": "Mahé",
+          "Mauritius": "Maurice",
+          "Reunion": "La Réunion"
+        }
+      },
+      "International": {
+        "label": "International",
+        "timezones": {}
+      },
+      "Pacific": {
+        "label": "Océan pacifique",
+        "timezones": {
+          "Chatham": "Iles Chatham",
+          "Easter": "Ile de Pâques",
+          "Efate": "Éfaté",
+          "Fiji": "Fidji",
+          "Galapagos": "Galápagos",
+          "Marquesas": "Iles Marquises",
+          "Midway": "Iles Midway",
+          "Norfolk": "Ile Norfolk",
+          "Noumea": "Nouméa",
+          "Pago_Pago": "Pago Pago",
+          "Palau": "Palaos",
+          "Pitcairn": "Iles Pitcairn",
+          "Port_Moresby": "Port Moresby"
+        }
+      },
+      "US": {
+        "label": "États-Unis d’Amérique",
+        "timezones": {
+          "Central": "Centre",
+          "Eastern": "Est",
+          "Hawaii": "Hawaï",
+          "Mountain": "Rocheuses",
+          "Pacific": "Pacifique"
+        }
+      }
+    }
+  }
+}

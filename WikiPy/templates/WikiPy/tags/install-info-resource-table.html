@@ -1,0 +1,57 @@
+{% load wpy_tags %}
+{% load wpy_utils %}
+
+{% if resources %}
+  <table class="table table-striped table-hover" id="wpy-install-info-{{ resource_type|replace:'_,-' }}-list">
+    <colgroup>
+      <col style="width: 20%"/>
+      <col style="width: 20%"/>
+      <col style="width: 15%"/>
+      <col style="width: 25%"/>
+      <col style="width: 20%"/>
+    </colgroup>
+    <thead>
+      <tr>
+        <th>{% wpy_translate 'special.install_info.resources.table.name.label' %}</th>
+        <th>{% wpy_translate 'special.install_info.resources.table.version.label' %}</th>
+        <th>{% wpy_translate 'special.install_info.resources.table.license.label' %}</th>
+        <th>{% wpy_translate 'special.install_info.resources.table.description.label' %}</th>
+        <th>{% wpy_translate 'special.install_info.resources.table.authors.label' %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for resource in resources %}
+        <tr id="wpy-install-info-extension-{{ resource.id|replace:'_,-' }}">
+          <td>
+            {% wpy_translate_resource resource 'name' none_if_undefined=True as name %}
+            {% wpy_external_link url=resource.home_url text=name %}
+          </td>
+          <td>{{ resource.version }}<br/>{% wpy_format_date resource.build_date %}</td>
+          <td>{% wpy_inner_link -1 'install_info' special_page_subtitle='License/'|add:resource_type|add:'/'|add:resource.id text=resource.license %}</td>
+          <td>
+            {% wpy_translate_resource resource 'description' none_if_undefined=True as desc %}
+            {{ desc|default_if_none:'-' }}
+          </td>
+          <td>
+            {% for author, url in resource.authors %}
+              {% if forloop.last and author == '...' %}
+                {% wpy_translate 'special.install_info.resources.table.authors.and_others' %}
+              {% else %}
+                {% if url %}{% wpy_external_link url=url text=author %}{% else %}{{ author }}{% endif %}<!--
+             -->{% if not forloop.last %}<!--
+             -->{% if forloop.revcounter0 == 1 %}
+                {% wpy_translate 'special.install_info.resources.table.authors.and' %}
+                {% else %}<!--
+             -->,<!--
+             -->{% endif %}<!--
+             -->{% endif %}
+              {% endif %}
+            {% endfor %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  {% wpy_translate 'special.install_info.resources.'|add:resource_type|add:'.empty' %}
+{% endif %}

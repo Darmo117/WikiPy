@@ -1,0 +1,20 @@
+{% load wpy_tags %}
+
+{% for page_group_title, pages in pages.items %}
+  <h3 class="wpy-category-group-title">{{ page_group_title }}</h3>
+  <ul class="wpy-category-group-pages">
+    {% for page in pages %}
+      {% if categories %}
+        <li class="wpy-category-group-subcategory">
+          {% wpy_inner_link namespace_id=page.namespace_id page_title=page.title text=page.title %}
+          {% if page.is_category_hidden %}
+            <span id="wpy-hidden-category-icon" class="mdi mdi-eye-off"
+                  title="{% wpy_translate 'title.hidden_category.tooltip' %}"></span>
+          {% endif %}
+        </li>
+      {% else %}
+        <li class="wpy-category-group-page">{% wpy_inner_link namespace_id=page.namespace_id page_title=page.title %}</li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+{% endfor %}

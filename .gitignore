@@ -1,0 +1,8 @@
+# Project exclude paths
+/.idea/
+/venv/
+# Remove once the project is ready
+/WikiPy/migrations/
+/WikiPy/additional_namespaces.json
+/WikiPy/SETUP_SECRET_KEY
+db.sqlite3

@@ -1,0 +1,13 @@
+{% load wpy_tags %}
+
+{% include 'WikiPy/special_pages/include/form.html' with form=wpy_context.logs_form method='get' %}
+
+<hr/>
+
+{% if wpy_context.paginator.count %}
+  {% wpy_log_list %}
+{% else %}
+  <div id="wpy-logs-no-result" class="alert alert-info text-center" role="alert">
+    {% wpy_translate 'error.no_results' %}
+  </div>
+{% endif %}

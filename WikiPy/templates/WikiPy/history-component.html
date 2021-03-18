@@ -1,0 +1,9 @@
+{% load wpy_tags %}
+
+{% if wpy_context.page_exists %}
+  {% wpy_history_list %}
+{% else %}
+  <div id="wpy-history-noresult" class="alert alert-danger text-center" role="alert">
+    {% wpy_translate 'error.no_history' %}
+  </div>
+{% endif %}

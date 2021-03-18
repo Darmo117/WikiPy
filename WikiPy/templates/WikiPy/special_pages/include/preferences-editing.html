@@ -1,0 +1,54 @@
+{% load wpy_tags %}
+
+<span class="wpy-prefs-form-section-title row" id="wpy-prefs-form-editor-section">
+  {% wpy_translate trans_prefix|add:'section.editor' %}
+</span>
+
+<div class="form-group custom-control custom-checkbox row">
+  <div class="col-sm-10">
+    {{ form.all_edits_minor }}
+    <label class="custom-control-label" for="{{ form.all_edits_minor.id_for_label }}">
+      {% wpy_translate trans_prefix|add:'all_edits_minor.label' %}
+    </label>
+  </div>
+</div>
+
+<div class="form-group custom-control custom-checkbox row">
+  <div class="col-sm-10">
+    {{ form.blank_comment_prompt }}
+    <label class="custom-control-label" for="{{ form.blank_comment_prompt.id_for_label }}">
+      {% wpy_translate trans_prefix|add:'blank_comment_prompt.label' %}
+    </label>
+  </div>
+</div>
+
+<div class="form-group custom-control custom-checkbox row">
+  <div class="col-sm-10">
+    {{ form.unsaved_changes_warning }}
+    <label class="custom-control-label" for="{{ form.unsaved_changes_warning.id_for_label }}">
+      {% wpy_translate trans_prefix|add:'unsaved_changes_warning.label' %}
+    </label>
+  </div>
+</div>
+
+<span class="wpy-prefs-form-section-title row" id="wpy-prefs-form-preview-section">
+  {% wpy_translate trans_prefix|add:'section.preview' %}
+</span>
+
+<div class="form-group custom-control custom-checkbox row">
+  <div class="col-sm-10">
+    {{ form.show_preview_first_edit }}
+    <label class="custom-control-label" for="{{ form.show_preview_first_edit.id_for_label }}">
+      {% wpy_translate trans_prefix|add:'show_preview_first_edit.label' %}
+    </label>
+  </div>
+</div>
+
+<div class="form-group custom-control custom-checkbox row">
+  <div class="col-sm-10">
+    {{ form.preview_above_edit_box }}
+    <label class="custom-control-label" for="{{ form.preview_above_edit_box.id_for_label }}">
+      {% wpy_translate trans_prefix|add:'preview_above_edit_box.label' %}
+    </label>
+  </div>
+</div>

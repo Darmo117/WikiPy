@@ -1,0 +1,6 @@
+{% load wpy_tags %}
+
+<div class="alert alert-secondary">
+  {% wpy_translate 'special.protect_page.notice' %}
+</div>
+{% include 'WikiPy/special_pages/include/form.html' with form=wpy_context.protect_page_form %}

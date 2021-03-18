@@ -1,0 +1,190 @@
+{% extends 'WikiPy/base.html' %}
+{% load wpy_skin_tags %}
+{% load wpy_tags %}
+
+{% block pre-content %}
+  <nav id="wpy-header" class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">{# FIXME sticky-top #}
+    <div class="container-fluid">
+      {% wpy_inner_link namespace_id=wpy_context.main_page_namespace.id page_title=wpy_context.main_page_title text=wpy_context.project_name tooltip='' ignore_current_title=True css_classes='navbar-brand' %}
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#wpy-navbar-content"
+              aria-controls="wpy-navbar-content" aria-expanded="false">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      {# TODO abstraire #}
+      <div class="collapse navbar-collapse" id="wpy-navbar-content">
+        <form id="wpy-header-search-form" class="input-group mx-auto" method="get"
+              action="{% wpy_inner_link namespace_id=-1 page_title='search' ignore_current_title=True only_url=True %}">
+          {% wpy_translate 'header.search.input.placeholder' project_name=wpy_context.project_name as placeholder %}
+          <input type="search" class="form-control" name="query" placeholder="{{ placeholder }}"
+                 aria-label="{{ placeholder }}" aria-describedby="wpy-header-search-button" accesskey="f">
+          <div class=" input-group-append">
+            <button class="btn btn-outline-light" type="submit" id="wpy-header-search-form-button"
+                    title="{% wpy_translate 'header.search.button.tooltip' %}">
+              <span class="mdi mdi-magnify"></span> {% wpy_translate 'header.search.button.label' %}
+            </button>
+          </div>
+          <input type="hidden" name="search_bar" value="1"/>
+        </form>
+
+        <ul class="navbar-nav ml-auto">
+          {# TODO abstraire #}
+          {% if wpy_context.languages|length > 1 %}
+            <li class="nav-item" id="wpy-language-select-item"
+                title="{% wpy_translate 'header.language_select.tooltip' %}">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">
+                    <span class="mdi mdi-translate"></span>
+                  </div>
+                </div>
+                <label for="wpy-language-select" class="sr-only">
+                  {% wpy_translate 'header.language_select.label' %}
+                </label>
+                <select id="wpy-language-select" class="custom-select">
+                  {% for lang in wpy_context.languages %}
+                    <option {% if lang.code == wpy_context.language.code %}selected{% endif %} value="{{ lang.code }}"
+                            dir="{{ lang.writing_direction }}">
+                      {{ lang.name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </li>
+          {% endif %}
+          {% if wpy_context.user.is_logged_in %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="wpy-username-dropdown" role="button"
+                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="mdi mdi-account"></span> {{ wpy_context.user.username }}
+              </a>
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="wpy-username-dropdown"
+                   style="z-index: 9999;">{# FIXME marche pas à cause de position: sticky du menu #}
+                {% wpy_skin_render 'menu.user.items' links_class='dropdown-item' as menu_items %}
+                {% for menu_item in menu_items %}
+                  {% if forloop.last %}
+                    <div class="dropdown-divider"></div>
+                  {% endif %}
+                  {{ menu_item }}
+                {% endfor %}
+              </div>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              {% wpy_skin_render 'menu.user.items' links_class='nav-link' as menu_items %}
+              {{ menu_items.0 }}
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div id="main-container" class="container-fluid">
+  <div class="row">
+  <div id="wpy-left-col" class="col">
+    {# TODO put in burger menu on mobile (≤ 800px) #}
+    <nav id="wpy-nav-bar-left">
+      <div id="wpy-nav-bar-logo" class="card bg-light mb-3">
+        {% wpy_skin_render 'project_logo' image_class='card-img-top' %}
+      </div>
+      <div id="wpy-nav-bar-navigation" class="card bg-light mb-3">
+        <div class="card-header">{% wpy_skin_render 'menu.side.navigation.title' %}</div>
+        <div class="card-body">
+          <ul class="list-unstyled">
+            {% wpy_skin_render 'menu.side.navigation.items' as menu_items %}
+            {% for menu_item in menu_items %}
+              <li>{{ menu_item }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      {% for menu_title in wpy_context.skin.additional_menus %}
+        <div id="wpy-nav-bar-navigation" class="card bg-light mb-3">
+          <div class="card-header">{{ menu_title }}</div>
+          <div class="card-body">
+            <ul class="list-unstyled">
+              {% wpy_skin_render 'menu.side.'|add:menu_title|add:'.items' as menu_items %}
+              {% for menu_item in menu_items %}
+                <li>{{ menu_item }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% endfor %}
+      <div id="wpy-nav-bar-wiki-tools" class="card bg-light mb-3">
+        <div class="card-header">{% wpy_skin_render 'menu.side.wiki_tools.title' %}</div>
+        <div class="card-body">
+          <ul class="list-unstyled">
+            {% wpy_skin_render 'menu.side.wiki_tools.items' as menu_items %}
+            {% for menu_item in menu_items %}
+              <li>{{ menu_item }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </div>
+
+  <div id="wpy-center-col" class="col">
+  {% if wpy_context.mode != 'special' and wpy_context.mode != 'setup' %}
+    <ul id="wpy-article-nav-bar" class="nav nav-tabs justify-content-center sticky-top">
+      {% wpy_skin_render 'menu.page.items' links_class='nav-link' as page_items %}
+      {% for page_item in page_items %}
+        <li class="nav-item">{{ page_item }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endblock pre-content %}
+
+{% block post-content %}
+  </div>
+  <div id="wpy-right-col" class="col">
+    <nav id="wpy-nav-bar-right">
+      {% if wpy_context.mode != 'special' and wpy_context.mode != 'setup' %}
+        <div id="wpy-nav-bar-page-tools" class="card bg-light mb-3">
+          <div class="card-header">{% wpy_skin_render 'menu.side.page_tools.title' %}</div>
+          <div class="card-body">
+            <ul class="list-unstyled">
+              {% wpy_skin_render 'menu.side.page_tools.items' as menu_items %}
+              {% for menu_item in menu_items %}
+                <li>{{ menu_item }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        <div id="wpy-nav-bar-more-page-tools" class="card bg-light mb-3">
+          <div class="card-header">{% wpy_skin_render 'menu.side.more_tools.title' %}</div>
+          <div class="card-body">
+            <ul class="list-unstyled">
+              {% wpy_skin_render 'menu.side.more_tools.items' as menu_items %}
+              {% for menu_item in menu_items %}
+                <li>{{ menu_item }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        {% if wpy_context.page_categories %}
+          <div id="wpy-nav-bar-categories" class="card bg-light mb-3">
+            <div class="card-header">{% wpy_skin_render 'menu.side.categories.title' %}</div>
+            <div class="card-body">
+              <ul class="list-unstyled">
+                {% wpy_skin_render 'menu.side.categories.items' as menu_items %}
+                {% for menu_item in menu_items %}
+                  <li>{{ menu_item }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        {% endif %}
+      {% endif %}
+    </nav>
+  </div>
+  </div>
+  </div>
+  <footer id="wpy-footer" class="py-4 bg-dark text-white-50">
+    <div class="container-fluid">
+      {% wpy_skin_render 'footer' %}
+    </div>
+  </footer>
+{% endblock post-content %}

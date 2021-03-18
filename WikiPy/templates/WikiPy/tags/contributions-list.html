@@ -1,0 +1,36 @@
+{% extends 'WikiPy/tags/revisions-list.html' %}
+{% load wpy_tags %}
+
+{% block table_header %}
+  <td>{% wpy_translate 'revisions_table.header.revision' %}</td>
+  <td>{% wpy_translate 'revisions_table.header.page_or_message' %}</td>
+  <td>{% wpy_translate 'revisions_table.header.size_diff' %}</td>
+  <td>{% wpy_translate 'revisions_table.header.tags' %}</td>
+  <td>{% wpy_translate 'revisions_table.header.comment' %}</td>
+{% endblock %}
+
+{% block revision_actions %}
+  {% wpy_translate 'link.history.tooltip' as hist %}
+  {% wpy_diff_link revision against='previous' %}
+  {% wpy_history_link revision %}
+{% endblock %}
+
+{% block table_item %}
+  <td>
+    {% include 'WikiPy/tags/revision-link.html' %}
+  </td>
+  <td>
+    {% wpy_inner_link namespace_id=revision.page.namespace_id page_title=revision.page.title %}
+  </td>
+  <td>
+    {% wpy_diff_size_tag revision.diff_size revision.size %}
+  </td>
+  <td>
+    {% wpy_revision_tags revision %}
+  </td>
+  <td>
+    {% if revision.comment %}
+      {% wpy_revision_comment revision.comment hidden=revision.comment_hidden %}
+    {% endif %}
+  </td>
+{% endblock %}

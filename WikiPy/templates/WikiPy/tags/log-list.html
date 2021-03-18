@@ -1,0 +1,10 @@
+{% load wpy_tags %}
+{% load wpy_utils %}
+
+{% wpy_paginator top=True %}
+<ul class="wpy-log-entries">
+  {% for type, log_entry in log_entries %}
+    <li class="wpy-log-entry wpy-log-entry-{{ type|replace:'_,-' }}">{{ log_entry }}</li>
+  {% endfor %}
+</ul>
+{% wpy_paginator top=False %}

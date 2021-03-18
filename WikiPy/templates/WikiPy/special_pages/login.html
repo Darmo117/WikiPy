@@ -1,0 +1,25 @@
+{% load wpy_tags %}
+
+{% if wpy_context.login_notice %}
+  <div class="alert alert-info" role="alert">
+    {{ wpy_context.login_notice }}
+  </div>
+{% endif %}
+{% if wpy_context.login_warning %}
+  <div class="alert alert-warning" role="alert">
+    {{ wpy_context.login_warning }}
+  </div>
+{% endif %}
+
+<div class="row">
+  {% if not wpy_context.user.is_logged_in %}
+    <div class="col">
+      {% include 'WikiPy/special_pages/include/form.html' with form=wpy_context.login_form %}
+    </div>
+  {% endif %}
+
+  <div id="wpy-login-other-links" class="col text-center">
+    {#{% wpy_inner_link namespace_id=NS_SPECIAL page_title='password_reset' %}#}
+    {% wpy_inner_link namespace_id=NS_SPECIAL page_title='create_account' %}
+  </div>
+</div>

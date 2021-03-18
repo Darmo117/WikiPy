@@ -1,0 +1,7 @@
+li.wpy-search-result {
+  margin-bottom: 1em;
+}
+
+li:first-child.wpy-search-result {
+  margin-top: 1em;
+}
