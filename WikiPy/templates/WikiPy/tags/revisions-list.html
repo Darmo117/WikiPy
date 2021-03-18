@@ -23,11 +23,13 @@
 
 {% wpy_paginator top=True %}
 <table id="wpy-revisions-list" class="table table-striped table-hover text-center">
-  <tbody>
-    <tr class="thead-light">
-      <td>{% wpy_translate 'revisions_table.header.actions' %}</td>
+  <thead>
+    <tr>
+      <th scope="col">{% wpy_translate 'revisions_table.header.actions' %}</th>
       {% block table_header %}{% endblock %}
     </tr>
+  </thead>
+  <tbody>
     {% for revision, revision_link, user_link in revisions %}
       <tr class="wpy-revision-item">
         <td>

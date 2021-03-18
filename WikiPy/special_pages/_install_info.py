@@ -2,6 +2,8 @@ import dataclasses
 import os
 import typing as typ
 
+import pkg_resources
+
 from . import SpecialPage, MISC_CAT
 from .. import page_context, extensions as exts, parser, settings, skins as skins_
 from ..api import titles as api_titles
@@ -17,6 +19,7 @@ class InstallInfoPageContext(page_context.PageContext):
     install_info_parser_functions: typ.List[parser.ParserFunction]
     install_info_parser_tags: typ.List[parser.ExtendedHTMLTag]
     install_info_parser_magic_keywords: typ.List[parser.MagicKeyword]
+    install_info_installed_packages: typ.Dict[str, str]
 
     def __init__(
             self,
@@ -29,7 +32,8 @@ class InstallInfoPageContext(page_context.PageContext):
             extensions: typ.List[exts.Extension],
             parser_functions: typ.List[parser.ParserFunction],
             parser_tags: typ.List[parser.ExtendedHTMLTag],
-            parser_magic_keywords: typ.List[parser.MagicKeyword]
+            parser_magic_keywords: typ.List[parser.MagicKeyword],
+            installed_packages: typ.Dict[str, str]
     ):
         self._context = context
         self.install_info_wiki_url_path = wiki_url_path
@@ -40,6 +44,7 @@ class InstallInfoPageContext(page_context.PageContext):
         self.install_info_parser_functions = parser_functions
         self.install_info_parser_tags = parser_tags
         self.install_info_parser_magic_keywords = parser_magic_keywords
+        self.install_info_installed_packages = installed_packages
 
 
 @dataclasses.dataclass(init=False)
@@ -95,6 +100,7 @@ class InstallInfoPage(SpecialPage):
 
         else:
             title = base_context.language.translate('special.install_info.display_title')
+            installed_packages = {k: v for k, v in sorted((p.key, p.version) for p in pkg_resources.working_set)}
             context = InstallInfoPageContext(
                 base_context,
                 wiki_url_path=api_titles.get_wiki_url_path(),
@@ -104,7 +110,8 @@ class InstallInfoPage(SpecialPage):
                 extensions=sorted(exts.get_loaded_extensions(), key=lambda e: e.name(base_context.language)),
                 parser_functions=parser.WikicodeParser.registered_functions(),
                 parser_tags=parser.WikicodeParser.registered_tags(),
-                parser_magic_keywords=parser.WikicodeParser.registered_magic_keywords()
+                parser_magic_keywords=parser.WikicodeParser.registered_magic_keywords(),
+                installed_packages=installed_packages
             )
 
         return context, [], title

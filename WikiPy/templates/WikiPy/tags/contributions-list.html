@@ -2,11 +2,11 @@
 {% load wpy_tags %}
 
 {% block table_header %}
-  <td>{% wpy_translate 'revisions_table.header.revision' %}</td>
-  <td>{% wpy_translate 'revisions_table.header.page_or_message' %}</td>
-  <td>{% wpy_translate 'revisions_table.header.size_diff' %}</td>
-  <td>{% wpy_translate 'revisions_table.header.tags' %}</td>
-  <td>{% wpy_translate 'revisions_table.header.comment' %}</td>
+  <th scope="col">{% wpy_translate 'revisions_table.header.revision' %}</th>
+  <th scope="col">{% wpy_translate 'revisions_table.header.page_or_message' %}</th>
+  <th scope="col">{% wpy_translate 'revisions_table.header.size_diff' %}</th>
+  <th scope="col">{% wpy_translate 'revisions_table.header.tags' %}</th>
+  <th scope="col">{% wpy_translate 'revisions_table.header.comment' %}</th>
 {% endblock %}
 
 {% block revision_actions %}

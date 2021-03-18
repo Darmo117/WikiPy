@@ -1152,6 +1152,17 @@
             }
           }
         },
+        "python_packages": {
+          "title": "Packages Python installés",
+          "table": {
+            "package": {
+              "label": "Package"
+            },
+            "version": {
+              "label": "Version"
+            }
+          }
+        },
         "resources": {
           "table": {
             "name": {

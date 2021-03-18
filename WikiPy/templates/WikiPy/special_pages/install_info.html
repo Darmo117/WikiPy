@@ -11,19 +11,41 @@
     </colgroup>
     <tbody>
       <tr>
-        <th>{% wpy_translate 'special.install_info.general.table.version.label' %}</th>
+        <th scope="row">{% wpy_translate 'special.install_info.general.table.version.label' %}</th>
         <td>{{ wpy_context.install_info_wikipy_version }}</td>
       </tr>
       <tr>
-        <th>{% wpy_translate 'special.install_info.general.table.wiki_url_path.label' %}</th>
+        <th scope="row">{% wpy_translate 'special.install_info.general.table.wiki_url_path.label' %}</th>
         <td>
           <code>{% wpy_external_link url=wpy_context.install_info_wiki_url_path %}</code>
         </td>
       </tr>
       <tr>
-        <th>{% wpy_translate 'special.install_info.general.table.api_url_path.label' %}</th>
+        <th scope="row">{% wpy_translate 'special.install_info.general.table.api_url_path.label' %}</th>
         <td><code>{% wpy_external_link url=wpy_context.install_info_api_url_path %}</code></td>
       </tr>
+    </tbody>
+  </table>
+
+  <h2>{% wpy_translate 'special.install_info.python_packages.title' %}</h2>
+  <table class="table table-striped table-hover">
+    <colgroup>
+      <col style="width: 50%"/>
+      <col style="width: 50%"/>
+    </colgroup>
+    <thead>
+      <tr>
+        <th scope="col">{% wpy_translate 'special.install_info.python_packages.table.package.label' %}</th>
+        <th scope="col">{% wpy_translate 'special.install_info.python_packages.table.version.label' %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for package_name, package_version in wpy_context.install_info_installed_packages.items %}
+        <tr>
+          <td><code>{% wpy_external_link 'https://pypi.org/project/'|add:package_name text=package_name %}</code></td>
+          <td>{% wpy_external_link 'https://pypi.org/project/'|add:package_name|add:'/'|add:package_version|add:'/' text=package_version %}</td>
+        </tr>
+      {% endfor %}
     </tbody>
   </table>
 
