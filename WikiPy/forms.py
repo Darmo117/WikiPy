@@ -1,3 +1,6 @@
+"""
+This module defines base form classes and forms used outside of built-in special pages.
+"""
 import typing as typ
 
 import django.contrib.auth as dj_auth
@@ -8,6 +11,14 @@ from .api import users as api_users
 
 
 def init_namespace_choices(add_all: bool, language: settings.i18n.Language) -> typ.Iterable[typ.Tuple[str, str]]:
+    """
+    Returns a list of tuples containing all namespaces for choice widgets.
+    The "All" option has an the empty string as an ID.
+
+    :param add_all: If true, adds an "All" option at the head of the list.
+    :param language: The language to use for the namespaces names.
+    :return: A list of tuple, each containing the namespace’s ID and its name in the given language.
+    """
     choices = []
 
     if add_all:
@@ -34,7 +45,16 @@ def init_namespace_choices(add_all: bool, language: settings.i18n.Language) -> t
 
 
 class WikiPyForm(dj_forms.Form):
+    """Base class for all forms used by the wiki."""
+
     def __init__(self, name: str, *args, warn_unsaved_changes: bool = False, **kwargs):
+        """
+        :param name: This form’s name. It will be used by the I18N framework.
+        :param args: Other positional arguments.
+        :param warn_unsaved_changes: If true this form will warn the user
+            of any unsaved changes before exiting the page.
+        :param kwargs: Other named arguments.
+        """
         super().__init__(*args, **kwargs)
 
         self.__name = name
@@ -57,14 +77,17 @@ class WikiPyForm(dj_forms.Form):
 
     @property
     def name(self) -> str:
+        """This form’s name."""
         return self.__name
 
     @property
     def warn_unsaved_changes(self) -> bool:
+        """Returns whether this form has to warn the user if they have unsaved changes when exiting the page."""
         return self.__warn_unsaved_changes
 
 
 class SupportsReturnTo(WikiPyForm):
+    """Forms wanting to support the return to action can inherit this class."""
     return_to = dj_forms.CharField(
         label='return_to',
         required=False,
@@ -73,12 +96,22 @@ class SupportsReturnTo(WikiPyForm):
 
 
 class ConfirmPasswordForm:
+    """Forms that need to have password confirmation can inherit this class."""
+
     def passwords_match(self) -> bool:
+        """
+        Do the passwords match?
+        This method requires the form to have been cleaned and to have a password and password_confirm fields.
+
+        :return: True if the cleaned values in the password and password_confirm fields are the exact same,
+            false otherwise.
+        """
         cleaned_data = getattr(self, 'cleaned_data')
         return cleaned_data['password'] == cleaned_data['password_confirm']
 
 
 class EditPageForm(WikiPyForm):
+    """Form used when editing a wiki page."""
     content = dj_forms.CharField(
         label='content',
         required=False,
@@ -104,9 +137,18 @@ class EditPageForm(WikiPyForm):
         widget=dj_forms.HiddenInput(),
         required=False
     )
+    """ID of the page section being edited (optional)."""
 
     def __init__(self, *args, language: settings.i18n.Language = None, disabled: bool = False,
                  warn_unsaved_changes=True, **kwargs):
+        """
+        :param args: Positional arguments.
+        :param language: Page’s current language.
+        :param disabled: If true, the content field will be disabled.
+        :param warn_unsaved_changes: If true this form will warn the user
+            of any unsaved changes before exiting the page.
+        :param kwargs: Other named arguments.
+        """
         super().__init__('edit', *args, warn_unsaved_changes=warn_unsaved_changes, **kwargs)
 
         if disabled:
@@ -115,7 +157,104 @@ class EditPageForm(WikiPyForm):
             self.fields['comment'].widget.attrs['placeholder'] = language.translate('form.edit.comment.tooltip')
 
 
+class EditMessageForm(WikiPyForm):
+    """Form used to create/edit a message."""
+    content = dj_forms.CharField(
+        label='content',
+        required=True,
+        help_text=True,
+        widget=dj_forms.Textarea(attrs={'rows': 3})
+    )
+    comment = dj_forms.CharField(
+        label='comment',
+        required=False
+    )
+    minor_edit = dj_forms.BooleanField(
+        label='minor_edit',
+        required=False
+    )
+    reply_to = dj_forms.IntegerField(
+        widget=dj_forms.HiddenInput(),
+        required=False
+    )
+    message_id = dj_forms.IntegerField(
+        widget=dj_forms.HiddenInput(),
+        required=False
+    )
+
+    def __init__(self, *args, name: str = None, language: settings.i18n.Language = None, warn_unsaved_changes=True,
+                 **kwargs):
+        """
+        :param args: Positional arguments.
+        :param name: The name of this form. Defaults to 'edit_message'.
+        :param language: Page’s current language.
+        :param warn_unsaved_changes: If true this form will warn the user
+            of any unsaved changes before exiting the page.
+        :param kwargs: Other named arguments.
+        """
+        super().__init__(name or 'edit_message', *args, warn_unsaved_changes=warn_unsaved_changes, **kwargs)
+
+        if language:
+            self.fields['comment'].widget.attrs['placeholder'] = language.translate('form.edit.comment.tooltip')
+
+
+class NewTopicForm(EditMessageForm):
+    """Form used to create new topics."""
+    title = dj_forms.CharField(
+        label='title',
+        required=True
+    )
+    parent_topic = dj_forms.ChoiceField(
+        choices=(),
+        label='parent_topic',
+        required=False
+    )
+
+    field_order = ['title', 'parent_topic', 'content', 'comment', 'minor_edit', 'follow_page', 'reply_to', 'message_id']
+
+    def __init__(self, *args, language: settings.i18n.Language = None, warn_unsaved_changes=True, **kwargs):
+        """
+        :param args: Positional arguments.
+        :param language: Page’s current language.
+        :param warn_unsaved_changes: If true this form will warn the user
+            of any unsaved changes before exiting the page.
+        :param kwargs: Other named arguments.
+        """
+        super().__init__(*args, name='new_topic', language=language, warn_unsaved_changes=warn_unsaved_changes,
+                         **kwargs)
+
+
+class EditTopicForm(WikiPyForm):
+    """Form used to edit topics."""
+    title = dj_forms.CharField(
+        label='title',
+        required=True
+    )
+    comment = dj_forms.CharField(
+        label='comment',
+        required=False
+    )
+    minor_edit = dj_forms.BooleanField(
+        label='minor_edit',
+        required=False
+    )
+
+    def __init__(self, *args, language: settings.i18n.Language = None, warn_unsaved_changes=True, **kwargs):
+        """
+        :param args: Positional arguments.
+        :param language: Page’s current language.
+        :param warn_unsaved_changes: If true this form will warn the user
+            of any unsaved changes before exiting the page.
+        :param kwargs: Other named arguments.
+        """
+        super().__init__('edit_topic', *args, warn_unsaved_changes=warn_unsaved_changes, **kwargs)
+
+        if language:
+            self.fields['comment'].widget.attrs['placeholder'] = language.translate('form.edit.comment.tooltip')
+
+
 class SetupPageForm(WikiPyForm, ConfirmPasswordForm):
+    """Form used by the wiki setup page."""
     # noinspection PyProtectedMember
     username = dj_forms.CharField(
         label='username',

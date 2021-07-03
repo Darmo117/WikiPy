@@ -253,11 +253,20 @@ ul {
   padding-left: 0;
 }
 
+/*********
+ * Talks *
+ *********/
+
+#wpy-new-topic-btn,
+#wpy-new-topic-form {
+  margin-bottom: 1rem;
+}
+
 /**************
  * Ace editor *
  **************/
 
-#wpy-ace-editor {
+.wpy-ace-editor {
   width: 100%;
   border: #ced4da solid 1px;
   border-radius: 0.25em;

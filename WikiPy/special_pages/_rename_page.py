@@ -51,6 +51,7 @@ class RenamePageForm(forms.WikiPyForm):
                                                                                 language=base_context.language)
         self.fields['new_namespace'].choices = forms.init_namespace_choices(add_all=False,
                                                                             language=base_context.language)
+        self.fields['create_redirection'].disabled = not base_context.user.has_right(settings.RIGHT_DELETE_PAGES)
 
 
 @dataclasses.dataclass(init=False)
@@ -94,6 +95,7 @@ class RenamePage(SpecialPage):
                 'current_title': title,
                 'new_namespace': ns_id,
                 'new_title': title,
+                'create_redirection': not base_context.user.has_right(settings.RIGHT_DELETE_PAGES),
             }),
             global_errors=[]
         )
@@ -114,7 +116,7 @@ class RenamePage(SpecialPage):
             try:
                 api_pages.rename_page(base_context, current_namespace_id, current_title, new_namespace_id, new_title,
                                       reason, create_redirection)
-            except api_errors.PageRenameForbidden as e:
+            except api_errors.PageRenameForbiddenError as e:
                 errors.append(
                     {
                         'origin page does not exist': 'origin_page_does_not_exist',
@@ -124,6 +126,12 @@ class RenamePage(SpecialPage):
                         'same origin and target titles': 'same_old_and_new_titles',
                     }.get(e.code)
                 )
+            except api_errors.PageEditConflictError as e:
+                pass  # TODO
+            except api_errors.PageEditForbiddenError as e:
+                pass  # TODO
+            except api_errors.MissingRightError as e:
+                pass  # TODO
             else:
                 # TODO Redirect to action summary page
                 pass

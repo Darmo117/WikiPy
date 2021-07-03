@@ -36,26 +36,6 @@ class SignUpForm(forms.SupportsReturnTo, forms.ConfirmPasswordForm):
         required=True,
         widget=dj_forms.PasswordInput()
     )
-    test = dj_forms.BooleanField(
-        label='test'
-    )
-    test2 = dj_forms.ChoiceField(
-        choices=((str(i), str(i)) for i in range(10)),
-        label='test2',
-        widget=dj_forms.RadioSelect
-    )
-    test3 = dj_forms.ChoiceField(
-        choices=((str(i), str(i)) for i in range(10)),
-        label='test3'
-    )
-    test4 = dj_forms.ChoiceField(
-        choices=((str(i), str(i)) for i in range(10)),
-        label='test4',
-        widget=dj_forms.SelectMultiple
-    )
-    test5 = dj_forms.FileField(
-        label='test5'
-    )
     # noinspection PyProtectedMember
     password_confirm = dj_forms.CharField(
         label='password_confirm',
@@ -67,7 +47,7 @@ class SignUpForm(forms.SupportsReturnTo, forms.ConfirmPasswordForm):
     )
 
     def __init__(self, *args, **kwargs):
-        super().__init__('create-account', *args, **kwargs)
+        super().__init__('create_account', *args, **kwargs)
 
 
 @dataclasses.dataclass(init=False)
@@ -123,6 +103,12 @@ class CreateAccountPage(SpecialPage):
                     api_users.create_user(username, password=password, email=email)
                 except api_errors.DuplicateUsernameError:
                     errors.append('duplicate_username')
+                except api_errors.InvalidUsernameError:
+                    errors.append('invalid_username')
+                except api_errors.InvalidPasswordError:
+                    errors.append('invalid_password')
+                except api_errors.InvalidEmailError:
+                    errors.append('invalid_email')
                 else:
                     main_page_title = api_titles.get_full_page_title(settings.MAIN_PAGE_NAMESPACE_ID,
                                                                      settings.MAIN_PAGE_TITLE)

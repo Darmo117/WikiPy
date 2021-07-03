@@ -1,9 +1,30 @@
 {% load wpy_tags %}
 
-{% if wpy_context.paginator %}
-  {% wpy_talk_list %}
-{% else %}
-  <div id="wpy-talks-noresult" class="alert alert-info text-center" role="alert">
-    {% wpy_translate 'error.no_talks' %}
+{% if wpy_context.edit_protection_status %}
+  <div class="wpy-edit-interface-warning-box alert alert-warning" role="alert">
+    <p>
+      {% wpy_translate 'group.'|add:wpy_context.edit_protection_status.protection_level as group_name %}
+      {% wpy_translate 'form.edit.protection_warning' group_name=group_name reason=wpy_context.edit_protection_status.reason %}
+    </p>
+    {% wpy_format_log_entry wpy_context.edit_protection_log_entry %}
   </div>
+{% endif %}
+
+{% if wpy_context.rendered_page_content %}
+  {{ wpy_context.rendered_page_content }}
+{% else %}
+  {% if wpy_context.user_can_edit_talk %}
+    <div style="text-align: center">
+      <button id="wpy-new-topic-btn" class="btn btn-primary">{% wpy_translate 'form.talk.new_topic.button' %}</button>
+    </div>
+    {% include 'WikiPy/message-form.html' with form=wpy_context.new_topic_form %}
+    {% include 'WikiPy/message-form.html' with form=wpy_context.edit_message_form %}
+  {% endif %}
+  {% if wpy_context.paginator %}
+    {% wpy_talk_list %}
+  {% else %}
+    <div id="wpy-talks-noresult" class="alert alert-info text-center" role="alert">
+      {% wpy_translate 'error.no_talks' %}
+    </div>
+  {% endif %}
 {% endif %}

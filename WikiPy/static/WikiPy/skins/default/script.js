@@ -1,4 +1,5 @@
 (function () {
+  // User link popups
   $(".wpy-user-link-tooltip-btn[data-toggle='popover']").each(function () {
     let $button = $(this);
     let $userLink = $("#" + $button.data("user-link"));
@@ -31,4 +32,16 @@
     });
     $button.attr("title", wpy.translate("popover.user.tooltip"));
   });
+
+  // Page layout resize
+  function updatePageLayout() {
+    if (window.innerWidth <= 1224) {
+      $("#wpy-nav-bar-right").insertAfter($("#wpy-nav-bar-left"));
+    } else {
+      $("#wpy-center-col").next().append($("#wpy-nav-bar-right"));
+    }
+  }
+
+  updatePageLayout();
+  $(window).resize(updatePageLayout);
 })();

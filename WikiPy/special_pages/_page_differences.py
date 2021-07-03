@@ -81,7 +81,7 @@ class PageDifferences(SpecialPage):
 
                 if (revision1.hidden or revision2.hidden) and \
                         not user.has_right(settings.RIGHT_HIDE_REVISIONS):
-                    raise api_errors.PageReadForbidden(None)
+                    raise api_errors.PageReadForbiddenError(None)
 
                 context = PageDifferencesPageContext(
                     base_context,
@@ -91,12 +91,12 @@ class PageDifferences(SpecialPage):
                     page_diff_nb_not_shown=nb_not_shown,
                     page_diff_same_page=revision1.page.id == revision2.page.id
                 )
-            except api_errors.RevisionDoesNotExist as e:
+            except api_errors.RevisionDoesNotExistError as e:
                 error = base_context.language.translate(
                     'special.page_differences.error.undefined_revision_id',
                     revision_id=int(str(e))
                 )
-            except api_errors.PageReadForbidden:
+            except api_errors.PageReadForbiddenError:
                 error = base_context.language.translate('special.page_differences.error.read_forbidden')
 
         if error:

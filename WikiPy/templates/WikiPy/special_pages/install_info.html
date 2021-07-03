@@ -24,6 +24,18 @@
         <th scope="row">{% wpy_translate 'special.install_info.general.table.api_url_path.label' %}</th>
         <td><code>{% wpy_external_link url=wpy_context.install_info_api_url_path %}</code></td>
       </tr>
+      <tr>
+        <th scope="row">{% wpy_translate 'special.install_info.general.table.media_backend.label' %}</th>
+        <td><code>{{ wpy_context.install_info_media_backend }}</code></td>
+      </tr>
+      <tr>
+        <th scope="row">{% wpy_translate 'special.install_info.general.table.db_manager.label' %}</th>
+        <td><code>{{ wpy_context.install_info_db_manager }}</code></td>
+      </tr>
+      <tr>
+        <th scope="row">{% wpy_translate 'special.install_info.general.table.email_backend.label' %}</th>
+        <td><code>{{ wpy_context.install_info_email_backend }}</code></td>
+      </tr>
     </tbody>
   </table>
 

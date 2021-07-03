@@ -20,7 +20,7 @@
 
 {{ wpy_context.rendered_page_content }}
 
-{% if wpy_context.page.namespace_id == 2 %}
+{% if wpy_context.page.namespace_id == NS_CATEGORY %}
   {% if wpy_context.subcategories %}
     <h2>{% wpy_translate 'category.subcategories.title' %}</h2>
     {% wpy_subcategories_list %}

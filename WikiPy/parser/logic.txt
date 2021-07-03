@@ -1,7 +1,10 @@
-4 steps:
+Parsing steps:
+  - extract nowiki tags
+  - extract noinclude, includeonly and onlyinclude tags
   - substitute magic keywords
-  - parse variables
-  - parse transclusions
-  - parse functions
+  - substitute variables
+  - substitute transclusions
+  - substitute functions
   - parse tables
-  - parse resulting code
+  - parse HTML tags
+  - parse remaining special tags

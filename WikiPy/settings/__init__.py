@@ -1,6 +1,10 @@
+"""
+This module defines all settings for the wiki.
+"""
 import json as _json
 import logging as _logging
 import os as _os
+import pathlib as _pathlib
 import re as _re
 import typing as _typ
 
@@ -17,7 +21,8 @@ ALLOWED_HOSTS = []
 
 APP_NAME = ''
 
-BASE_DIR = ''
+# noinspection PyTypeChecker
+BASE_DIR: _pathlib.Path = None
 WIKI_APP_DIR = ''
 
 FROM_EMAIL = ''
@@ -71,7 +76,12 @@ _skin_names = []
 _extension_names = []
 
 
-def init(base_dir: str):
+def init(base_dir: _pathlib.Path):
+    """
+    Initializes the settings. Should be called within the project’s settings.
+
+    :param base_dir: The project’s root directory.
+    """
     global ALLOWED_HOSTS, APP_NAME, PROJECT_NAME, DEFAULT_LANGUAGE_CODE, MAIN_PAGE_NAMESPACE_ID, MAIN_PAGE_TITLE, \
         HIDE_TITLE_ON_MAIN_PAGE, CASE_SENSITIVE_TITLE, INVALID_TITLE_REGEX, TIME_ZONE, NAMESPACES, \
         GROUPS, FROM_EMAIL, EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, EMAIL_USE_TLS, \
@@ -328,9 +338,6 @@ def init(base_dir: str):
         GROUP_ALL: {
             'editable': False,
             'namespaces': rights_all,
-            'global': {
-                RIGHT_RENAME_PAGES: True,
-            },
             'needs_validation': True,
             'hide_from_RC': False,
         },
@@ -344,6 +351,10 @@ def init(base_dir: str):
             'editable': True,
             'inherits': GROUP_EMAIL_CONFIRMED,
             'needs_validation': False,
+            'global': {
+                RIGHT_PIN_TOPICS: True,
+                RIGHT_RENAME_PAGES: True,
+            },
         },
         GROUP_PATROLLERS: {
             'inherits': GROUP_AUTOPATROLLED,
@@ -373,7 +384,9 @@ def init(base_dir: str):
         },
         GROUP_RIGHTS_MANAGERS: {
             'inherits': GROUP_AUTOPATROLLED,
-            'global': {RIGHT_EDIT_USERS_GROUPS: True},
+            'global': {
+                RIGHT_EDIT_USERS_GROUPS: True,
+            },
         },
     }
 
@@ -426,6 +439,17 @@ def init(base_dir: str):
 
 
 def post_load():
+    """
+    This function finalizes wiki loading.
+    Load order:
+        - built-in logs
+        - skins
+        - extensions
+        - parser’s magic keyword and functions (including extensions)
+        - special pages (including extensions)
+        - email connection
+    It should be called within the ready() method of the wiki’s config class.
+    """
     # Avoid circular imports
     from ..api import emails as api_emails, logs as api_logs
     from .. import special_pages, skins, extensions, models

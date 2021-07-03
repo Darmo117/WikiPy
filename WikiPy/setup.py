@@ -51,7 +51,8 @@ def _create_page(request: dj_wsgi.WSGIRequest, namespace_id: int, title: str, us
         skin_id=user.data.skin,
         redirect_enabled=False
     ).get_page_context()
-    api_pages.submit_page_content(context, namespace_id, title, user, content, _COMMENT, False)
+    # No need to check for errors
+    api_pages.submit_page_content(context, namespace_id, title, content, _COMMENT, False)
 
 
 def setup(request: dj_wsgi.WSGIRequest, username: str, password: str, email: str, secret_key: str) -> str:

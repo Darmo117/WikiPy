@@ -1,3 +1,8 @@
+"""
+This module defines handler classes for the different page actions.
+"""
+from __future__ import annotations
+
 import abc
 import string
 import typing as typ
@@ -17,12 +22,14 @@ STATUS_NOT_FOUND = 404
 
 ACTION_READ = 'read'
 ACTION_TALK = 'talk'
+ACTION_SUBMIT_MESSAGE = 'submit_message'
 ACTION_EDIT = 'edit'
 ACTION_SUBMIT = 'submit'
 ACTION_HISTORY = 'history'
 ACTION_RAW = 'raw'
 
 MODE_READ = 'read'
+MODE_TALK = 'talk'
 MODE_EDIT = 'edit'
 MODE_HISTORY = 'history'
 MODE_SPECIAL = 'special'
@@ -30,9 +37,15 @@ MODE_SETUP = 'setup'
 
 
 class ActionHandler(abc.ABC):
+    """
+    Base action handler class.
+    Calling the constructor of this class returns the concrete class for the given action.
+    """
+
     @staticmethod
     def valid_actions() -> typ.Iterable[str]:
-        return ActionHandler._handlers().keys()
+        """Returns the list of valid page actions."""
+        return ActionHandler.__handlers().keys()
 
     def __new__(cls, **kwargs):
         action = kwargs['action']
@@ -43,7 +56,7 @@ class ActionHandler(abc.ABC):
             else:
                 actual_class = _ReadActionHandler
         else:
-            actual_class = cls._handlers().get(action)
+            actual_class = ActionHandler.__handlers().get(action)
 
         if not actual_class:
             raise ValueError(f'Invalid action "{action}"')
@@ -64,13 +77,29 @@ class ActionHandler(abc.ABC):
             redirects_list: typ.List[str] = None,
             special_page_kwargs: typ.Dict[str, typ.Any] = None
     ):
+        """
+        Creates a handler for the given action.
+
+        :param action: The action.
+        :param request: The HTTP request.
+        :param namespace_id: Requested page’s namespace ID.
+        :param title: Requested page’s title.
+        :param user: User performing the action.
+        :param language: Language to display the page in.
+        :param skin_id: Skin to use when rendering the page.
+        :param revision_id: Page’s revision ID. May be ignored for some actions.
+        :param redirect_enabled: If true and the page is a redirection,
+            the resulting context will be for the target page, not the requested page.
+        :param redirects_list: The list of all redirects until this point. Used to detect redirection loops.
+        :param special_page_kwargs: If the requested page is special, these arguments will be passed onto it.
+        """
         self._action = action
         self._request = request
         self._page, self._page_exists = api_pages.get_page(namespace_id, title)
         if not self._page_exists:
             self._page.content_model = api_pages.get_default_content_model(namespace_id, title)
-        self._can_edit = api_users.can_edit_page(user, namespace_id, title)
-        self._can_read = api_users.can_read_page(user, namespace_id, title)
+        self._can_edit, self._can_edit_talk = user.can_edit_page(namespace_id, title)
+        self._can_read = user.can_read_page(namespace_id, title)
         self._user = user
         self._language = language
         self._skin = skins.get_skin(skin_id)
@@ -95,13 +124,20 @@ class ActionHandler(abc.ABC):
 
     @abc.abstractmethod
     def get_page_context(self) -> typ.Tuple[page_context.PageContext, int]:
+        """
+        Returns the context for the requested page and action.
+
+        :return: A tuple containing the context and an error code.
+        """
         pass
 
     @property
     def archived_revision(self) -> bool:
+        """Whether the user requested a specific page revision ID."""
         return self._revision is not None and self._revision_id is not None
 
     def _get_read_page_context(self) -> page_context.PageContext:
+        """Returns the read page context."""
         base_context = self._get_base_page_context()
 
         context = page_context.ReadPageContext(
@@ -110,7 +146,8 @@ class ActionHandler(abc.ABC):
             revision=self._revision,
             archived=self.archived_revision,
             page_categories=api_pages.get_page_categories(
-                self._page,
+                self._page.namespace_id,
+                self._page.title,
                 get_maintenance=self._user.data.display_maintenance_categories
             )
         )
@@ -180,6 +217,7 @@ class ActionHandler(abc.ABC):
         return context
 
     def _get_base_page_context(self) -> page_context.PageContext:
+        """Returns the base page context."""
         main_page_full_title = api_titles.get_full_page_title(settings.MAIN_PAGE_NAMESPACE_ID, settings.MAIN_PAGE_TITLE)
         languages = list(sorted(settings.i18n.get_languages().values(), key=lambda l: l.name))
         is_main_page = self._page.full_title == main_page_full_title
@@ -228,11 +266,14 @@ class ActionHandler(abc.ABC):
         )
 
     @staticmethod
-    def _handlers():
+    def __handlers() -> typ.Dict[str, ActionHandler]:
+        """A dictionary mapping every action to a concrete handler class."""
         # Cannot use a class property as subclasses would not yet be defined
+        # noinspection PyTypeChecker
         return {
             ACTION_READ: _ReadActionHandler,
             ACTION_TALK: _TalkActionHandler,
+            ACTION_SUBMIT_MESSAGE: _TalkActionHandler,
             ACTION_EDIT: _EditActionHandler,
             ACTION_SUBMIT: _EditActionHandler,
             ACTION_HISTORY: _HistoryActionHandler,
@@ -240,11 +281,20 @@ class ActionHandler(abc.ABC):
         }
 
     @staticmethod
-    def _format_message(page_content: str, **kwargs) -> str:
-        return string.Template(page_content).safe_substitute(kwargs)
+    def _format_message(s: str, **kwargs) -> str:
+        """
+        $-formats a string with the given values.
+
+        :param s: The string to format.
+        :param kwargs: The values to insert.
+        :return: The formatted string.
+        """
+        return string.Template(s).safe_substitute(kwargs)
 
 
 class _ReadActionHandler(ActionHandler):
+    """'read' action handler."""
+
     def get_page_context(self):
         if self._page.namespace_id == settings.SPECIAL_NS.id and self._page_exists:
             base_title = api_titles.get_special_page_title(self._page.title)
@@ -284,13 +334,12 @@ class _ReadActionHandler(ActionHandler):
                 elif self._revision_id is None:
                     wikicode = revision.content
                     page_lang = self._page.content_language
-                    redir = api_pages.get_redirect(wikicode)
-                    if redir:
+                    if redir := api_pages.get_redirect(wikicode):
                         display_redirect = True
                         redirect, redirect_anchor = redir
                         if redirect in (self._redirects_list or []):
                             self._redirect_enabled = False
-            except api_errors.RevisionDoesNotExist:
+            except api_errors.RevisionDoesNotExistError:
                 wikicode, page_lang = api_pages.get_message('InvalidRevisionID')
                 wikicode = self._format_message(wikicode, revision_id=self._revision_id)
 
@@ -310,25 +359,96 @@ class _ReadActionHandler(ActionHandler):
 
 
 class _TalkActionHandler(ActionHandler):
+    """'talk' action handler."""
+
     def get_page_context(self):
-        pass  # TODO
+        redirect = None
+        redirect_anchor = None
+        display_redirect = False
+
+        if self._can_read:
+            render = None
+            status = STATUS_FOUND
+            self._mode = MODE_TALK
+            self._content_language = self._language
+            self._noindex = True
+            self._redirected_from = self._redirects_list[0] if self._redirects_list else None
+            base_context = self._get_base_page_context()
+            # Display redirection if necessary
+            if revision := api_pages.get_page_revision(self._page.namespace_id, self._page.title, self._user):
+                if redir := api_pages.get_redirect(revision.content):
+                    display_redirect = True
+                    redirect, redirect_anchor = redir
+                    if redirect in (self._redirects_list or []):
+                        self._redirect_enabled = False
+                        render = dj_safe.mark_safe(api_pages.render_wikicode(
+                            revision.content,
+                            base_context,
+                            no_redirect=True,
+                            enable_comment=False
+                        )[0])
+
+            if not render and self._can_edit_talk and self._action == ACTION_SUBMIT_MESSAGE:
+                pass
+
+            warn_unsaved = base_context.user.data.unsaved_changes_warning
+            new_topic_form = forms.NewTopicForm(
+                language=base_context.language,
+                warn_unsaved_changes=warn_unsaved
+            )
+            edit_message_form = forms.EditMessageForm(
+                language=base_context.language,
+                warn_unsaved_changes=warn_unsaved
+            )
+
+            protection_status, log_entry = None, None
+            if prot_status := api_pages.get_page_protection(base_context.page.namespace_id, base_context.page.title):
+                if prot_status[0].applies_to_talk_page:
+                    protection_status, log_entry = prot_status
+
+            context = page_context.TalkPageContext(
+                base_context,
+                can_edit_talk=self._can_edit_talk,
+                new_topic_form=new_topic_form,
+                edit_message_form=edit_message_form,
+                rendered_page_content=render,
+                is_redirection=redirect is not None,
+                redirected_from=self._redirected_from,
+                protection_status=protection_status,
+                protection_log_entry=log_entry
+            )
+
+        else:
+            self._mode = MODE_READ
+            status = STATUS_FORBIDDEN
+            self._wikicode, _ = api_pages.get_message('ReadForbidden')
+            context = self._get_read_page_context()
+
+        if not redirect or not self._redirect_enabled:
+            return context, status
+        else:
+            return page_context.RedirectPageContext(context, redirect, anchor=redirect_anchor,
+                                                    display=display_redirect), STATUS_FOUND
 
 
 class _EditActionHandler(ActionHandler):
+    """'edit' action handler."""
+
     def get_page_context(self):
         if self._can_edit or self._can_read:
             if not self._can_edit and not self._page_exists:
-                self._wikicode, page_lang = api_pages.get_page_message(self._page, 'CreateForbidden',
-                                                                       no_per_title_notice=True)
+                self._wikicode, page_lang = api_pages.get_page_message(
+                    self._page.namespace_id, self._page.title, 'CreateForbidden', no_per_title_notice=True)
                 self._content_language = page_lang or self._language
                 self._noindex = True
                 self._mode = MODE_READ
                 return self._get_read_page_context(), STATUS_FORBIDDEN
 
             if self._can_edit:
-                edit_notice = api_pages.get_page_message(self._page, 'EditNotice')[0]
+                edit_notice = api_pages.get_page_message(self._page.namespace_id, self._page.title, 'EditNotice')[0]
             else:
-                edit_notice = api_pages.get_page_message(self._page, 'EditForbidden')[0]
+                # TODO prendre en compte les blocages
+                edit_notice = api_pages.get_page_message(self._page.namespace_id, self._page.title, 'EditForbidden')[0]
 
             try:
                 revision = api_pages.get_page_revision(self._page.namespace_id, self._page.title,
@@ -338,7 +458,7 @@ class _EditActionHandler(ActionHandler):
                 else:
                     wikicode = ''
                 status = STATUS_FOUND
-            except api_errors.RevisionDoesNotExist:
+            except api_errors.RevisionDoesNotExistError:
                 message, _ = api_pages.get_message('InvalidRevisionID')
                 if message:
                     wikicode = self._format_message(message, revision_id=self._revision_id)
@@ -381,9 +501,12 @@ class _EditActionHandler(ActionHandler):
                             to=self._page.full_title
                         ), STATUS_FOUND
             else:
-                form = forms.EditPageForm(initial={
-                    'content': self._wikicode,
-                })
+                form = forms.EditPageForm(
+                    language=self._get_base_page_context().language,
+                    initial={
+                        'content': self._wikicode,
+                    }
+                )
 
             return (self._get_edit_page_context(
                 edit_notice=edit_notice,
@@ -393,7 +516,8 @@ class _EditActionHandler(ActionHandler):
             ), status)
 
         else:
-            self._wikicode, page_lang = api_pages.get_page_message(self._page, 'ReadForbidden')
+            self._wikicode, page_lang = api_pages.get_page_message(self._page.namespace_id, self._page.title,
+                                                                   'ReadForbidden')
             self._content_language = page_lang or self._language
             self._noindex = True
             self._mode = MODE_READ
@@ -408,11 +532,13 @@ class _EditActionHandler(ActionHandler):
         try:
             ns_id = self._page.namespace_id
             title = self._page.title
-            api_pages.submit_page_content(context, ns_id, title, self._user, self._wikicode, comment, minor,
-                                          section_id=section_id, maintenance_category=maintenance_category)
-        except api_errors.PageEditForbidden:
+            current_revision_id = api_pages.get_page_revision(ns_id, title, self._user)
+            api_pages.submit_page_content(context, ns_id, title, self._wikicode, comment, minor,
+                                          section_id=section_id, maintenance_category=maintenance_category,
+                                          current_revision_id=current_revision_id)
+        except api_errors.PageEditForbiddenError:
             return False
-        except api_errors.PageEditConflit:
+        except api_errors.PageEditConflictError:
             # TODO handle conflicts
             return False
         else:
@@ -468,6 +594,8 @@ class _EditActionHandler(ActionHandler):
 
 
 class _HistoryActionHandler(ActionHandler):
+    """'history' action handler."""
+
     def get_page_context(self):
         self._noindex = True
         if self._can_read:
@@ -478,7 +606,8 @@ class _HistoryActionHandler(ActionHandler):
             else:
                 return self._get_page_history_context(paginator=None, paginator_page=0), STATUS_NOT_FOUND
         else:
-            self._wikicode, page_lang = api_pages.get_page_message(self._page, 'ReadForbidden')
+            self._wikicode, page_lang = api_pages.get_page_message(self._page.namespace_id, self._page.title,
+                                                                   'ReadForbidden')
             self._content_language = page_lang or self._language
             self._mode = MODE_READ
             return self._get_read_page_context(), STATUS_FORBIDDEN
@@ -490,6 +619,8 @@ class _HistoryActionHandler(ActionHandler):
 
 
 class _SetupActionHandler(ActionHandler):
+    """'setup' action handler."""
+
     def get_page_context(self):
         if not setup.are_pages_setup():
             if self._method == 'POST':

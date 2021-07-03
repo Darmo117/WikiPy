@@ -1,3 +1,6 @@
+"""
+This module defines functions related to users.
+"""
 import datetime
 import logging
 import re
@@ -5,6 +8,7 @@ import typing as typ
 
 import django.contrib.auth as dj_auth
 import django.core.exceptions as dj_exc
+import django.core.handlers.wsgi as dj_wsgi
 import django.db.models as dj_db_models
 import django.db.transaction as dj_db_trans
 
@@ -30,6 +34,22 @@ email_validator = models.email_validator
 @dj_db_trans.atomic
 def create_user(username: str, email: str = None, password: str = None, ip: str = None,
                 ignore_email: bool = False) -> models.User:
+    """
+    Creates a new user account.
+    Automated backend accounts should only specify username and a password and set ignore_email to True.
+    The IP address should not be used outside of this API.
+
+    :param username: Account’s username.
+    :param email: Account’s email address.
+    :param password: Account’s password.
+    :param ip: Account’s IP address. Only used for anonymous accounts.
+    :param ignore_email: If true, the email address will be ignored. Only used for the wiki setup account.
+    :return: The generated User object.
+    :raises InvalidUsernameError: If the username is invalid.
+    :raises DuplicateUsernameError: If the username already exists.
+    :raises InvalidPasswordError: If the password is invalid.
+    :raises InvalidEmailError: If the email address is invalid.
+    """
     from . import titles
 
     anonymous = ip is not None
@@ -52,7 +72,6 @@ def create_user(username: str, email: str = None, password: str = None, ip: str 
             models.password_validator(password)
         except dj_exc.ValidationError:
             raise errors.InvalidPasswordError(password)
-        password = password.strip()
 
         if not ignore_email:
             try:
@@ -95,6 +114,14 @@ def create_user(username: str, email: str = None, password: str = None, ip: str 
 
 @dj_db_trans.atomic
 def update_user_data(user: models.User, **kwargs) -> models.User:
+    """
+    Updates the preferences for the given user.
+
+    :param user: The user to update.
+    :param kwargs: The updated user data.
+    :return: The updated user.
+    :raises ValueError: If kwargs contains an illegal attribute.
+    """
     allowed_fields = (
         'lang_code',
         'signature',
@@ -157,7 +184,16 @@ def update_user_data(user: models.User, **kwargs) -> models.User:
     return get_user_from_name(user.username)
 
 
-def log_in(request, username: str, password: str) -> bool:
+@dj_db_trans.atomic
+def log_in(request: dj_wsgi.WSGIRequest, username: str, password: str) -> bool:
+    """
+    Authenticates then logs in the user from the given request using the specified username and password.
+
+    :param request: The HTTP request.
+    :param username: User’s username.
+    :param password: User’s password.
+    :return: True if the user was successfully authenticated and logged in, false otherwise.
+    """
     user = dj_auth.authenticate(request, username=username, password=password)
     if user is not None:
         dj_auth.login(request, user)
@@ -165,11 +201,25 @@ def log_in(request, username: str, password: str) -> bool:
     return False
 
 
-def log_out(request):
+def log_out(request: dj_wsgi.WSGIRequest):
+    """
+    Logs out the user from the given request.
+
+    :param request: The HTTP request.
+    """
     dj_auth.logout(request)
 
 
-def get_user_from_request(request) -> models.User:
+@dj_db_trans.atomic
+def get_user_from_request(request: dj_wsgi.WSGIRequest) -> models.User:
+    """
+    Returns the user from the given request.
+    If the user is not logged in and their IP address is not registered, a new Anonymous account will be created.
+    This account will be named Anonymous-<id> with id being an auto-incremented integer value starting from 1.
+
+    :param request: The HTTP request.
+    :return: The User object.
+    """
     dj_user = dj_auth.get_user(request)
 
     if dj_user.is_anonymous:
@@ -184,6 +234,7 @@ def get_user_from_request(request) -> models.User:
             else:
                 i = 1
             username = f'Anonymous-{i}'
+            # No need to check for errors
             return create_user(username, ip=ip)
         else:
             dj_user = dj_auth.get_user_model().objects.get(userdata__ip_address=ip)
@@ -193,6 +244,12 @@ def get_user_from_request(request) -> models.User:
 
 
 def get_user_from_name(username: str) -> typ.Optional[models.User]:
+    """
+    Returns the User object for the given username.
+
+    :param username: The username.
+    :return: The User object or None if no account with this username exists.
+    """
     try:
         dj_user = dj_auth.get_user_model().objects.get(username__iexact=username)
         user_data = models.UserData.objects.get(user=dj_user)
@@ -202,6 +259,13 @@ def get_user_from_name(username: str) -> typ.Optional[models.User]:
 
 
 def get_user_gender_from_page(namespace_id: int, title: str) -> typ.Optional[models.Gender]:
+    """
+    Returns the gender for the given user page.
+
+    :param namespace_id: Page’s namespace ID.
+    :param title: Page’s title.
+    :return: The gender or None if the page is not a user page or the user does not exist.
+    """
     if namespace_id == settings.USER_NS.id:
         page_user = get_user_from_name(title.split('/')[0])
         return page_user.data.gender if page_user else None
@@ -209,37 +273,100 @@ def get_user_gender_from_page(namespace_id: int, title: str) -> typ.Optional[mod
 
 
 def user_exists(username: str) -> bool:
+    """
+    Checks whether an account exists for the given username.
+
+    :param username: The username to check.
+    :return: True if an account exists, false otherwise.
+    """
     return dj_auth.get_user_model().objects.filter(username__iexact=username).count() != 0
 
 
 def ip_exists(ip: str) -> bool:
+    """
+    Checks whether the given IP address is registered.
+
+    :param ip: The IP address to check.
+    :return: True if the IP address is registered, false otherwise.
+    """
     return models.UserData.objects.filter(ip_address=ip).count() != 0
 
 
 @dj_db_trans.atomic
-def block_user(user: models.User, duration: int, reason: str, *, pages: typ.Iterable[str] = None,
-               namespaces: typ.Iterable[int] = None):
-    # TODO check rights
-    for title in pages:
-        models.UserBlock(user=user.data, duration=duration, reason=reason, pages=f'page:{title}').save()
-    for ns_id in namespaces:
-        models.UserBlock(user=user.data, duration=duration, reason=reason, pages=f'namespace:{ns_id}').save()
+def block_user(performer: models.User, user_to_block: models.User, duration: int, reason: str, *,
+               on_pages: typ.Iterable[str] = None, on_namespaces: typ.Iterable[int] = None,
+               on_own_talk_page: bool = False, on_whole_site: bool = False):
+    """
+    Blocks the given user on the specified pages and/or namespaces for the given duration.
+
+    :param performer: The user performing this action.
+    :param user_to_block: The user to block.
+    :param duration: The duration in days.
+    :param reason: Reason for blocking this user.
+    :param on_pages: The pages on which this user will be blocked. Ignored if on_whole_site is true.
+    :param on_namespaces: The namespaces on which this user will be blocked. Ignored if on_whole_site is true.
+    :param on_own_talk_page: If true, the user will not be able to edit its own talk page.
+    Ignored if on_whole_site is true.
+    :param on_whole_site: If true, the user will be blocked on the whole wiki.
+    :raises MissingRightError: If the current user does not have the permission to block/unblock users.
+    """
+    check_rights(performer, settings.RIGHT_BLOCK_USERS)
+    if on_whole_site:
+        models.UserBlock(user=user_to_block.django_user, duration=duration, reason=reason, on_whole_site=True).save()
+    else:
+        models.UserBlock(
+            user=user_to_block.django_user,
+            duration=duration,
+            reason=reason,
+            on_own_talk_page=on_own_talk_page,
+            pages=','.join(on_pages),
+            namespaces=','.join(map(str, on_namespaces))
+        ).save()
     # logs.add_log_entry(models.LOG_USER_BLOCK, user, reason=reason)  # TODO
 
 
-def can_read_page(current_user: models.User, namespace_id: int, title: str) -> bool:
-    return current_user.can_read_page(namespace_id, title)
+@dj_db_trans.atomic
+def unblock_user(performer: models.User, reason: str, block_id: int):
+    """
+    Deletes the given user block.
 
-
-def can_edit_page(current_user: models.User, namespace_id: int, title: str) -> bool:
-    return current_user.can_edit_page(namespace_id, title)
+    :param performer: The user performing this action.
+    :param reason: Reason for deleting this user block.
+    :param block_id: User block ID.
+    :raises MissingRightError: If the current user does not have the permission to block/unblock users.
+    """
+    check_rights(performer, settings.RIGHT_BLOCK_USERS)
+    try:
+        block = models.UserBlock.objects.get(id=block_id)
+    except models.UserBlock.DoesNotExist:
+        raise errors.UserBlockDoesNotExistError(block_id)
+    else:
+        unblocked_user = get_user_from_name(block.user.username)
+        block.delete()
+        # TODO log
 
 
 def get_user_contributions(current_user: models.User, username: str, namespace: int = None,
                            only_hidden_revisions: bool = False, only_last_edits: bool = False,
-                           only_page_creations: bool = False, hide_minor: bool = False,
+                           only_page_creations: bool = False, hide_minor: bool = False, hide_messages: bool = False,
                            from_date: datetime.date = None, to_date: datetime.date = None) \
-        -> typ.Sequence[models.PageRevision]:
+        -> typ.Sequence[typ.Union[models.PageRevision, models.MessageRevision]]:
+    """
+    Returns the contributions of the given user.
+
+    :param current_user: The current user.
+    :param username: The user to get the contributions of.
+    :param namespace: Only return edits on pages in this namespace.
+    :param only_hidden_revisions: Only return hidden revisions.
+    Will not return anything if current_user does not have the permission to hide revisions.
+    :param only_last_edits: Only return edits that are current.
+    :param only_page_creations: Only return edits that created a page.
+    :param hide_minor: Do not return minor edits.
+    :param hide_messages: Do not return message edits.
+    :param from_date: Only return edits at or after this date.
+    :param to_date: Only return edits at or before this date.
+    :return: The list of revisions.
+    """
     if user_exists(username):
         kwargs = {
             'author__username': username,
@@ -269,35 +396,81 @@ def get_user_contributions(current_user: models.User, username: str, namespace: 
                     (not only_page_creations or result.has_created_page):
                 result.lock()
                 results.append(result)
+
+        # TODO add messages if hide_messages is False
+
         return results
     return []
 
 
 @dj_db_trans.atomic
 def add_user_to_group(user: models.User, group_id: str, performer: models.User = None, auto: bool = False,
-                      reason: str = None) -> bool:
-    if group_exists(group_id) and ((performer and performer.has_right(settings.RIGHT_EDIT_USERS_GROUPS)) or auto):
-        models.UserGroupRel(user=user.django_user, group_id=group_id).save()
-        logs.add_log_entry(models.LOG_USER_GROUP_CHANGE, performer, target_user=user.username, reason=reason,
-                           group=group_id, joined=True)
-        return True
-    return False
+                      reason: str = None):
+    """
+    Adds the given user to a group.
+
+    :param user: The user to add to the group.
+    :param group_id: The group ID.
+    :param performer: The user performing this action.
+    :param auto: Is the operation made by the server? If true, the performer argument will be ignored.
+    :param reason: Reason for adding the user to this group.
+    :raises MissingRightError: If auto is False and the performer does not have the permission to edit users’ groups.
+    """
+    if performer and not auto:
+        check_rights(performer, settings.RIGHT_EDIT_USERS_GROUPS)
+    if not group_exists(group_id):
+        raise ValueError(f'group with ID {group_id} does not exist')
+
+    models.UserGroupRel(user=user.django_user, group_id=group_id).save()
+    logs.add_log_entry(models.LOG_USER_GROUP_CHANGE, performer, target_user=user.username, reason=reason,
+                       group=group_id, joined=True)
 
 
 @dj_db_trans.atomic
 def remove_user_from_group(user: models.User, group_id: str, performer: models.User = None, auto: bool = False,
-                           reason: str = None) -> bool:
-    if group_exists(group_id) and ((performer and performer.has_right(settings.RIGHT_EDIT_USERS_GROUPS)) or auto):
-        try:
-            rel = models.UserGroupRel.objects.get(user=user.django_user, group_id=group_id)
-        except models.UserGroupRel.DoesNotExist:
-            pass
-        else:
-            rel.delete()
-            logs.add_log_entry(models.LOG_USER_GROUP_CHANGE, performer, reason=reason, group=group_id, joined=False)
-        return True
-    return False
+                           reason: str = None):
+    """
+    Removes the given user from a group.
+
+    :param user: The user to add to the group.
+    :param group_id: The group ID.
+    :param performer: The user performing this action.
+    :param auto: Is the operation made by the server? If true, the performer argument will be ignored.
+    :param reason: Reason for adding the user to this group.
+    :raises MissingRightError: If auto is False and the performer does not have the permission to edit users’ groups.
+    """
+    if performer and not auto:
+        check_rights(performer, settings.RIGHT_EDIT_USERS_GROUPS)
+    if not group_exists(group_id):
+        raise ValueError(f'group with ID {group_id} does not exist')
+
+    try:
+        rel = models.UserGroupRel.objects.get(user=user.django_user, group_id=group_id)
+    except models.UserGroupRel.DoesNotExist:
+        pass
+    else:
+        rel.delete()
+        logs.add_log_entry(models.LOG_USER_GROUP_CHANGE, performer, reason=reason, group=group_id, joined=False)
 
 
 def group_exists(group_id: str) -> bool:
+    """
+    Checks whether a group ID exists.
+
+    :param group_id: The group ID to check.
+    :return: True if a group with this ID exists, false otherwise.
+    """
     return group_id in settings.GROUPS
+
+
+def check_rights(user: models.User, *rights: str):
+    """
+    Checks whether the given user has all the specified rights.
+
+    :param user: The user to check the permissions of.
+    :param rights: The rights the user should have.
+    :raises MissingRightError: If the user does not have at least one of the specified rights.
+    """
+    for right in rights:
+        if not user.has_right(right):
+            raise errors.MissingRightError(right)

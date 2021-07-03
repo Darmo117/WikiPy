@@ -32,7 +32,7 @@ def diff_header(context: page_context.TemplateContext, revision: models.PageRevi
     page_link = skin.format_internal_link(language, current_title, page_title)
     edit_link = wpy_tags.wpy_edit_link(context, revision, ignore_revision_id=True)
     history_link = wpy_tags.wpy_history_link(context, revision)
-    if current_user.can_edit_page(revision.page.namespace_id, revision.page.title):
+    if current_user.can_edit_page(revision.page.namespace_id, revision.page.title)[0]:
         page_link += ' ({} {})'.format(edit_link, history_link)
     else:
         page_link += ' ({})'.format(history_link)

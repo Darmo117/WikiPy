@@ -29,14 +29,14 @@
     <link rel="stylesheet" href="{% static 'WikiPy/libs/bootstrap/bootstrap-rtl.min.css' %}">
   {% endif %}
 
-  <link href="{% static 'WikiPy/css/common.css' %}" rel="stylesheet"/>
+  <link href="{% static 'WikiPy/css/common.min.css' %}" rel="stylesheet"/>
   {# Using "with" to avoid warning #}
-  {% with path='WikiPy/skins/'|add:wpy_context.skin.id|add:'/style.css' %}
+  {% with path='WikiPy/skins/'|add:wpy_context.skin.id|add:'/style.min.css' %}
     <link href="{% static path %}" rel="stylesheet"/>
   {% endwith %}
   {% if wpy_context.mode == 'special' and wpy_context.load_special_page_css %}
     {# Using "with" to avoid warning #}
-    {% with path='WikiPy/css/special_pages/'|add:wpy_context.special_page_id|add:'.css' %}
+    {% with path='WikiPy/css/special_pages/'|add:wpy_context.special_page_id|add:'.min.css' %}
       <link href="{% static path %}" rel="stylesheet"/>
     {% endwith %}
   {% endif %}
@@ -84,6 +84,8 @@
             --> <span id="wpy-maintenance-category-icon" class="mdi mdi-tools"
                       title="{% wpy_translate 'title.maintenance_category.tooltip' %}"></span><!--
           -->{% endif %}<!--
+        {% elif wpy_context.mode == 'talk' %}
+        -->{% wpy_translate 'title.talk' page_title=wpy_context.page.full_title %}<!--
         {% elif wpy_context.mode == 'edit' %}
           {% if wpy_context.page_exists %}
             {% if wpy_context.user_can_edit %}
@@ -141,6 +143,8 @@
         {% endif %}
       {% elif wpy_context.mode == 'read' %}
         {% include 'WikiPy/read-component.html' %}
+      {% elif wpy_context.mode == 'talk' %}
+        {% include 'WikiPy/talk-component.html' %}
       {% elif wpy_context.mode == 'edit' %}
         {% include 'WikiPy/editor-component.html' %}
       {% elif wpy_context.mode == 'history' %}
@@ -153,7 +157,8 @@
   {# JS #}
 
   <script>{{ js_data }}</script>
-  <script src="{% static 'WikiPy/libs/jquery-3.5.1.min.js' %}"></script>
+  <script src="{% static 'WikiPy/libs/jquery-3.6.0.min.js' %}"></script>
+  <script src="{% static 'WikiPy/js/jquery.confirmExit.min.js' %}"></script>
   <script src="{% static 'WikiPy/libs/popper.min.js' %}"></script>
   {% if wpy_context.language.writing_direction == 'ltr' %}
     <script src="{% static 'WikiPy/libs/bootstrap/bootstrap.min.js' %}"></script>
@@ -162,20 +167,20 @@
     <script src="{% static 'WikiPy/libs/bootstrap/bootstrap-rtl.min.js' %}"></script>
   {% endif %}
 
-  <script src="{% static 'WikiPy/js/common.js' %}"></script>
+  <script src="{% static 'WikiPy/js/common.min.js' %}"></script>
   {# Using "with" to avoid warning #}
-  {% with path='WikiPy/skins/'|add:wpy_context.skin.id|add:'/script.js' %}
+  {% with path='WikiPy/skins/'|add:wpy_context.skin.id|add:'/script.min.js' %}
     <script src="{% static path %}"></script>
   {% endwith %}
   {% if wpy_context.mode == 'special' and wpy_context.page_exists %}
     {% if wpy_context.load_special_page_js %}
       {# Using "with" to avoid warning #}
-      {% with p='WikiPy/js/special_pages/'|add:wpy_context.special_page_id|add:'.js' %}
+      {% with p='WikiPy/js/special_pages/'|add:wpy_context.special_page_id|add:'.min.js' %}
         <script src="{% static p %}"></script>
       {% endwith %}
     {% endif %}
     {% if wpy_context.load_special_page_form %}
-      <script src="{% static 'WikiPy/js/forms.js' %}"></script>
+      <script src="{% static 'WikiPy/js/forms.min.js' %}"></script>
     {% endif %}
   {% endif %}
 
@@ -186,13 +191,16 @@
       {% wpy_static NS_USER wpy_context.user.username|add:'/common.js' %}
       {% wpy_static NS_USER wpy_context.user.username|add:'/'|add:wpy_context.skin.id|add:'.js' %}
     {% endif %}
-    {% if wpy_context.mode == 'edit' %}
-      <script src="{% static 'WikiPy/js/ace-editor/ace.js' %}"></script>
-      <script src="{% static 'WikiPy/js/editor.js' %}"></script>
-      <script src="{% static 'WikiPy/js/forms.js' %}"></script>
+    {% if wpy_context.mode == 'edit' or wpy_context.mode == 'submit' or wpy_context.mode == 'talk' or wpy_context.mode == 'submit_message' %}
+      <script src="{% static 'WikiPy/libs/ace-editor/ace.js' %}"></script>
+      <script src="{% static 'WikiPy/js/editor.min.js' %}"></script>
+      <script src="{% static 'WikiPy/js/forms.min.js' %}"></script>
+      {% if wpy_context.mode == 'talk' or wpy_context.mode == 'submit_message' %}
+        <script src="{% static 'WikiPy/js/talk.min.js' %}"></script>
+      {% endif %}
     {% endif %}
   {% else %}
-    <script src="{% static 'WikiPy/js/forms.js' %}"></script>
+    <script src="{% static 'WikiPy/js/forms.min.js' %}"></script>
   {% endif %}
 </body>
 </html>

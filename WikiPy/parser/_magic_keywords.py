@@ -1,3 +1,6 @@
+"""
+This module defines the default magic keywords.
+"""
 import datetime
 
 from . import _registry
@@ -9,6 +12,15 @@ from . import _registry
 
 
 def _get_datetime(context, user_time: bool) -> datetime:
+    """
+    Returns the current date and time.
+
+    :param context: The context to use.
+    :type context: WikiPy.page_context.PageContext
+    :param user_time: If true, the current time in the user’s
+        timezone will be returned instead of the server’s timezone.
+    :return: The current time in the server’s or user’s timezone.
+    """
     if user_time:
         return context.user_date_time
     return context.date_time

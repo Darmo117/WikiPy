@@ -88,41 +88,47 @@
       <div id="wpy-nav-bar-logo" class="card bg-light mb-3">
         {% wpy_skin_render 'project_logo' image_class='card-img-top' %}
       </div>
-      <div id="wpy-nav-bar-navigation" class="card bg-light mb-3">
-        <div class="card-header">{% wpy_skin_render 'menu.side.navigation.title' %}</div>
-        <div class="card-body">
-          <ul class="list-unstyled">
-            {% wpy_skin_render 'menu.side.navigation.items' as menu_items %}
-            {% for menu_item in menu_items %}
-              <li>{{ menu_item }}</li>
-            {% endfor %}
-          </ul>
-        </div>
-      </div>
-      {% for menu_title in wpy_context.skin.additional_menus %}
+      {% wpy_skin_render 'menu.side.navigation.items' as menu_items %}
+      {% if menu_items %}
         <div id="wpy-nav-bar-navigation" class="card bg-light mb-3">
-          <div class="card-header">{{ menu_title }}</div>
+          <div class="card-header">{% wpy_skin_render 'menu.side.navigation.title' %}</div>
           <div class="card-body">
             <ul class="list-unstyled">
-              {% wpy_skin_render 'menu.side.'|add:menu_title|add:'.items' as menu_items %}
               {% for menu_item in menu_items %}
                 <li>{{ menu_item }}</li>
               {% endfor %}
             </ul>
           </div>
         </div>
+      {% endif %}
+      {% for menu_title in wpy_context.skin.additional_menus %}
+        {% wpy_skin_render 'menu.side.'|add:menu_title|add:'.items' as menu_items %}
+        {% if menu_items %}
+          <div id="wpy-nav-bar-navigation" class="card bg-light mb-3">
+            <div class="card-header">{{ menu_title }}</div>
+            <div class="card-body">
+              <ul class="list-unstyled">
+                {% for menu_item in menu_items %}
+                  <li>{{ menu_item }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        {% endif %}
       {% endfor %}
-      <div id="wpy-nav-bar-wiki-tools" class="card bg-light mb-3">
-        <div class="card-header">{% wpy_skin_render 'menu.side.wiki_tools.title' %}</div>
-        <div class="card-body">
-          <ul class="list-unstyled">
-            {% wpy_skin_render 'menu.side.wiki_tools.items' as menu_items %}
-            {% for menu_item in menu_items %}
-              <li>{{ menu_item }}</li>
-            {% endfor %}
-          </ul>
+      {% wpy_skin_render 'menu.side.wiki_tools.items' as menu_items %}
+      {% if menu_items %}
+        <div id="wpy-nav-bar-wiki-tools" class="card bg-light mb-3">
+          <div class="card-header">{% wpy_skin_render 'menu.side.wiki_tools.title' %}</div>
+          <div class="card-body">
+            <ul class="list-unstyled">
+              {% for menu_item in menu_items %}
+                <li>{{ menu_item }}</li>
+              {% endfor %}
+            </ul>
+          </div>
         </div>
-      </div>
+      {% endif %}
     </nav>
   </div>
 
@@ -142,28 +148,32 @@
   <div id="wpy-right-col" class="col">
     <nav id="wpy-nav-bar-right">
       {% if wpy_context.mode != 'special' and wpy_context.mode != 'setup' %}
-        <div id="wpy-nav-bar-page-tools" class="card bg-light mb-3">
-          <div class="card-header">{% wpy_skin_render 'menu.side.page_tools.title' %}</div>
-          <div class="card-body">
-            <ul class="list-unstyled">
-              {% wpy_skin_render 'menu.side.page_tools.items' as menu_items %}
-              {% for menu_item in menu_items %}
-                <li>{{ menu_item }}</li>
-              {% endfor %}
-            </ul>
+        {% wpy_skin_render 'menu.side.page_tools.items' as menu_items %}
+        {% if menu_items %}
+          <div id="wpy-nav-bar-page-tools" class="card bg-light mb-3">
+            <div class="card-header">{% wpy_skin_render 'menu.side.page_tools.title' %}</div>
+            <div class="card-body">
+              <ul class="list-unstyled">
+                {% for menu_item in menu_items %}
+                  <li>{{ menu_item }}</li>
+                {% endfor %}
+              </ul>
+            </div>
           </div>
-        </div>
-        <div id="wpy-nav-bar-more-page-tools" class="card bg-light mb-3">
-          <div class="card-header">{% wpy_skin_render 'menu.side.more_tools.title' %}</div>
-          <div class="card-body">
-            <ul class="list-unstyled">
-              {% wpy_skin_render 'menu.side.more_tools.items' as menu_items %}
-              {% for menu_item in menu_items %}
-                <li>{{ menu_item }}</li>
-              {% endfor %}
-            </ul>
+        {% endif %}
+        {% wpy_skin_render 'menu.side.more_tools.items' as menu_items %}
+        {% if menu_items %}
+          <div id="wpy-nav-bar-more-page-tools" class="card bg-light mb-3">
+            <div class="card-header">{% wpy_skin_render 'menu.side.more_tools.title' %}</div>
+            <div class="card-body">
+              <ul class="list-unstyled">
+                {% for menu_item in menu_items %}
+                  <li>{{ menu_item }}</li>
+                {% endfor %}
+              </ul>
+            </div>
           </div>
-        </div>
+        {% endif %}
         {% if wpy_context.page_categories %}
           <div id="wpy-nav-bar-categories" class="card bg-light mb-3">
             <div class="card-header">{% wpy_skin_render 'menu.side.categories.title' %}</div>

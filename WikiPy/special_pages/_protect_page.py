@@ -48,6 +48,10 @@ class ProtectPageForm(forms.WikiPyForm):
         required=True,
         help_text=True
     )
+    apply_to_talk = dj_forms.BooleanField(
+        label='apply_to_talk',
+        required=False
+    )
     apply_to_subpages = dj_forms.BooleanField(
         label='apply_to_subpages',
         required=False
@@ -124,9 +128,11 @@ class ProtectPage(SpecialPage):
             prot = res[0]
             level = prot.protection_level
             exp_date = prot.expiration_date
+            apply_to_talk = prot.applies_to_talk_page
         else:
             level = None
             exp_date = None
+            apply_to_talk = False
 
         return ProtectPageContext(
             base_context,
@@ -136,6 +142,7 @@ class ProtectPage(SpecialPage):
                 'level': level,
                 'predefined_expiration_date': '' if exp_date is None else 'other',
                 'expiration_date': exp_date,
+                'apply_to_talk': apply_to_talk,
             }),
             global_errors=[]
         )
@@ -151,6 +158,7 @@ class ProtectPage(SpecialPage):
             title = form.cleaned_data['title']
             protection_level = form.cleaned_data['level']
             reason = form.cleaned_data['reason']
+            apply_to_talk = form.cleaned_data['apply_to_talk']
             apply_to_subpages = form.cleaned_data['apply_to_subpages']
             pred_exp_date = form.cleaned_data['predefined_expiration_date']
             if pred_exp_date == 'other':
@@ -160,9 +168,9 @@ class ProtectPage(SpecialPage):
             else:
                 exp_date = datetime.date.fromisoformat(pred_exp_date)
             try:
-                api_pages.protect_page(namespace_id, title, base_context.user, protection_level, reason,
+                api_pages.protect_page(namespace_id, title, base_context.user, protection_level, reason, apply_to_talk,
                                        apply_to_subpages, exp_date)
-            except api_errors.PageProtectionForbidden:
+            except (api_errors.PageProtectionForbiddenError, api_errors.MissingRightError):
                 errors.append('protect_forbidden')
             else:
                 # Redirect to origin page

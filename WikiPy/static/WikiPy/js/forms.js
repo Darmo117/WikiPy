@@ -1,3 +1,11 @@
+/**
+ * This file handles various things related to forms:
+ * - Password confirmation if needeed
+ * - Invalid data CSS classes
+ * - Unsaved changes warnings
+ *
+ * @author Damien Vergnet
+ */
 (function () {
   // Add .is-invalid class to form inputs with associated
   // .invalid-feedback div.
@@ -8,14 +16,15 @@
     }
   });
 
-  /*
-   * Handle password confirmation.
-   */
+  // Iterate over all forms
   $("form").each(function () {
     let $form = $(this);
     let formId = $form.attr("id");
     let $passwordConfirmation = $(`#${formId}-password-confirm`);
 
+    /*
+     * Handle password confirmation.
+     */
     if ($passwordConfirmation.length) {
       let $password = $(`#${formId}-password`);
       let $submit = $(`#${formId}-submit`);
@@ -40,23 +49,17 @@
       $passwordConfirmation.keyup(checkPasswords);
     }
 
-    // Store form state at page load
-    $form.initial_form_state = $form.serialize();
-
-    // Store form state after form submit
-    $form.submit(function () {
-      $form.initial_form_state = $form.serialize();
-    });
-
+    // Handle unsaved warning.
     if ($form.find('input[name="warn-unsaved"]').length) {
-      // Check form changes before leaving the page and warn user if needed
-      $(window).bind("beforeunload", function (e) {
-        let form_state = $form.serialize();
-        if ($form.initial_form_state !== form_state) {
-          let message = "You have unsaved changes on this page. Do you want to leave this page and discard your changes or stay on this page?";
-          e.returnValue = message; // Cross-browser compatibility (src: MDN)
-          return message;
-        }
+      $form.confirmExit();
+    }
+
+    // Cancel button of page edit form.
+    if (formId === "wpy-edit-form") {
+      $("#wpy-edit-form-cancel-btn").click(function () {
+        // Remove onbeforeunload event if it was set by confirmExit.
+        window.onbeforeunload = null;
+        history.back();
       });
     }
   });

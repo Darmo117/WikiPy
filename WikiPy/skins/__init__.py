@@ -1,3 +1,31 @@
+"""This module defines classes and functions related to skins.
+Skins are used to render the pages to users.
+
+All skins have to be installed in this package.
+Skin subclasses must be defined in a separate sub-package and define a load_skin() function
+that takes in the skins directory path as a string and returns an instance of the skin’s class.
+
+Skins license files should be inside the skin’s directory and named “LICENSE”.
+The directory should also contain a skin.json file that must feature the following attributes:
+    - version (string): the skin’s version.
+    - build_date (string): the skin’s build date as an ISO date (YYYY-MM-DDTHH:mm:SS).
+    - home_url (string): the URL to the page that describes the skin. May be null.
+    - license (string): the skin’s license. May be null.
+    - fallback_language (string): the code of the language to use
+        if there are no mapping for a translation key in a given language.
+    - authors (array): the list of people that worked on the skin. Each item should have the following attributes:
+        - name: the person’s full name or alias.
+        - url: the person’s home page URL. May be null.
+
+Skins’ packages should have the following structure:
+    - langs: a directory that contains language files. Each language file should be named “<language code>.json”.
+        Each language file should have these two attributes:
+            - name (string): the skin’s name in the language.
+            - description (string): the skin’s description in the language.
+    - skin.json: the file described above.
+    - __init__.py: the file that defines the load_skin function returning the skin’s class.
+    - LICENSE (optional): the file containing the full license.
+"""
 import abc
 import dataclasses
 import importlib
@@ -14,16 +42,10 @@ from django.conf import settings as dj_settings
 from .. import apps, settings, special_pages, page_context
 from ..api import titles as api_titles, pages as api_pages
 
-__all__ = [
-    'Skin',
-    'load_skin',
-    'get_skin',
-    'get_loaded_skins',
-]
-
 
 @dataclasses.dataclass(frozen=True)
 class MenuItem:
+    """A simple class that represents a menu item."""
     item_id: str = None
     access_key: str = None
     icon: str = None
@@ -44,6 +66,11 @@ class MenuItem:
 
 
 class PageTemplate:
+    """The page template object provides the list of menus and their items that every skin should display.
+
+    The page template is located in the “page_template.json” file within this package.
+    """
+
     def __init__(self):
         self.__menus_links = {}
 
@@ -118,15 +145,23 @@ _PAGE_TEMPLATE = PageTemplate()
 
 class Skin(settings.resource_loader.ExternalResource, abc.ABC):
     def __init__(self, path: str, ident: str, **body_attrs: str):
+        """This object defines a skin.
+
+        :param path: The skins’ directory path.
+        :param ident: The skins’s ID.
+        :param body_attrs: A dictionary containing attributes to add to the body tag on each page.
+        """
         super().__init__(path, 'skin', ident)
         self.__body_attrs = dict(body_attrs)
 
     @property
     def body_attrs(self) -> str:
+        """The string of attributes to add to the body tag."""
         return dj_safe.mark_safe(' '.join(map(lambda e: f'{e[0]}="{e[1]}"', self.__body_attrs.items())))
 
     @property
     def additional_menus(self) -> typ.List[str]:
+        """Returns a list of menus defined in the WikiPy:SideMenus pages, but not present in the page template."""
         side_menus = api_pages.get_page_content(settings.WIKIPY_NS.id, 'SideMenus')
         items = []
         if side_menus:
@@ -138,9 +173,8 @@ class Skin(settings.resource_loader.ExternalResource, abc.ABC):
         return items
 
     def get_rendered_menu_items(self, menu_id: str, context, *link_classes: str) -> typ.List[str]:
-        """
-        Returns the items for a specific menu ID.
-        Items will be filtered using the given page context.
+        """Returns the items for a specific menu ID.
+        Items to actually render will be filtered using the given page context.
 
         :param menu_id: ID of the menu to return the items of.
         :param context: Context of the page being rendered.
@@ -291,6 +325,24 @@ class Skin(settings.resource_loader.ExternalResource, abc.ABC):
                              css_classes: typ.Sequence[str] = None, access_key: str = None, only_url: bool = False,
                              new_tab: bool = False, id_: str = None, data_attributes: typ.Dict[str, str] = None,
                              url_params: typ.Dict[str, typ.Any] = None) -> str:
+        """Renders an internal link.
+
+        :param language: The current page language.
+        :param current_page_title: The title of the current page.
+        :param page_title: The title of the target page.
+        :param text: The text to display instead of the page’s name and anchor.
+        :param tooltip: The links tooltip.
+        :param anchor: The anchor in the target page.
+        :param no_red_link: If true and the target page does not exist, the link will not appear red.
+        :param css_classes: CSS classes to add to the link.
+        :param access_key: The access key for this link.
+        :param only_url: If true, only the URL will be returned, without the rendered tags.
+        :param new_tab: If true, the link will open a new tab or window (target="_blank").
+        :param id_: The link’s id attribute’s value.
+        :param data_attributes: Data attributes to add to the link.
+        :param url_params: Parameters to add to the URL.
+        :return: The HTML link or the URL.
+        """
         url_params = url_params or {}
         ns_id, title = api_titles.extract_namespace_and_title(page_title, ns_as_id=True)
         page_exists = no_red_link or api_pages.page_exists(ns_id, title, talk=url_params.get('action') == 'talk')
@@ -320,25 +372,46 @@ class Skin(settings.resource_loader.ExternalResource, abc.ABC):
             paren = language.translate('link.redlink.tooltip')
             link_tooltip += f' ({paren})'
 
-        if not only_url:
-            return self._format_link(url, link_text, link_tooltip, page_exists, css_classes or [], access_key,
-                                     external=new_tab, id_=id_, **(data_attributes or {}))
-        else:
+        if only_url:
             return url
+        return self._format_link(url, link_text, link_tooltip, page_exists, css_classes or [], access_key,
+                                 external=new_tab, id_=id_, **(data_attributes or {}))
 
     def format_external_link(self, url: str, text: str = None, css_classes: typ.Sequence[str] = None) -> str:
+        """Renders an external link.
+
+        :param url: The link’s URL.
+        :param text: The text to display instead of the URL.
+        :param css_classes: CSS classes to add to the link.
+        :return: The rendered link.
+        """
         return self._format_link(url, text or url, tooltip=url, page_exists=True, css_classes=css_classes or [],
                                  external=True)
 
     @abc.abstractmethod
     def _format_link(self, url: str, text: str, tooltip: str, page_exists: bool, css_classes: typ.Sequence[str],
                      access_key: str = None, external: bool = False, id_: str = None, **data_attributes) -> str:
+        """Renders an HTML link.
+        It is called by the format_internal_link and format_external_link
+        methods after they have processed some of their parameters.
+
+        :param url: The link’s URL.
+        :param text: The text to display instead of the URL.
+        :param tooltip: The links tooltip.
+        :param page_exists: Whether the target page exists. Always true for external links.
+        :param css_classes: CSS classes to add to the link.
+        :param access_key: The access key for this link.
+        :param external: Whether the link is external.
+        :param id_: The link’s id attribute’s value.
+        :param data_attributes: Data attributes to add to the link.
+        :return: The rendered link.
+        """
         pass
 
     def render_wikicode(self, parsed_wikicode, context, enable_comment: bool = False) -> str:
-        """
-        Renders the given parsed wikicode.
-        :param parsed_wikicode: The parsed wikicode to render.
+        """Renders the given parsed wikicode (node tree).
+
+        :param parsed_wikicode: The parsed wikicode, as a node tree.
         :type parsed_wikicode: WikiPy.parser.WikicodeNode
         :param context: Context of the page being rendered.
         :type context: WikiPy.page_context.PageContext
@@ -351,7 +424,7 @@ class Skin(settings.resource_loader.ExternalResource, abc.ABC):
         if enable_comment:
             comment = f"""
 <!--
-Page generated by WikiPy in {total:0.4}\u00a0ms.
+Page generated by WikiPy in {total:0.4} ms.
 Skin: {self.name(context.language)}
 -->"""
         else:
@@ -364,6 +437,14 @@ _loaded_skins = {}
 
 
 def load_skin(name: str) -> bool:
+    """Loads the skin with the given name.
+
+    Skin subclasses must be defined in a package and define a load_skin() function
+    that takes in the skins directory path and returns an instance of the skin’s class.
+
+    :param name: The skin’s name.
+    :return: True if the skin has been loaded, false otherwise.
+    """
     logging.info(f'Loading skin "{name}"…')
 
     try:
@@ -397,8 +478,22 @@ def load_skin(name: str) -> bool:
 
 
 def get_skin(ident: str) -> typ.Optional[Skin]:
+    """Returns the skin with the given ID.
+
+    :param ident: The skin’s ID.
+    :return: The skin or None if the ID is not defined.
+    """
     return _loaded_skins.get(ident)
 
 
 def get_loaded_skins() -> typ.Iterable[Skin]:
+    """Returns the list of all loaded skins."""
     return _loaded_skins.values()
+
+
+__all__ = [
+    'Skin',
+    'load_skin',
+    'get_skin',
+    'get_loaded_skins',
+]

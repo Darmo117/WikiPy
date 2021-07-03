@@ -1,0 +1,69 @@
+{% load wpy_tags %}
+{% load wpy_utils %}
+
+{% with trans_prefix='form.talk.'|add:form.name|add:'.' %}
+  <form action="{% url 'wikipy:page' raw_page_title=wpy_context.page.url_full_title %}?action=submit_message"
+        method="post" id="wpy-{{ form.name|replace:'_,-' }}-form" style="display: none;">
+    <h4 id="wpy-{{ form.name|replace:'_,-' }}-header">{% wpy_translate trans_prefix|add:'form_title' %}</h4>
+    {% if form.warn_unsaved_changes %}
+      <input type="hidden" name="warn-unsaved" value="1">
+    {% endif %}
+
+    {% if form.name == 'new_topic' %}
+      <div class="form-group">
+        <label for="{{ form.title.id_for_label }}">
+          {% wpy_translate trans_prefix|add:'title.label' %}
+        </label>
+        {{ form.title }}
+      </div>
+    {% endif %}
+
+    <div class="form-group">
+      <label for="{{ form.content.id_for_label }}">
+        {% wpy_translate trans_prefix|add:'content.label' %}
+      </label>
+      <div class="wpy-ace-editor" id="{{ form.content.id_for_label }}-ace"
+           data-ace-target="{{ form.content.id_for_label }}"
+           data-content-model="wiki_page"></div>
+      {{ form.content }}
+    </div>
+
+    <div class="form-group">
+      <label for="{{ form.comment.id_for_label }}">
+        {% wpy_translate trans_prefix|add:'comment.label' %}
+      </label>
+      {{ form.comment }}
+    </div>
+
+    <div class="form-group text-center">
+      <div class="custom-control custom-checkbox custom-control-inline">
+        {{ form.minor_edit }}
+        <label for="{{ form.minor_edit.id_for_label }}" class="custom-control-label"
+               title="{% wpy_translate trans_prefix|add:'minor_edit.tooltip' %}">
+          {% wpy_translate trans_prefix|add:'minor_edit.label' %}
+        </label>
+      </div>
+
+      <div class="custom-control custom-checkbox custom-control-inline">
+        {{ form.follow_page }}
+        <label for="{{ form.follow_page.id_for_label }}" class="custom-control-label"
+               title="{% wpy_translate trans_prefix|add:'follow_page.tooltip' %}">
+          {% wpy_translate trans_prefix|add:'follow_page.label' %}
+        </label>
+      </div>
+    </div>
+
+    <div class=" text-center">
+      <input id="wpy-{{ form.name|replace:'_,-' }}-form-submit-btn" type="submit"
+             value="{% wpy_translate trans_prefix|add:'submit.label' %}"
+             title="{% wpy_translate trans_prefix|add:'submit.tooltip' %}" class="btn btn-primary" accesskey="s"/>
+      <button id="wpy-{{ form.name|replace:'_,-' }}-form-cancel-btn" type="button"
+              title="{% wpy_translate trans_prefix|add:'cancel.tooltip' %}"
+              class="btn btn-outline-danger">{% wpy_translate trans_prefix|add:'cancel.label' %}</button>
+    </div>
+
+    {{ form.reply_to }}
+    {{ form.message_id }}
+    {% csrf_token %}
+  </form>
+{% endwith %}

@@ -41,8 +41,8 @@ def page(request: dj_wsgi.WSGIRequest, raw_page_title: str = '') -> dj_http.Http
     try:
         formatted_title = api_titles.as_url_title(
             api_titles.get_actual_page_title(api_titles.title_from_url(raw_page_title)))
-    except (api_errors.BadTitleException, api_errors.EmptyPageTitleException) as e:
-        if isinstance(e, api_errors.EmptyPageTitleException):
+    except (api_errors.BadTitleError, api_errors.EmptyPageTitleError) as e:
+        if isinstance(e, api_errors.EmptyPageTitleError):
             title = special_pages.get_special_page_for_id('empty_title').title
             args = {}
         else:

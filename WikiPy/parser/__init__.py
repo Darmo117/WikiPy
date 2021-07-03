@@ -1,3 +1,6 @@
+"""
+The parser generates tokens from wikicode.
+"""
 from __future__ import annotations
 
 import random
@@ -10,23 +13,6 @@ from . import _nodes
 from . import _tags
 from ._registry import *
 
-__all__ = [
-    'WikicodeParser',
-    'WikicodeNode',
-    'RedirectNode',
-    'ExtendedHTMLTagNode',
-    'ExtendedHTMLTag',
-    'load_magic_keywords',
-    'load_functions',
-    'magic_keyword',
-    'parser_function',
-    'get_registered_magic_keywords',
-    'get_registered_functions',
-    'ParserFeature',
-    'ParserFunction',
-    'MagicKeyword',
-]
-
 WikicodeNode = _nodes.WikicodeNode
 RedirectNode = _nodes.RedirectNode
 ExtendedHTMLTagNode = _nodes.ExtendedHTMLTagNode
@@ -34,18 +20,21 @@ ExtendedHTMLTag = _tags.ExtendedHTMLTag
 
 
 def load_magic_keywords():
+    """Loads all registered magic keywords, including those from extensions."""
     for mk in get_registered_magic_keywords().values():
         # noinspection PyProtectedMember
         WikicodeParser._register_magic_keyword(mk)
 
 
 def load_functions():
+    """Loads all registered parser functions, including those from extensions."""
     for name, function in get_registered_functions().items():
         # noinspection PyProtectedMember
         WikicodeParser._register_function(function, name)
 
 
 def _init_special_tags() -> typ.Dict[str, _tags.NonHTMLTag]:
+    """Returns a mapping containing every special tag (links, bold, etc.) identified by their opening delimiter."""
     tags = [
         _tags.InternalLinkOrCategoryTag(),
         _tags.ExternalLinkTag(),
@@ -54,12 +43,17 @@ def _init_special_tags() -> typ.Dict[str, _tags.NonHTMLTag]:
         _tags.UnderlinedTextTag(),
         _tags.StrikethroughTextTag(),
         _tags.OverlinedTextTag(),
-        _tags.ImageOrVideoTag(),
+        _tags.FileTag(),
     ]
     return {t.open_delimiter: t for t in tags}
 
 
+# TODO nowiki, noinclude, includeonly, onlyinclude tags
 class WikicodeParser:
+    """
+    The parser’s role is to convert wikicode into a token tree
+    to be used by skins to render pages, to categories pages, etc.
+    """
     # TODO use titles’ regex
     REDIRECT_PATTERN = re.compile(r'@REDIRECT\[\[([^\n]+?)(?:#([^\n]+?))?]]')
     MAX_TRANSCLUSIONS_DEPTH = 50  # TODO change after tests
@@ -71,7 +65,6 @@ class WikicodeParser:
     DELIMITER = 'delimiter'
 
     # TODO disable all on* attributes
-    # True means the tag has no closing tag
     ALLOWED_HTML_TAGS = (
         ('abbr', False),
         ('address', False),
@@ -134,6 +127,10 @@ class WikicodeParser:
         ('var', False),
         ('wbr', False),
     )
+    """
+    The list of every allowed HTML tag.
+    The boolean in each tuple indicates whether the tag has a closing tag.
+    """
 
     __magic_keywords: typ.Dict[str, _registry.MagicKeyword] = {}
     __special_tags: typ.Dict[str, _tags.NonHTMLTag] = _init_special_tags()
@@ -151,22 +148,27 @@ class WikicodeParser:
 
     @property
     def max_depth_reached(self) -> bool:
+        """Whether the maximum recursion depth has been reached while parsing the code."""
         return self.__max_depth_reached
 
     @property
     def too_many_redirects(self) -> bool:
+        """Whether the redirection limit has been reached while parsing the code."""
         return self.__too_many_redirects
 
     @property
     def circular_transclusion_detected(self) -> bool:
+        """Whether a circular transclusion has been detected while parsing the code."""
         return self.__circular_transclusion
 
     @property
     def called_non_existant_template(self) -> bool:
+        """Whether there was an attempt to transclude a non-existant template."""
         return self.__called_non_existant_template
 
     @property
     def categories(self) -> typ.Dict[str, str]:
+        """The list of categories with their sort key that where encountered while parsing."""
         return dict(self.__categories)
 
     def parse_wikicode(self, wikicode: str, context, no_redirect: bool = False) \
@@ -175,7 +177,7 @@ class WikicodeParser:
         Parses the given wikicode.
 
         :param wikicode: The wikicode to parse.
-        :param context: The context to use.
+        :param context: The page context to use.
         :type context: WikiPy.page_context.PageContext
         :param no_redirect: If true and the wikicode is a redirection, this redirection will not be followed and a
                             RedirectNode will be returned instead.
@@ -187,16 +189,16 @@ class WikicodeParser:
                              variables_values: typ.Dict[str, str]) \
             -> typ.Union[_nodes.DocumentNode, _nodes.RedirectNode]:
         """
-        Parses the given wikicode.
+        Parses the given wikicode recursively.
 
         :param wikicode: The wikicode to parse.
         :param context: The context to use.
         :type context: WikiPy.page_context.PageContext
-        :param depth: The recursive parsing depth. If it is greater than the defined limit, the parsing stops for the
-                      concerned branch and a DocumentNode containing the raw text is returned.
+        :param depth: The current recursive parsing depth. If it is greater than the defined limit,
+            the parsing stops for the current branch and a DocumentNode containing the raw text is returned.
         :param no_redirect: If true and the wikicode is a redirection, this redirection will not be followed and a
-                            RedirectNode will be returned instead.
-        :param variables_values: A dictionary defining the values of variables.
+            RedirectNode will be returned instead.
+        :param variables_values: A dictionary mapping variables to their respective value.
         :return: The parsed wikicode as a DocumentNode or RedirectNode.
         """
         from ..api import titles as api_titles, pages as api_pages
@@ -224,22 +226,29 @@ class WikicodeParser:
         else:
             wikicode = self._substitute_and_transclude(wikicode, context, depth, variables_values)
             wikicode = self._substitute_functions(wikicode)
-            wikicode = self._substitute_tags(wikicode)
-            wikicode = self._substitute_tables(wikicode)
-            wikicode = wikicode.replace('{{!}}', '|')
+            wikicode = wikicode.replace('{{!}}', '|')  # Substitute '|' placeholders
             root_node = _nodes.DocumentNode(*self._parse_document(wikicode, top=depth == 0))
 
         return root_node
 
     def _substitute_and_transclude(self, wikicode: str, context, depth: int, variables_values: typ.Dict[str, str]) \
             -> str:
-        if depth > self.MAX_TRANSCLUSIONS_DEPTH:
-            self.__max_depth_reached = True
-            return wikicode
+        """
+        Performs the following operations in this order:
+            - substitutes magic keywords
+            - substitutes variables with their value
+            - transcludes templates and other pages
 
+        :param wikicode: The wikicode to preform these operations on.
+        :param context: The page context to use.
+        :type context: WikiPy.page_context.PageContext
+        :param depth: The current recursive parsing depth.
+        :param variables_values: A dictionary mapping variables to their respective values.
+        :return: The substituted wikicode.
+        """
         wikicode = self._substitute_magic_keywords(wikicode, context)
         wikicode = self._substitute_variables(wikicode, variables_values)
-        return self._substitute_transclusions(wikicode, context, depth)
+        return self._perform_transclusions(wikicode, context, depth)
 
     def _substitute_magic_keywords(self, wikicode: str, context) -> str:
         """
@@ -257,6 +266,14 @@ class WikicodeParser:
         return wikicode
 
     def _substitute_variables(self, wikicode: str, variables_values: typ.Dict[str, str], depth: int = 0) -> str:
+        """
+        Recursively substitutes variables with their values.
+
+        :param wikicode: The wikicode to perform substitutions on.
+        :param variables_values: A dictionary mapping variables to their respective values.
+        :param depth: The current recursive parsing depth.
+        :return: The substituted wikicode.
+        """
         # Maximum depth reached, stop parsing
         if depth > self.MAX_TRANSCLUSIONS_DEPTH:
             self.__max_depth_reached = True
@@ -341,7 +358,16 @@ class WikicodeParser:
 
         return result + buffer
 
-    def _substitute_transclusions(self, wikicode: str, context, depth: int) -> str:
+    def _perform_transclusions(self, wikicode: str, context, depth: int) -> str:
+        """
+        Recursively performs all transclusions on the given wikicode.
+
+        :param wikicode: The wikicode to perform substitutions on.
+        :param context: The context to use.
+        :type context: WikiPy.page_context.PageContext
+        :param depth: The current recursive parsing depth.
+        :return: The wikicode with all transclusions performed.
+        """
         # Maximum depth reached, stop parsing
         if depth > self.MAX_TRANSCLUSIONS_DEPTH:
             self.__max_depth_reached = True
@@ -526,7 +552,7 @@ class WikicodeParser:
                         key = (item[0] + '=')
                     else:
                         key = ''
-                    return key + self._substitute_transclusions(item[1], context, depth)
+                    return key + self._perform_transclusions(item[1], context, depth)
 
                 buffer += '|' + '|'.join(map(subst, params_values.items()))
 
@@ -534,16 +560,24 @@ class WikicodeParser:
 
     # noinspection PyMethodMayBeStatic
     def _substitute_functions(self, wikicode: str) -> str:
-        return wikicode  # TODO
+        """
+        Substitutes all parser functions.
 
-    def _substitute_tags(self, wikicode: str) -> str:
-        return self.make_safe(wikicode)  # TODO
-
-    # noinspection PyMethodMayBeStatic
-    def _substitute_tables(self, wikicode: str) -> str:
+        :param wikicode: The wikicode to perform substitutions on.
+        :return: The substituted wikicode.
+        """
         return wikicode  # TODO
 
     def _parse_document(self, wikicode: str, top: bool = False) -> typ.Sequence[_nodes.WikicodeNode]:
+        """
+        Converts the wiki code into a sequence of nodes.
+
+        :param wikicode: The wikicode to parse.
+        :param top: Indicates whether the given wikicode is at the root document.
+            If true, all placeholders will be substituted with their value.
+        :return: A sequence of nodes.
+        """
+
         def new_paragraph(b: str):
             nonlocal paragraph
 
@@ -552,6 +586,8 @@ class WikicodeParser:
             if not paragraph.is_empty:
                 nodes.append(paragraph)
                 paragraph = _nodes.ParagraphNode()
+
+        wikicode = self.make_safe(wikicode)  # TEMP remove once HTML tags are correctly parsed
 
         if top:
             # Tags should be already parsed at this point,
@@ -638,7 +674,8 @@ class WikicodeParser:
         return nodes
 
     def _generate_placeholder(self, name: str, content: str) -> str:
-        """Generates a new placeholder with the given name and content.
+        """
+        Generates a new placeholder with the given name and content.
         The generated placeholder and its associated content are then
         stored into the placeholders registry.
 
@@ -647,12 +684,13 @@ class WikicodeParser:
         :return: The generated placeholder.
         """
         n = random.randint(0, 0xffffffff)
-        placeholder = f"""?#`PLACEHOLDER--{name}-{hex(n)[2:].rjust(8, '0').upper()}--REDLOHECALP`#?"""
+        placeholder = f"""?#`″PLACEHOLDER--{name}-{hex(n)[2:].rjust(8, '0').upper()}--REDLOHECALP″`#?"""
         self.__placeholders[placeholder] = content
         return placeholder
 
     def _substitute_placeholders(self, text: str) -> str:
-        """Substitutes all placeholders in the given text by using the placeholders registry.
+        """
+        Substitutes all placeholders (except nowiki) in the given text by using the placeholders registry.
 
         :param text: The text.
         :return: The text with all placeholders substituted.
@@ -664,40 +702,73 @@ class WikicodeParser:
 
     @classmethod
     def _register_tag(cls, tag: _tags.ExtendedHTMLTag):
+        """
+        Registers a custom HTML-like tag.
+
+        :param tag: The tag to register.
+        :raises ValueError: If a tag with the same name is already registered.
+        """
         if tag.name in cls.__html_tags:
             raise ValueError(f'attempt to register two tags with the same name "{tag.name}"')
         cls.__html_tags[tag.name] = tag
 
     @classmethod
     def registered_tags(cls) -> typ.List[_tags.ExtendedHTMLTag]:
+        """Returns the list of all registered custom HTML-like tags."""
         return sorted(cls.__html_tags.values(), key=lambda t: t.name)
 
     @classmethod
     def _register_magic_keyword(cls, mk: _registry.MagicKeyword):
+        """
+        Registers a magic keyword.
+
+        :param mk: The keyword to register.
+        :raises ValueError: If a keyword with the same name is already registered.
+        """
         if mk.name in cls.__magic_keywords:
             raise ValueError(f'attempt to register two magic keywords with the same name "{mk.name}"')
         cls.__magic_keywords[mk.name] = mk
 
     @classmethod
     def registered_magic_keywords(cls) -> typ.List[_registry.MagicKeyword]:
+        """Returns the list of all registered magic keywords."""
         return sorted(cls.__magic_keywords.values(), key=lambda mk: mk.name)
 
     @classmethod
     def _register_function(cls, function: _registry.ParserFunction, name: str):
+        """
+        Registers a parser function.
+
+        :param function: The function to register.
+        :raises ValueError: If a function with the same name is already registered.
+        """
         if name in cls.__functions:
             raise ValueError(f'attempt to register two functions with the same name "{name}"')
         cls.__functions[name] = function
 
     @classmethod
     def registered_functions(cls) -> typ.List[_registry.ParserFunction]:
+        """Returns the list of all registered parser functions."""
         return sorted(cls.__functions.values(), key=lambda f: f.name)
 
     @staticmethod
     def make_safe(text: str) -> str:
+        """
+        Makes the given text safe by escaping all "<" and ">" characters.
+
+        :param text: The text to escape.
+        :return: The safe text.
+        """
         return text.replace('<', '&lt;').replace('>', '&gt;')
 
     @classmethod
     def get_redirect(cls, wikicode: str) -> typ.Optional[typ.Tuple[str, typ.Optional[str]]]:
+        """
+        If the given wikicode is a redirection, returns the target page’s full title and anchor.
+
+        :param wikicode: The wikicode to parse.
+        :return: A tuple containing the full title and anchor, or None if the wikicode is not a redirection.
+        """
         from ..api import titles as api_titles, errors as api_errors
 
         if m := cls.REDIRECT_PATTERN.fullmatch(wikicode.strip()):
@@ -705,7 +776,7 @@ class WikicodeParser:
             anchor = m.group(2) if m.lastindex == 2 else None
             try:
                 api_titles.check_title(title)
-            except (api_errors.BadTitleException, api_errors.EmptyPageTitleException):
+            except (api_errors.BadTitleError, api_errors.EmptyPageTitleError):
                 pass
             else:
                 return api_titles.get_actual_page_title(title), anchor
@@ -743,3 +814,21 @@ class WikicodeParser:
             sections[t] = sections[t][:-1]
 
         return header, sections
+
+
+__all__ = [
+    'WikicodeParser',
+    'WikicodeNode',
+    'RedirectNode',
+    'ExtendedHTMLTagNode',
+    'ExtendedHTMLTag',
+    'load_magic_keywords',
+    'load_functions',
+    'magic_keyword',
+    'parser_function',
+    'get_registered_magic_keywords',
+    'get_registered_functions',
+    'ParserFeature',
+    'ParserFunction',
+    'MagicKeyword',
+]

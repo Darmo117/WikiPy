@@ -3,6 +3,7 @@ import os
 import typing as typ
 
 import pkg_resources
+from django.conf import settings as dj_settings
 
 from . import SpecialPage, MISC_CAT
 from .. import page_context, extensions as exts, parser, settings, skins as skins_
@@ -14,6 +15,9 @@ class InstallInfoPageContext(page_context.PageContext):
     install_info_wikipy_version: str
     install_info_wiki_url_path: str
     install_info_api_url_path: str
+    install_info_media_backend: str
+    install_info_db_manager: str
+    install_info_email_backend: str
     install_info_extensions: typ.List[exts.Extension]
     install_info_skins: typ.List[skins_.Skin]
     install_info_parser_functions: typ.List[parser.ParserFunction]
@@ -28,6 +32,9 @@ class InstallInfoPageContext(page_context.PageContext):
             wikipy_version: str,
             wiki_url_path: str,
             api_url_path: str,
+            media_backend: str,
+            db_manager: str,
+            email_backend: str,
             skins: typ.List[skins_.Skin],
             extensions: typ.List[exts.Extension],
             parser_functions: typ.List[parser.ParserFunction],
@@ -38,6 +45,9 @@ class InstallInfoPageContext(page_context.PageContext):
         self._context = context
         self.install_info_wiki_url_path = wiki_url_path
         self.install_info_api_url_path = api_url_path
+        self.install_info_media_backend = media_backend
+        self.install_info_db_manager = db_manager
+        self.install_info_email_backend = email_backend
         self.install_info_wikipy_version = wikipy_version
         self.install_info_skins = skins
         self.install_info_extensions = extensions
@@ -105,6 +115,9 @@ class InstallInfoPage(SpecialPage):
                 base_context,
                 wiki_url_path=api_titles.get_wiki_url_path(),
                 api_url_path=api_titles.get_api_url_path(),
+                media_backend=settings.MEDIA_BACKEND_ID,
+                db_manager=dj_settings.DATABASES['default']['ENGINE'],
+                email_backend=dj_settings.EMAIL_BACKEND,
                 wikipy_version=settings.VERSION,
                 skins=sorted(skins_.get_loaded_skins(), key=lambda s: s.name(base_context.language)),
                 extensions=sorted(exts.get_loaded_extensions(), key=lambda e: e.name(base_context.language)),

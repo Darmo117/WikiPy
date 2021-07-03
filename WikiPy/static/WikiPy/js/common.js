@@ -1,14 +1,18 @@
-"use strict";
-
+/**
+ * This file initializes the wpy global object.
+ *
+ * @author Damien Vergnet
+ */
 (function () {
-  if (!Array.prototype.remove) {
-    Array.prototype.remove = function (value) {
-      let index = this.indexOf(value);
-      if (index > -1) {
-        this.splice(index, 1);
-      }
-    };
-  }
+  "use strict";
+
+  // Add in-place remove method to arrays.
+  Array.prototype.remove = function (value) {
+    let index = this.indexOf(value);
+    if (index > -1) {
+      this.splice(index, 1);
+    }
+  };
 
   let WPY_CONF = {};
   // noinspection JSUnresolvedVariable
@@ -18,51 +22,42 @@
   // noinspection JSUnresolvedVariable
   delete window.WPY_CONF;
 
-  class LockableMap {
-    _values;
-    _immutable;
-
-    constructor(immutable) {
-      this._values = {};
-      this._immutable = !!immutable;
+  /**
+   * A simple map object that can be locked but never unlocked.
+   *
+   * @author Damien Vergnet
+   */
+  class LockableMap extends Map {
+    /**
+     * Creates a new, unlocked map.
+     */
+    constructor() {
+      super();
+      this._immutable = false;
     }
 
+    /**
+     * Renders this map immutable.
+     */
     setImmutable() {
       this._immutable = true;
     }
 
-    get(key, fallback) {
-      return this._values[key] || fallback;
-    }
-
+    /**
+     * Sets a value for the given key.
+     * @param key {string} The key.
+     * @param value {*} The associated value.
+     * @throws Error If this map is locked.
+     */
     set(key, value) {
       if (this._immutable) {
         throw new Error("Map object is immutable");
       }
-      this._values[key] = value;
+      super.set(key, value);
     }
 
-    [Symbol.iterator]() {
-      return this.entries();
-    }
-
-    * entries() {
-      for (let [k, v] of Object.entries(this._values)) {
-        yield [k, v];
-      }
-    }
-
-    * keys() {
-      for (let k of Object.keys(this._values)) {
-        yield k;
-      }
-    }
-
-    * values() {
-      for (let v of Object.values(this._values)) {
-        yield v;
-      }
-    }
+    /** @private */
+    _immutable;
   }
 
   let config = new LockableMap();
@@ -79,12 +74,22 @@
   }
   config.setImmutable();
 
+  /**
+   * The "wpy" object contains all methods and attributes of the WikiPy JavaScript API.
+   *
+   * @author Damien Vergnet
+   */
   window.wpy = {
-    Map: LockableMap,
+    /**
+     * A simple map object that can be locked but never unlocked.
+     * @see LockableMap
+     */
+    LockableMap: LockableMap,
 
+    /**
+     * The config attribute contains global wiki data along with some related to the current page.
+     */
     config: config,
-
-    modules: {},
 
     /**
      * Encodes a string into a valid wiki page title URL.
@@ -97,7 +102,7 @@
 
     /**
      * Returns the translation for the given key.
-     * If no mapping correspond to the given key, the key is returned.
+     * If there is no mapping for the given key, the key is returned.
      * @param key {string}
      * @param args {Object?}
      * @return {string}
@@ -121,10 +126,13 @@
     when: function (dependencies, callback) {
       if (typeof dependencies === "string") {
         dependencies = [dependencies];
+      } else if (!(dependencies instanceof Array)) {
+        throw new TypeError("dependencies must be a string or array of strings");
       }
       if (typeof callback !== "function") {
         throw new TypeError("callback must be callable");
       }
+
       let toRemove = [];
       for (let d of dependencies) {
         if (this.getModule(d)) {
@@ -144,7 +152,8 @@
     /**
      * Registers a module for the given name. A property "id" holding the name of the module is added
      * to the object returned by the function.
-     * @param moduleName {string} The module’s name. Must follow the format "[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*".
+     * Once registered, the module can be accessed by calling <code>wpy.getModule("<module id>")</code>.
+     * @param moduleName {string} The module’s name. Must follow the format <code>[a-zA-Z0-9\_]+(\.[a-zA-Z0-9_]+)*</code>.
      * @param f {Function} The callback function that will load the module. It must return an object.
      */
     registerModule: function (moduleName, f) {
@@ -159,21 +168,6 @@
 
       let module = f();
       module.id = moduleName;
-      let names = moduleName.split('.');
-      let obj = this.modules;
-      // Build modules "namespaces"
-      for (let i = 0, last = false; i < names.length; i++, last = i === names.length - 1) {
-        let name = names[i];
-        if (!obj.hasOwnProperty(name)) {
-          if (last) {
-            obj[name] = module;
-          } else {
-            obj = obj[name] = {};
-          }
-        } else {
-          obj = obj[name];
-        }
-      }
       this._modules[moduleName] = module;
 
       let toRemove = [];
@@ -190,105 +184,168 @@
     },
 
     /**
-     * Returns the module for the given name.
-     * @param name {string} The module’s name.
+     * Returns the module for the given ID.
+     * @param id {string} The module’s ID.
      * @return {object|undefined} The module or undefined in none correspond.
      */
-    getModule: function (name) {
-      return this._modules[name];
+    getModule: function (id) {
+      return this._modules[id];
     },
 
     /**
      * Tells whether the given module has been loaded.
-     * @param name {string} The module’s name.
+     * @param id {string} The module’s ID.
      * @return {boolean} True if it is loaded, false otherwise.
      */
-    isModuleLoaded: function (name) {
-      return !!this.getModule(name);
+    isModuleLoaded: function (id) {
+      return !!this.getModule(id);
     },
 
+    /**
+     * This attribute defines methods related to the current page.
+     */
     currentPage: {
-      getTitle: function (url) {
+      /**
+       * Returns the title (without the namespace) of the current page.
+       * @param asUrl {boolean} If true, the returned title will be URL-compatible.
+       * @return {string} The current page’s title.
+       */
+      getTitle: function (asUrl) {
         let key = "PageTitle";
-        if (url) {
+        if (asUrl) {
           key = "Url" + key;
         }
         return WPY_CONF["wpy" + key];
       },
 
-      getSpecialPageTitle: function (url, canonical) {
+      /**
+       * Returns the title (without the namespace) of the current special page.
+       * @param asUrl {boolean} If true, the returned title will be URL-compatible.
+       * @param canonical {boolean} If true, the canonical title is returned; otherwise the local one is.
+       * @return {string} The current special page’s title.
+       */
+      getSpecialPageTitle: function (asUrl, canonical) {
         let key = "SpecialPageTitle";
         if (canonical) {
           key = "Canonical" + key;
         }
-        if (url) {
+        if (asUrl) {
           key = "Url" + key;
         }
-        console.log(key);
         return WPY_CONF["wpy" + key];
       },
 
-      getFullTitle: function (url) {
+      /**
+       * Returns the title (with the namespace) of the current page.
+       * @param asUrl {boolean} If true, the returned title will be URL-compatible.
+       * @return {string} The current page’s title.
+       */
+      getFullTitle: function (asUrl) {
         let key = "FullPageTitle";
-        if (url) {
+        if (asUrl) {
           key = "Url" + key;
         }
         return WPY_CONF["wpy" + key];
       },
 
-      getNamespaceName: function (url, canonical) {
+      /**
+       * Returns the namespace name of the current page.
+       * @param asUrl {boolean} If true, the returned namespace will be URL-compatible.
+       * @param canonical {boolean} If true, the canonical namespace name is returned; otherwise the local one is.
+       * @return {string} The current page’s namespace name.
+       */
+      getNamespaceName: function (asUrl, canonical) {
         let key = "NamespaceName";
         if (canonical) {
           key = "Canonical" + key;
         }
-        if (url) {
+        if (asUrl) {
           key = "Url" + key;
         }
         return WPY_CONF["wpy" + key];
       },
 
+      /**
+       * Returns the namespace ID of the current page.
+       * @return {number} The namespace ID of the current page.
+       */
       getNamespaceId: function () {
         return WPY_CONF["wpyNamespaceId"];
       },
 
+      /**
+       * Returns the action of the current page.
+       * @return {string} The action of the current page.
+       */
       getAction: function () {
         return WPY_CONF["wpyAction"];
       },
 
+      /**
+       * Returns the content type of the current page.
+       * @return {string} The content type of the current page.
+       */
       getContentType: function () {
         return WPY_CONF["wpyContentType"];
       },
 
+      /**
+       * Returns the ID of the currently used skin.
+       * @return {*} The ID of the current skin.
+       */
       getSkin: function () {
         return WPY_CONF["wpySkin"];
       },
     },
 
+    /**
+     * This attribute defines methods related to the current user.
+     */
     currentUser: {
+      /**
+       * Returns the name of the current user.
+       * @return {string} The name of the current user.
+       */
       getName: function () {
         return WPY_CONF["wpyUserName"];
       },
 
+      /**
+       * Returns the ID of the current user.
+       * @return {number} The ID of the current user.
+       */
       getId: function () {
         return WPY_CONF["wpyUserId"];
       },
 
+      /**
+       * Tells whether the current user is logged in.
+       * @return {boolean} True if the current user is logged in; false otherwise.
+       */
       isLoggedIn: function () {
         return WPY_CONF["wpyUserIsLoggedIn"];
       },
 
+      /**
+       * Returns the groups of the current user.
+       * @return {Array<string>} The groups of the current user.
+       */
       getGroups: function () {
         return WPY_CONF["wpyUserGroups"];
       },
     },
 
+    /**
+     * This attribute defines methods related toast popups.
+     */
     toast: {
       /**
-       *
+       * Displays a toast popup.
        * @param title {string} Toast’s title.
        * @param message {string} Toast’s message.
        * @param autoHide {boolean} True to hide automatically after the specified delay.
-       * @param hideDelay {number?} If autoHide is true, the delay in seconds (integer) until the toat disappears.
+       * @param hideDelay {number?} If autoHide is true, the delay in seconds (integer) until the toast disappears.
+       * Defaults to 0.
        */
       show: function (title, message, autoHide, hideDelay) {
         autoHide = !!autoHide;
@@ -323,8 +380,7 @@
   };
 
   /* Add keystroke in tooltips of elements with accesskey attribute. */
-  let accessKeyLabel = 'alt+shift+';
-
+  let accessKeyLabel = "alt+shift+";
   $("*[accesskey]").each(function (_, e) {
     let $element = $(e);
     let tooltip = $element.attr("title");
@@ -341,8 +397,8 @@
     url.search = params.toString();
   }
 
+  // Language selector behavior.
   let $languageSelector = $("#wpy-language-select");
-
   if ($languageSelector.length) {
     // Select current language
     $languageSelector.val(wpy.config.get("wpyLanguageCode"));
@@ -374,6 +430,7 @@
     }
   }
 
+  // Email confirmation resend button
   $("#wpy-change-email-resend").click(function () {
     $.get(
         wpy.config.get("wpyApiUrlPath"),
@@ -389,15 +446,4 @@
     );
     return false;
   });
-
-  function updatePageLayout() {
-    if (window.innerWidth <= 1224) {
-      $("#wpy-nav-bar-right").insertAfter($("#wpy-nav-bar-left"));
-    } else {
-      $("#wpy-center-col").next().append($("#wpy-nav-bar-right"));
-    }
-  }
-
-  updatePageLayout();
-  $(window).resize(updatePageLayout);
 })();

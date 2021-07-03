@@ -88,7 +88,15 @@ figure.img-thumbnail {
  * Code *
  ********/
 
-pre, code, #wpy-edit-form-content, #wpy-edit-form-comment {
+pre,
+code,
+#wpy-edit-form-content,
+#wpy-edit-form-comment,
+#wpy-new-topic-form-title,
+#wpy-new-topic-form-content,
+#wpy-new-topic-form-comment,
+#wpy-edit-message-form-content,
+#wpy-edit-message-form-comment {
   font-family: "Bitstream Vera Sans Mono", Monaco, "Courier New", Courier, monospace;
 }
 

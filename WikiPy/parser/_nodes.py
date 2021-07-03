@@ -1,3 +1,7 @@
+"""This module defines the base parser nodes as well as the default ones.
+
+Nodes are used to render the document they represent.
+"""
 from __future__ import annotations
 
 import abc
@@ -6,18 +10,32 @@ import typing as typ
 
 class WikicodeNode(abc.ABC):
     def __init__(self, inline: bool):
+        """The base class for nodes.
+        Nodes are used to render the document they represent.
+
+        :param inline: Indicates whether this node represents inline text.
+        """
         self.__inline = inline
         self._internal_nodes = []
 
     @property
     def is_inline(self):
+        """Whether this node represents inline text."""
         return self.__inline
 
     @property
     def content_to_parse(self) -> typ.Optional[str]:
+        """If this node still has content to parse, it should be accessible through this property.
+
+        :return: The text to parse or None if there is none.
+        """
         return None
 
     def set_parsed_content_nodes(self, nodes: typ.Sequence[WikicodeNode]):
+        """For nodes with text to parse, sets the nodes corresponding to the parsed text.
+
+        :param nodes: The nodes resulting from the content_to_parse text.
+        """
         self._internal_nodes = nodes
 
     def substitute_placeholders(self, placeholders: typ.Dict[str, str]):
@@ -32,7 +50,7 @@ class WikicodeNode(abc.ABC):
     @abc.abstractmethod
     def render(self, skin, context) -> str:
         """Renders this node as HTML.
-        Returned string is considered safe.
+        Returned string is considered HTML-safe.
 
         :param skin: The current skin.
         :type skin: WikiPy.skins.Skin
@@ -43,11 +61,15 @@ class WikicodeNode(abc.ABC):
         pass
 
     def get_categories(self) -> typ.List[CategoryNode]:
+        """Returns the list of CategoryNode instances among this node’s subnodes.
+        If this node is itself a CategoryNode, it returns itself.
+        """
         return [category for node in self._internal_nodes for category in node.get_categories()]
 
     def _render_internal_nodes(self, skin, context):
         """
-        Renders the internal nodes as HTML.
+        Renders this node’s internal nodes as HTML.
+        This method is meant to be used by subclasses in their render() method.
 
         :param skin: The current skin.
         :type skin: WikiPy.skins.Skin
@@ -59,7 +81,12 @@ class WikicodeNode(abc.ABC):
 
     @staticmethod
     def _do_substitute_placeholders(text: str, placeholders: typ.Dict[str, str]) -> str:
-        """Helper method to substitute placeholder in a given string."""
+        """Helper method to substitute placeholder in a given string.
+
+        :param text: The text to substitute from.
+        :param placeholders: The placeholders registry.
+        :return: The modified text.
+        """
         for ph, subst in placeholders.items():
             text = text.replace(ph, subst)
         return text
@@ -81,15 +108,24 @@ class InlineNode(WikicodeNode, abc.ABC):
 
 class DocumentNode(TopLevelNode):
     def __init__(self, *nodes: TopLevelNode):
+        """The Document node is the topmost node in any node tree representing a page.
+
+        :param nodes: The list of all its subnodes.
+        """
         super().__init__()
         self._internal_nodes = nodes
 
     @property
     def is_empty(self) -> bool:
+        """Whether this document has any subnodes.
+
+        :return: True if this document hasn’t any subnodes, false otherwise.
+        """
         return len(self._internal_nodes) == 0
 
     @property
     def nodes(self) -> typ.Tuple[TopLevelNode]:
+        """The list of all direct subnodes of this document."""
         return self._internal_nodes
 
     def render(self, skin, context):
@@ -101,16 +137,23 @@ class DocumentNode(TopLevelNode):
 
 class TitleNode(TopLevelNode):
     def __init__(self, content: WikicodeNode, level: int):
+        """The Title node represents a section title.
+
+        :param content: The title’s text.
+        :param level: The title’s section level.
+        """
         super().__init__()
         self.__content = content
         self.__level = level
 
     @property
     def content(self) -> WikicodeNode:
+        """The title text."""
         return self.__content
 
     @property
     def level(self) -> int:
+        """The section level."""
         return self.__level
 
     def render(self, skin, context) -> str:
@@ -122,18 +165,31 @@ class TitleNode(TopLevelNode):
 
 class ParagraphNode(TopLevelNode):
     def __init__(self, *text_nodes: WikicodeNode):
+        """Paragraph nodes are top-level nodes that contain a list of text nodes.
+
+        :param text_nodes: The list on text nodes this paragraph contains.
+        """
         super().__init__()
         self._internal_nodes = list(text_nodes)
 
     @property
     def is_empty(self):
+        """Whether this paragraph has any subnodes.
+
+        :return: True if this paragraph hasn’t any subnodes, false otherwise.
+        """
         return len(self._internal_nodes) == 0
 
     @property
     def nodes(self) -> typ.Tuple[WikicodeNode]:
+        """The list of all direct subnodes of this paragraph."""
         return tuple(self._internal_nodes)
 
     def append(self, text_node: WikicodeNode):
+        """Appends a new text node at the end of this paragraph.
+
+        :param text_node: The node to append.
+        """
         self._internal_nodes.append(text_node)
 
     def render(self, skin, context):
@@ -145,6 +201,11 @@ class ParagraphNode(TopLevelNode):
 
 class CategoryNode(InlineNode):
     def __init__(self, title: str, sort_key: str = None):
+        """Category nodes represent the categories the document they appear in belongs to.
+
+        :param title: The category title.
+        :param sort_key: The document’s sort key in this category.
+        """
         from ..api import titles as api_titles
 
         super().__init__()
@@ -153,10 +214,12 @@ class CategoryNode(InlineNode):
 
     @property
     def title(self) -> str:
+        """This category’s title."""
         return self.__title
 
     @property
     def sort_key(self) -> str:
+        """The sort key of the document for this category."""
         return self.__sort_key
 
     def render(self, skin, context) -> str:
@@ -171,11 +234,16 @@ class CategoryNode(InlineNode):
 
 class TextNode(InlineNode):
     def __init__(self, text: str):
+        """Text nodes represent links, styled or plain text.
+
+        :param text: The text of this node.
+        """
         super().__init__()
         self.__text = text
 
     @property
     def text(self) -> str:
+        """This node’s text."""
         return self.__text
 
     def substitute_placeholders(self, placeholders: typ.Dict[str, str]):
@@ -194,6 +262,13 @@ class TextNode(InlineNode):
 class InternalLinkNode(TextNode):
     def __init__(self, page_title: str, anchor: str = None, params: typ.Dict[str, typ.Union[str, typ.List[str]]] = None,
                  text: str = None):
+        """This node represents a link to another page on the same wiki.
+
+        :param page_title: The page’s title.
+        :param anchor: The optional anchor in this page.
+        :param params: Additional URL parameters.
+        :param text: The optional text to display in place of the URL.
+        """
         from ..api import titles as api_titles
 
         page_title = api_titles.get_actual_page_title(page_title)
@@ -212,14 +287,17 @@ class InternalLinkNode(TextNode):
 
     @property
     def page_title(self) -> str:
+        """Title of the page this link points to."""
         return self.__page_title
 
     @property
     def anchor(self) -> typ.Optional[str]:
+        """Anchor this link may point to in the target page."""
         return self.__anchor
 
     @property
     def params(self) -> typ.Dict[str, typ.Union[str, typ.List[str]]]:
+        """Additional URL parameters."""
         return self.__params
 
     @property
@@ -243,11 +321,16 @@ class InternalLinkNode(TextNode):
 
 class ExternalLinkNode(TextNode):
     def __init__(self, url: str, text: str = None):
+        """This node represents a link to an URL outside of the wiki (may be the same site).
+
+        :param text: The optional text to display in place of the URL.
+        """
         super().__init__(text=text or url)
         self.__url = url
 
     @property
     def url(self) -> str:
+        """The URL this link points to."""
         return self.__url
 
     @property
@@ -262,6 +345,8 @@ class ExternalLinkNode(TextNode):
 
 
 class BoldTextNode(TextNode):
+    """This node represents bold text."""
+
     @property
     def content_to_parse(self) -> typ.Optional[str]:
         return self.text
@@ -274,6 +359,8 @@ class BoldTextNode(TextNode):
 
 
 class ItalicTextNode(TextNode):
+    """This node represents italicized text."""
+
     @property
     def content_to_parse(self) -> typ.Optional[str]:
         return self.text
@@ -286,6 +373,8 @@ class ItalicTextNode(TextNode):
 
 
 class UnderlinedTextNode(TextNode):
+    """This node represents underlined text."""
+
     @property
     def content_to_parse(self) -> typ.Optional[str]:
         return self.text
@@ -298,6 +387,8 @@ class UnderlinedTextNode(TextNode):
 
 
 class OverlinedTextNode(TextNode):
+    """This node represents text with a line above it."""
+
     @property
     def content_to_parse(self) -> typ.Optional[str]:
         return self.text
@@ -310,6 +401,8 @@ class OverlinedTextNode(TextNode):
 
 
 class StrikethroughTextNode(TextNode):
+    """This node represents strikethrough text."""
+
     @property
     def content_to_parse(self) -> typ.Optional[str]:
         return self.text
@@ -321,8 +414,15 @@ class StrikethroughTextNode(TextNode):
         return f'Strikethrough[text={self.text!r}]'
 
 
-class ImageOrVideoNode(WikicodeNode):
+class FileNode(WikicodeNode):
     def __init__(self, file_name: str, width: str = None, legend: str = None):
+        """This node represents an embedded multimedia file.
+
+        :param file_name: The file’s name.
+        :param width: The display width. May be a CSS size value or 'thumb' to display it as a thumbnail.
+            Mainly intended for image and video files.
+        :param legend: The optional legend to display alongside the embedded file.
+        """
         super().__init__(inline=width != 'thumb')
         self.__file_name = file_name
         self.__width = width
@@ -330,14 +430,17 @@ class ImageOrVideoNode(WikicodeNode):
 
     @property
     def file_name(self) -> str:
+        """The file’s name."""
         return self.__file_name
 
     @property
     def width(self) -> str:
+        """The file’s display width. May be a CSS size value or 'thumb' for thumbnails."""
         return self.__width
 
     @property
     def legend(self) -> str:
+        """The optional legend to display alongside the embedded file."""
         return self.__legend
 
     @property
@@ -405,6 +508,13 @@ class ImageOrVideoNode(WikicodeNode):
 
 class ExtendedHTMLTagNode(WikicodeNode, abc.ABC):
     def __init__(self, name: str, inline: bool, content: str, **attributes: str):
+        """Extended HTML tags are special tags that use the HTML syntax.
+
+        :param name: The tag’s name.
+        :param inline: Whether this tag is inline or not.
+        :param content: The tag’s content.
+        :param attributes: The tag’s attributes.
+        """
         super().__init__(inline=inline)
         self.__name = name
         self.__attributes = attributes
@@ -412,10 +522,12 @@ class ExtendedHTMLTagNode(WikicodeNode, abc.ABC):
 
     @property
     def name(self) -> str:
+        """This tag’s name."""
         return self.__name
 
     @property
     def attributes(self) -> typ.Dict[str, str]:
+        """This tag’s attributes."""
         return self.__attributes.copy()
 
     @property
@@ -428,16 +540,24 @@ class ExtendedHTMLTagNode(WikicodeNode, abc.ABC):
 
 class RedirectNode(TopLevelNode):
     def __init__(self, target_page: str, anchor: str = None):
+        """This special node represents a redirection.
+        Redirect nodes should never be inside a Document node.
+
+        :param target_page: The title of the page to redirect to.
+        :param anchor: The optional anchor in the target page.
+        """
         super().__init__()
         self.__target_page = target_page
         self.__anchor = anchor
 
     @property
     def target_page(self) -> str:
+        """The title of the page to redirect to."""
         return self.__target_page
 
     @property
     def anchor(self) -> typ.Optional[str]:
+        """The optional anchor in the target page."""
         return self.__anchor
 
     def render(self, skin, context):

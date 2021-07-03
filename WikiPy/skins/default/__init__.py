@@ -1,8 +1,13 @@
+"""This module defines the default skin used by WikiPy."""
 from .. import Skin
 
 
 class DefaultSkin(Skin):
     def __init__(self, path: str):
+        """The defaut skin used by WikiPy.
+
+        :param path: The skins’ directory path.
+        """
         super().__init__(path, 'default', **{'class': 'd-flex flex-column'})
 
     def _format_link(self, url, text, tooltip, page_exists, css_classes, access_key=None, external=False, id_=None,

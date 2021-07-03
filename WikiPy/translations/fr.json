@@ -130,6 +130,14 @@
           "mass_deletion": "Suppression de masse",
           "uploads": "Fichiers mis en ligne"
         }
+      },
+      "form": {
+        "talk": {
+          "edit_message": {
+            "title_new": "Nouveau message",
+            "title_reply": "Répondre à ${username}"
+          }
+        }
       }
     },
     "duration": {
@@ -201,7 +209,9 @@
       "page_protection": {
         "title": "Journal des protections de pages",
         "entry": "${author:user} a changé le niveau de protection de ${full_page_title:link} vers «\u00a0${protection_level:group}\u00a0» jusqu’au ${expiration_date:date}. (${reason})",
-        "entry_no_date": "${author:user} a changé le niveau de protection de ${full_page_title:link} vers «\u00a0${protection_level:group}\u00a0» indéfiniment. (${reason})"
+        "entry_no_date": "${author:user} a changé le niveau de protection de ${full_page_title:link} vers «\u00a0${protection_level:group}\u00a0» indéfiniment. (${reason})",
+        "entry_talk": "${author:user} a changé le niveau de protection de ${full_page_title:link} et sa page de discussion vers «\u00a0${protection_level:group}\u00a0» jusqu’au ${expiration_date:date}. (${reason})",
+        "entry_no_date_talk": "${author:user} a changé le niveau de protection de ${full_page_title:link} et sa page de discussion vers «\u00a0${protection_level:group}\u00a0» indéfiniment. (${reason})"
       },
       "page_creation": {
         "title": "Journal des créations de pages",
@@ -241,6 +251,7 @@
       "license": "Les textes sont disponibles sous <a href=\"https://creativecommons.org/licenses/by-sa/3.0/deed.fr\">licence Creative Commons attribution partage à l’identique</a> si non précisé. D’autres licences peuvent s’appliquer aux contenus multimédias (cliquer sur chaque fichier)."
     },
     "title": {
+      "talk": "Discussion de «\u00a0$page_title\u00a0»",
       "edit": "Modification de «\u00a0$page_title\u00a0»",
       "create": "Création de «\u00a0$page_title\u00a0»",
       "source": "Sources de «\u00a0$page_title\u00a0»",
@@ -453,6 +464,71 @@
         "cancel": {
           "label": "Annuler",
           "tooltip": "Annuler toutes vos modifications"
+        }
+      },
+      "talk": {
+        "new_topic": {
+          "form_title": "Nouveau sujet",
+          "button": "Nouveau sujet",
+          "title": {
+            "label": "Titre du sujet",
+            "error": {
+              "required": "Veuillez donner un titre."
+            }
+          },
+          "content": {
+            "label": "Message",
+            "help": "Votre signature sera ajoutée automatiquement.",
+            "error": {
+              "required": "Les messages ne peuvent pas être vides."
+            }
+          },
+          "comment": {
+            "label": "Commentaire"
+          },
+          "minor_edit": {
+            "label": "Modification mineure"
+          },
+          "follow_page": {
+            "label": "Suivre la page"
+          },
+          "submit": {
+            "label": "Publier",
+            "tooltip": "Publier votre message"
+          },
+          "cancel": {
+            "label": "Annuler",
+            "tooltip": "Annuler toutes vos modifications"
+          }
+        },
+        "edit_message": {
+          "form_title": "Nouveau message",
+          "reply_button": "Répondre",
+          "edit_button": "Modifier votre message",
+          "content": {
+            "label": "Message",
+            "help": "Votre signature sera ajoutée automatiquement.",
+            "error": {
+              "required": "Les messages ne peuvent pas être vides."
+            }
+          },
+          "comment": {
+            "label": "Commentaire"
+          },
+          "minor_edit": {
+            "label": "Modification mineure"
+          },
+          "follow_page": {
+            "label": "Suivre la page"
+          },
+          "submit": {
+            "label": "Publier",
+            "tooltip": "Publier votre message"
+          },
+          "cancel": {
+            "label": "Annuler",
+            "tooltip": "Annuler toutes vos modifications"
+          }
         }
       }
     },
@@ -1081,6 +1157,9 @@
               "required": "Veuillez renseigner un motif."
             }
           },
+          "apply_to_talk": {
+            "label": "Appliquer à la page de discussion"
+          },
           "apply_to_subpages": {
             "label": "Appliquer aux sous-pages"
           },
@@ -1142,13 +1221,22 @@
           "title": "Informations générales",
           "table": {
             "version": {
-              "label": "Version"
+              "label": "Version de WikiPy"
             },
             "wiki_url_path": {
               "label": "Chemin d’URL du wiki"
             },
             "api_url_path": {
               "label": "Chemin d’URL de l’API"
+            },
+            "media_backend": {
+              "label": "Gestionnaire de média"
+            },
+            "db_manager": {
+              "label": "Gestionnaire de base de données"
+            },
+            "email_backend": {
+              "label": "Gestionnaire d’emails"
             }
           }
         },

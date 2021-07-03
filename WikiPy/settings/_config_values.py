@@ -1,3 +1,6 @@
+"""
+This module defines global values to be used anywhere.
+"""
 WIKI_SETUP_PAGE_TITLE = 'WikiSetup'
 
 ##########

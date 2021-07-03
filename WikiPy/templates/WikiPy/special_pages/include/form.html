@@ -2,7 +2,7 @@
 {% load wpy_tags %}
 {% load wpy_utils %}
 
-{% with trans_prefix='special.'|add:form.name|add:'.form.' %}
+{% with trans_prefix=prefix|default:'special.{}.form.'|format_string:form.name %}
   {% with form_name=form.name|replace:'-,_'|add:'_form_global_errors' %}
     {% with global_errors=wpy_context|get_attr:form_name %}
       {% if global_errors %}
@@ -18,9 +18,7 @@
   {% endwith %}
   <form method="{{ method|default:'post' }}" id="wpy-{{ form.name|replace:'_,-' }}-form"
         {% if action %}action="{{ action }}"{% endif %}>
-    {% if method != 'get' %}
-      {% csrf_token %}
-    {% endif %}
+    {% if method != 'get' %}{% csrf_token %}{% endif %}
 
     {% if form.warn_unsaved_changes %}
       <input type="hidden" name="warn-unsaved" value="1">

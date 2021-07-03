@@ -135,6 +135,14 @@
           "mass_deletion": "Mass deletion",
           "uploads": "Uploads"
         }
+      },
+      "form": {
+        "talk": {
+          "edit_message": {
+            "title_new": "New message",
+            "title_reply": "Replying to ${username}"
+          }
+        }
       }
     },
     "duration": {
@@ -207,7 +215,9 @@
       "page_protection": {
         "title": "Page protection log",
         "entry": "${author:user} has set the protection level of ${full_page_title:link} to “${protection_level:group}” until ${expiration_date:date}. (${reason})",
-        "entry_no_date": "${author:user} has set the protection level of ${full_page_title:link} to “${protection_level:group}” indefinitely. (${reason})"
+        "entry_no_date": "${author:user} has set the protection level of ${full_page_title:link} to “${protection_level:group}” indefinitely. (${reason})",
+        "entry_talk": "${author:user} has set the protection level of ${full_page_title:link} and its talk page to “${protection_level:group}” until ${expiration_date:date}. (${reason})",
+        "entry_no_date_talk": "${author:user} has set the protection level of ${full_page_title:link} and its talk page to “${protection_level:group}” indefinitely. (${reason})"
       },
       "page_creation": {
         "title": "Page creation log",
@@ -247,6 +257,7 @@
       "license": "Text is available under the <a href=\"https://creativecommons.org/licenses/by-sa/3.0/\">Creative Commons Attribution-ShareAlike License</a> unless otherwise noted. Other licenses may apply to multimedia content (click on each file for more details)."
     },
     "title": {
+      "talk": "Talk about “$page_title”",
       "edit": "Editing “$page_title”",
       "create": "Creating “$page_title”",
       "source": "Sources of “$page_title”",
@@ -426,7 +437,7 @@
         "protection_warning": "<strong>WARNING: This page is protected.</strong> Only users belonging to the group “$group_name” can edit it for the following reason: <i>$reason</i>",
         "deleted_warning": "<strong>WARNING</strong>: You are trying create a page that was deleted previously.",
         "content": {
-          "label": "Edit zone:"
+          "label": "Edit zone"
         },
         "comment": {
           "label": "Comment",
@@ -459,6 +470,71 @@
         "cancel": {
           "label": "Cancel",
           "tooltip": "Discard all changes"
+        }
+      },
+      "talk": {
+        "new_topic": {
+          "form_title": "New topic",
+          "button": "New topic",
+          "title": {
+            "label": "Topic title",
+            "error": {
+              "required": "Please provide a topic title."
+            }
+          },
+          "content": {
+            "label": "Message",
+            "help": "Your signature will be added automatically.",
+            "error": {
+              "required": "Message cannot be empty."
+            }
+          },
+          "comment": {
+            "label": "Comment"
+          },
+          "minor_edit": {
+            "label": "Minor edit"
+          },
+          "follow_page": {
+            "label": "Follow the page"
+          },
+          "submit": {
+            "label": "Post",
+            "tooltip": "Publish your message"
+          },
+          "cancel": {
+            "label": "Cancel",
+            "tooltip": "Discard all changes"
+          }
+        },
+        "edit_message": {
+          "form_title": "New message",
+          "reply_button": "Reply",
+          "edit_button": "Edit your message",
+          "content": {
+            "label": "Message",
+            "help": "Your signature will be added automatically.",
+            "error": {
+              "required": "Message cannot be empty."
+            }
+          },
+          "comment": {
+            "label": "Comment"
+          },
+          "minor_edit": {
+            "label": "Minor edit"
+          },
+          "follow_page": {
+            "label": "Follow the page"
+          },
+          "submit": {
+            "label": "Post",
+            "tooltip": "Publish your message"
+          },
+          "cancel": {
+            "label": "Cancel",
+            "tooltip": "Discard all changes"
+          }
         }
       }
     },
@@ -1082,6 +1158,9 @@
               "required": "Please provide a reason."
             }
           },
+          "apply_to_talk": {
+            "label": "Apply to talk page"
+          },
           "apply_to_subpages": {
             "label": "Apply to subpages"
           },
@@ -1134,13 +1213,22 @@
           "title": "General information",
           "table": {
             "version": {
-              "label": "Version"
+              "label": "WikiPy Version"
             },
             "wiki_url_path": {
               "label": "Wiki URL path"
             },
             "api_url_path": {
               "label": "API URL path"
+            },
+            "media_backend": {
+              "label": "Media Backend"
+            },
+            "db_manager": {
+              "label": "Database Manager"
+            },
+            "email_backend": {
+              "label": "Email Manager"
             }
           }
         },

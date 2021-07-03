@@ -1,4 +1,5 @@
 {% load wpy_tags %}
+{% load wpy_utils %}
 {% load diff_tags %}
 
 {% if wpy_context.page_diff_error %}
@@ -68,28 +69,28 @@
         </tr>
       {% else %}
         {% for d in wpy_context.page_diff_diff %}
-          {% if d|length_is:2 %}{# TODO #}
+          {% if d|is_instance:'WikiPy.api.DiffLine' %}
+            <tr class="wpy-diff-table-line">
+              <td class="wpy-diff-table-marker">
+                {% if d.line1 != d.line2 and d.line1 != None %}−{% else %}&nbsp;{% endif %}
+              </td>
+              <td class="{% if d.line1 != None %}wpy-diff-table-text{% endif %} {% if d.line1 != d.line2 and d.line1 != None %}wpy-diff-table-deletion{% endif %}">
+                <pre>{% if d.line1 %}{% diff_format d.line1 d.ranges1 inserted=False %}{% endif %}</pre>
+              </td>
+              <td class="wpy-diff-table-marker">
+                {% if d.line1 != d.line2 and d.line2 != None %}+{% else %}&nbsp;{% endif %}
+              </td>
+              <td class="{% if d.line2 != None %}wpy-diff-table-text{% endif %} {% if d.line1 != d.line2 and d.line2 != None %}wpy-diff-table-insertion{% endif %}">
+                <pre>{% if d.line2 %}{% diff_format d.line2 d.ranges2 inserted=True %}{% endif %}</pre>
+              </td>
+            </tr>
+          {% else %}{# TODO #}
             <tr class="wpy-diff-table-line">
               <td colspan="2" class="wpy-diff-table-line-number">
                 {% wpy_translate 'special.page_differences.line_number' line_nb=d.0 %}
               </td>
               <td colspan="2" class="wpy-diff-table-line-number">
                 {% wpy_translate 'special.page_differences.line_number' line_nb=d.1 %}
-              </td>
-            </tr>
-          {% else %}
-            <tr class="wpy-diff-table-line">
-              <td class="wpy-diff-table-marker">
-                {% if d.0 != d.1 and d.0 != None %}−{% else %}&nbsp;{% endif %}
-              </td>
-              <td class="{% if d.0 != None %}wpy-diff-table-text{% endif %} {% if d.0 != d.1 and d.0 != None %}wpy-diff-table-deletion{% endif %}">
-                <pre>{% if d.0 %}{% diff_format d.0 d.2 inserted=False %}{% endif %}</pre>
-              </td>
-              <td class="wpy-diff-table-marker">
-                {% if d.0 != d.1 and d.1 != None %}+{% else %}&nbsp;{% endif %}
-              </td>
-              <td class="{% if d.1 != None %}wpy-diff-table-text{% endif %} {% if d.0 != d.1 and d.1 != None %}wpy-diff-table-insertion{% endif %}">
-                <pre>{% if d.1 %}{% diff_format d.1 d.3 inserted=True %}{% endif %}</pre>
               </td>
             </tr>
           {% endif %}

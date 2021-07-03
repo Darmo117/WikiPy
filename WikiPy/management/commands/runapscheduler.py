@@ -1,3 +1,8 @@
+"""
+This module defines a command that runs backgroud database tasks.
+
+This command should be run after starting the server.
+"""
 import logging
 
 from apscheduler.schedulers.blocking import BlockingScheduler
@@ -20,6 +25,7 @@ def delete_old_job_executions(max_age=604_800):
 class Command(BaseCommand):
     help = 'Runs apscheduler.'
 
+    # TODO
     def handle(self, *args, **options):
         scheduler = BlockingScheduler(timezone=settings.TIME_ZONE)
         scheduler.add_jobstore(DjangoJobStore(), 'default')

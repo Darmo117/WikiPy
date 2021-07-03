@@ -1,5 +1,6 @@
 {% load static %}
 {% load wpy_tags %}
+{% load wpy_utils %}
 
 <div id="wpy-edit-notice">
   <div id="wpy-edit-notice-{{ wpy_context.page.namespace_id }}">
@@ -35,7 +36,8 @@
   </div>
 {% else %}
   {% with form=wpy_context.edit_form trans_prefix='form.edit.' %}
-    <form action="{% url 'wikipy:page' raw_page_title=wpy_context.page.url_full_title %}?action=submit" method="post">
+    <form action="{% url 'wikipy:page' raw_page_title=wpy_context.page.url_full_title %}?action=submit" method="post"
+          id="wpy-{{ form.name|replace:'_,-' }}-form">
       {% if form.warn_unsaved_changes %}
         <input type="hidden" name="warn-unsaved" value="1">
       {% endif %}
@@ -44,7 +46,10 @@
         <label class="sr-only" for="{{ form.content.id_for_label }}">
           {% wpy_translate trans_prefix|add:'content.label' %}
         </label>
-        <div id="wpy-ace-editor"></div>
+        <div class="wpy-ace-editor" id="{{ form.content.id_for_label }}-ace"
+             data-ace-target="{{ form.content.id_for_label }}"
+             data-content-model="{{ wpy_context.page.content_model }}"
+             {% if not wpy_context.user_can_edit %}data-disabled="1"{% endif %}></div>
         {{ form.content }}
       </div>
 
@@ -84,25 +89,23 @@
           {% endif %}
         </div>
 
-        <div class=" text-center">
-          <input id="wpy-edit-form-submit-btn" type="submit" value="{% wpy_translate trans_prefix|add:'submit.label' %}"
-                 title="{% wpy_translate trans_prefix|add:'submit.tooltip' %}" class="btn btn-primary"
-                 accesskey="s"/>
-          <input id="wpy-edit-form-preview-btn" type="button"
-                 value="{% wpy_translate trans_prefix|add:'preview.label' %}" disabled
-                 title="{% wpy_translate trans_prefix|add:'preview.tooltip' %}" class="btn btn-secondary"
-                 accesskey="p"/>
-          <input id="wpy-edit-form-diff-btn" type="button" value="{% wpy_translate trans_prefix|add:'diff.label' %}"
-                 disabled title="{% wpy_translate trans_prefix|add:'diff.tooltip' %}" class="btn btn-secondary"
-                 accesskey="w"/>
-          <input id="wpy-edit-form-cancel-btn" type="button" value="{% wpy_translate trans_prefix|add:'cancel.label' %}"
-                 disabled title="{% wpy_translate trans_prefix|add:'cancel.tooltip' %}" class="btn btn-outline-danger"/>
+        <div class="text-center">
+          <input id="wpy-edit-form-submit-btn" type="submit" accesskey="s"
+                 value="{% wpy_translate trans_prefix|add:'submit.label' %}"
+                 title="{% wpy_translate trans_prefix|add:'submit.tooltip' %}" class="btn btn-primary"/>
+          <button id="wpy-edit-form-preview-btn" type="button" accesskey="p"
+                  title="{% wpy_translate trans_prefix|add:'preview.tooltip' %}"
+                  class="btn btn-secondary">{% wpy_translate trans_prefix|add:'preview.label' %}</button>
+          <button id="wpy-edit-form-diff-btn" type="button" accesskey="w"
+                  title="{% wpy_translate trans_prefix|add:'diff.tooltip' %}"
+                  class="btn btn-secondary">{% wpy_translate trans_prefix|add:'diff.label' %}</button>
+          <button id="wpy-edit-form-cancel-btn" type="button"
+                  title="{% wpy_translate trans_prefix|add:'cancel.tooltip' %}"
+                  class="btn btn-outline-danger">{% wpy_translate trans_prefix|add:'cancel.label' %}</button>
         </div>
 
         {{ form.section_id }}
         {% csrf_token %}
-      {% else %}
-        <input type="hidden" id="wpy-editor-disabled" value="1" />
       {% endif %}
     </form>
   {% endwith %}
