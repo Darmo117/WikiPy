@@ -51,7 +51,7 @@ def diff_header(context: page_context.TemplateContext, revision: models.PageRevi
         comment += wpy_tags.wpy_revision_comment(context, revision.comment, revision.comment_hidden)
 
     actions = ''
-    if current_user.has_right(settings.RIGHT_HIDE_REVISIONS):
+    if current_user.has_right(settings.RIGHT_DELETE_REVISIONS):
         actions = wpy_tags.wpy_show_hide_revision_link(context, revision)
 
     if show_nav_link:

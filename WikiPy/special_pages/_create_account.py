@@ -72,7 +72,7 @@ class CreateAccountPage(SpecialPage):
         context = self._get_return_to_context(request, base_context)
 
         notice = dj_safe.mark_safe(api_pages.render_wikicode(
-            api_pages.get_message('CreateAccountDisclaimer')[0],
+            api_pages.get_message('CreateAccountDisclaimer', performer=context.user)[0],
             base_context
         ))
 

@@ -162,7 +162,7 @@ class Skin(settings.resource_loader.ExternalResource, abc.ABC):
     @property
     def additional_menus(self) -> typ.List[str]:
         """Returns a list of menus defined in the WikiPy:SideMenus pages, but not present in the page template."""
-        side_menus = api_pages.get_page_content(settings.WIKIPY_NS.id, 'SideMenus')
+        side_menus = api_pages.get_page_content(settings.WIKIPY_NS.id, 'SideMenus', performer=None)
         items = []
         if side_menus:
             for line in side_menus.split('\n'):
@@ -202,7 +202,7 @@ class Skin(settings.resource_loader.ExternalResource, abc.ABC):
 
             if menu_id == 'navigation' or menu_id in self.additional_menus:
                 # TODO optimiser
-                side_menus = api_pages.get_page_content(settings.WIKIPY_NS.id, 'SideMenus')
+                side_menus = api_pages.get_page_content(settings.WIKIPY_NS.id, 'SideMenus', performer=c.user)
                 default_items = {i.item_id: i for i in items}
                 current_menu = None
                 items = []

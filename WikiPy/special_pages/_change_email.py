@@ -77,10 +77,12 @@ class ChangeEmailPage(SpecialPage):
                 email_pending_confirmation=None,
                 email_confirmation_code=None,
                 email_confirmation_date=api_dt.now(),
-                django_email=user.data.email_pending_confirmation
+                django_email=user.data.email_pending_confirmation,
+                performer=None,
+                auto=True
             )
             if not user.is_in_group(settings.GROUP_EMAIL_CONFIRMED):
-                api_users.add_user_to_group(user, group_id=settings.GROUP_EMAIL_CONFIRMED, auto=True)
+                api_users.add_user_to_group(user, group_id=settings.GROUP_EMAIL_CONFIRMED, performer=None, auto=True)
             # Reload page
             return page_context.RedirectPageContext(
                 base_context,

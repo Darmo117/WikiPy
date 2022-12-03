@@ -12,7 +12,7 @@ import django.core.handlers.wsgi as dj_wsgi
 import django.db.models as dj_db_models
 import django.db.transaction as dj_db_trans
 
-from . import emails, errors, logs
+from . import emails, errors, logs, _action
 from .. import models, settings
 
 
@@ -101,9 +101,9 @@ def create_user(username: str, email: str = None, password: str = None, ip: str 
     user = models.User(dj_user, data)
     logs.add_log_entry(models.LOG_USER_CREATION, user, automatic=ignore_email or anonymous)
     reason = settings.i18n.get_language(settings.DEFAULT_LANGUAGE_CODE).translate('log.user_creation.reason')
-    add_user_to_group(user, settings.GROUP_ALL, auto=True, reason=reason)
+    add_user_to_group(user, settings.GROUP_ALL, performer=None, auto=True, reason=reason)
     if not anonymous:
-        add_user_to_group(user, settings.GROUP_USERS, auto=True, reason=reason)
+        add_user_to_group(user, settings.GROUP_USERS, performer=None, auto=True, reason=reason)
 
     logging.info(f'Successfully created user "{username}".')
     emails.send_email_change_confirmation_email(user, user.django_user.email)
@@ -112,16 +112,25 @@ def create_user(username: str, email: str = None, password: str = None, ip: str 
     return user
 
 
+@_action.api_action()
 @dj_db_trans.atomic
-def update_user_data(user: models.User, **kwargs) -> models.User:
+def update_user_data(user: models.User, *, performer: models.User = None, auto: bool = False, **kwargs) -> models.User:
     """
     Updates the preferences for the given user.
 
     :param user: The user to update.
     :param kwargs: The updated user data.
+    :param performer: The user performing this action.
+    :param auto: If true, the performer parameter will be ignored. For internal API use only!
     :return: The updated user.
     :raises ValueError: If kwargs contains an illegal attribute.
     """
+    if not auto:
+        if performer.django_user.id == user.django_user.id:
+            _action.check_rights(performer, settings.RIGHT_EDIT_MY_PREFERENCES)
+        else:
+            raise errors.ActionError('cannot edit preferences of others')
+
     allowed_fields = (
         'lang_code',
         'signature',
@@ -292,17 +301,18 @@ def ip_exists(ip: str) -> bool:
     return models.UserData.objects.filter(ip_address=ip).count() != 0
 
 
+@_action.api_action(settings.RIGHT_BLOCK_USERS)
 @dj_db_trans.atomic
-def block_user(performer: models.User, user_to_block: models.User, duration: int, reason: str, *,
+def block_user(user_to_block: models.User, duration: int, reason: str, *, performer: models.User,
                on_pages: typ.Iterable[str] = None, on_namespaces: typ.Iterable[int] = None,
                on_own_talk_page: bool = False, on_whole_site: bool = False):
     """
     Blocks the given user on the specified pages and/or namespaces for the given duration.
 
-    :param performer: The user performing this action.
     :param user_to_block: The user to block.
     :param duration: The duration in days.
     :param reason: Reason for blocking this user.
+    :param performer: The user performing this action.
     :param on_pages: The pages on which this user will be blocked. Ignored if on_whole_site is true.
     :param on_namespaces: The namespaces on which this user will be blocked. Ignored if on_whole_site is true.
     :param on_own_talk_page: If true, the user will not be able to edit its own talk page.
@@ -310,7 +320,6 @@ def block_user(performer: models.User, user_to_block: models.User, duration: int
     :param on_whole_site: If true, the user will be blocked on the whole wiki.
     :raises MissingRightError: If the current user does not have the permission to block/unblock users.
     """
-    check_rights(performer, settings.RIGHT_BLOCK_USERS)
     if on_whole_site:
         models.UserBlock(user=user_to_block.django_user, duration=duration, reason=reason, on_whole_site=True).save()
     else:
@@ -322,20 +331,20 @@ def block_user(performer: models.User, user_to_block: models.User, duration: int
             pages=','.join(on_pages),
             namespaces=','.join(map(str, on_namespaces))
         ).save()
-    # logs.add_log_entry(models.LOG_USER_BLOCK, user, reason=reason)  # TODO
+    # logs.add_log_entry(models.LOG_USER_BLOCK, performer, user, reason=reason)  # TODO
 
 
+@_action.api_action(settings.RIGHT_BLOCK_USERS)
 @dj_db_trans.atomic
-def unblock_user(performer: models.User, reason: str, block_id: int):
+def unblock_user(reason: str, block_id: int, *, performer: models.User):
     """
     Deletes the given user block.
 
-    :param performer: The user performing this action.
     :param reason: Reason for deleting this user block.
     :param block_id: User block ID.
+    :param performer: The user performing this action.
     :raises MissingRightError: If the current user does not have the permission to block/unblock users.
     """
-    check_rights(performer, settings.RIGHT_BLOCK_USERS)
     try:
         block = models.UserBlock.objects.get(id=block_id)
     except models.UserBlock.DoesNotExist:
@@ -346,6 +355,7 @@ def unblock_user(performer: models.User, reason: str, block_id: int):
         # TODO log
 
 
+@_action.api_action()
 def get_user_contributions(current_user: models.User, username: str, namespace: int = None,
                            only_hidden_revisions: bool = False, only_last_edits: bool = False,
                            only_page_creations: bool = False, hide_minor: bool = False, hide_messages: bool = False,
@@ -388,7 +398,7 @@ def get_user_contributions(current_user: models.User, username: str, namespace: 
 
         query_set = models.PageRevision.objects.filter(query).order_by('-date')
         results = []
-        can_hide = current_user.has_right(settings.RIGHT_HIDE_REVISIONS)
+        can_hide = current_user.has_right(settings.RIGHT_DELETE_REVISIONS)
         for result in query_set:
             can_read = current_user.can_read_page(result.page.namespace_id, result.page.title)
             is_current = not result.get_next(ignore_hidden=not can_hide)
@@ -403,8 +413,9 @@ def get_user_contributions(current_user: models.User, username: str, namespace: 
     return []
 
 
+@_action.api_action()
 @dj_db_trans.atomic
-def add_user_to_group(user: models.User, group_id: str, performer: models.User = None, auto: bool = False,
+def add_user_to_group(user: models.User, group_id: str, *, performer: models.User = None, auto: bool = False,
                       reason: str = None):
     """
     Adds the given user to a group.
@@ -417,7 +428,7 @@ def add_user_to_group(user: models.User, group_id: str, performer: models.User =
     :raises MissingRightError: If auto is False and the performer does not have the permission to edit users’ groups.
     """
     if performer and not auto:
-        check_rights(performer, settings.RIGHT_EDIT_USERS_GROUPS)
+        _action.check_rights(performer, settings.RIGHT_EDIT_USERS_GROUPS)
     if not group_exists(group_id):
         raise ValueError(f'group with ID {group_id} does not exist')
 
@@ -426,8 +437,9 @@ def add_user_to_group(user: models.User, group_id: str, performer: models.User =
                        group=group_id, joined=True)
 
 
+@_action.api_action()
 @dj_db_trans.atomic
-def remove_user_from_group(user: models.User, group_id: str, performer: models.User = None, auto: bool = False,
+def remove_user_from_group(user: models.User, group_id: str, *, performer: models.User = None, auto: bool = False,
                            reason: str = None):
     """
     Removes the given user from a group.
@@ -440,7 +452,7 @@ def remove_user_from_group(user: models.User, group_id: str, performer: models.U
     :raises MissingRightError: If auto is False and the performer does not have the permission to edit users’ groups.
     """
     if performer and not auto:
-        check_rights(performer, settings.RIGHT_EDIT_USERS_GROUPS)
+        _action.check_rights(performer, settings.RIGHT_EDIT_USERS_GROUPS)
     if not group_exists(group_id):
         raise ValueError(f'group with ID {group_id} does not exist')
 
@@ -461,16 +473,3 @@ def group_exists(group_id: str) -> bool:
     :return: True if a group with this ID exists, false otherwise.
     """
     return group_id in settings.GROUPS
-
-
-def check_rights(user: models.User, *rights: str):
-    """
-    Checks whether the given user has all the specified rights.
-
-    :param user: The user to check the permissions of.
-    :param rights: The rights the user should have.
-    :raises MissingRightError: If the user does not have at least one of the specified rights.
-    """
-    for right in rights:
-        if not user.has_right(right):
-            raise errors.MissingRightError(right)

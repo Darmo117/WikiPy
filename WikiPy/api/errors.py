@@ -17,6 +17,11 @@ class BadTitleError(ValueError):
         super().__init__(character)
 
 
+class ActionError(Exception):
+    def __init__(self, code: str):
+        super().__init__(code)
+
+
 class PageError(Exception):
     """Base class for page-related errors."""
 

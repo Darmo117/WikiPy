@@ -67,7 +67,8 @@ class PageDifferences(SpecialPage):
             error = base_context.language.translate('special.page_differences.error.missing_revision_id')
         else:
             try:
-                diff, revision1, revision2, nb_not_shown = api_pages.get_diff(revision_id1, revision_id2, user, True, 3)
+                diff, revision1, revision2, nb_not_shown = api_pages.get_diff(revision_id1, revision_id2, True, 3,
+                                                                              performer=user)
 
                 if revision1.page.id == revision2.page.id:
                     page_title = api_titles.get_full_page_title(revision1.page.namespace_id, revision1.page.title)
@@ -80,7 +81,7 @@ class PageDifferences(SpecialPage):
                                                             page_title1=page_title1, page_title2=page_title2)
 
                 if (revision1.hidden or revision2.hidden) and \
-                        not user.has_right(settings.RIGHT_HIDE_REVISIONS):
+                        not user.has_right(settings.RIGHT_DELETE_REVISIONS):
                     raise api_errors.PageReadForbiddenError(None)
 
                 context = PageDifferencesPageContext(

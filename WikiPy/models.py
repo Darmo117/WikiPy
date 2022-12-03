@@ -768,7 +768,8 @@ class User:
         """
         return any(map(lambda g: g.has_right(right), self.__data.groups))
 
-    def can_read_page(self, namespace_id: int, title: str) -> bool:  # TODO prendre en compte les blocages
+    # TODO prendre en compte les restrictions et blocages
+    def can_read_page(self, namespace_id: int, title: str) -> bool:
         """
         Checks whether this user can read the given page.
 
@@ -776,9 +777,9 @@ class User:
         :param title: Page’s title.
         :return: True if the user can read the page, False otherwise.
         """
-        return (namespace_id == settings.USER_NS.id and re.fullmatch(fr'{self.username}(/.*)?', title)
-                or self.has_right(settings.RIGHT_EDIT_USER_PAGES)
-                or any(map(lambda g: g.can_read_pages_in_namespace(namespace_id), self.__data.groups)))
+        return (self.has_right(settings.RIGHT_READ_PAGES) or
+                (namespace_id == settings.USER_NS.id and re.fullmatch(fr'{self.username}(/.*)?', title)
+                 or self.has_right(settings.RIGHT_EDIT_USER_PAGES)))
 
     # TODO prendre en compte les blocages
     def can_edit_page(self, namespace_id: int, title: str) -> typ.Tuple[bool, bool]:
@@ -787,20 +788,21 @@ class User:
 
         :param namespace_id: Page’s namespace ID.
         :param title: Page’s title.
-        :return: True if the user can edit the page, False otherwise.
+        :return: Two booleans indicating whether this user can edit the page or the talk page respectively.
         """
         try:
             page_protection = PageProtectionStatus.objects.get(page_namespace_id=namespace_id, page_title=title)
         except PageProtectionStatus.DoesNotExist:
             page_protection = None
 
+        ns = settings.NAMESPACES[namespace_id]
         can_edit = (
                 self.can_read_page(namespace_id, title)
                 and (not page_protection or self.is_in_group(page_protection.protection_level))
                 and (
                         (namespace_id == settings.USER_NS.id and re.fullmatch(fr'{self.username}(/.*)?', title))
                         or self.has_right(settings.RIGHT_EDIT_USER_PAGES)
-                        or any(map(lambda g: g.can_edit_pages_in_namespace(namespace_id), self.__data.groups))
+                        or any(map(lambda g: g.can_edit_pages_in_namespace(ns), self.__data.groups))
                 )
         )
         can_edit_talk = (
@@ -810,20 +812,6 @@ class User:
             # TODO and not is_redirect
         )
         return can_edit, can_edit_talk
-
-    def can_rename_page(self, namespace_id: int, title: str) -> bool:
-        """
-        Checks whether this user can rename the given page.
-
-        :param namespace_id: Page’s namespace ID.
-        :param title: Page’s title.
-        :return: True if the user can rename the page, False otherwise.
-        """
-        from .api import pages as api_pages
-
-        return (self.has_right(settings.RIGHT_RENAME_PAGES)
-                and api_pages.page_exists(namespace_id, title)
-                and self.can_edit_page(namespace_id, title))[0]
 
     def __repr__(self):
         return f'User[django_user={self.__django_user.username},data={self.__data}]'

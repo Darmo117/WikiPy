@@ -251,7 +251,8 @@ def init(base_dir: _pathlib.Path):
         name=get_ns_name(id_),
         alias=get_ns_alias(id_),
         feminine_name=get_ns_feminine_name(id_),
-        masculine_name=get_ns_masculine_name(id_)
+        masculine_name=get_ns_masculine_name(id_),
+        requires_rights=(RIGHT_EDIT_SITE_INTERFACE,)
     )
     NAMESPACES[id_] = USER_NS
     id_ = 4
@@ -306,7 +307,8 @@ def init(base_dir: _pathlib.Path):
         allows_subpages=True,
         can_be_main=False,
         name=get_ns_name(id_),
-        alias=get_ns_alias(id_)
+        alias=get_ns_alias(id_),
+        requires_rights=(RIGHT_EDIT_GADGETS,)
     )
     NAMESPACES[id_] = GADGET_NS
 
@@ -327,111 +329,158 @@ def init(base_dir: _pathlib.Path):
     # Rights/Groups #
     #################
 
-    rights_all = {}
-    for ns_id in NAMESPACES:
-        ns_rights = {k: True for k in NAMESPACE_RIGHTS}
-        if ns_id in [SPECIAL_NS.id, WIKIPY_NS.id, USER_NS.id, GADGET_NS.id]:
-            ns_rights[RIGHT_EDIT_PAGES] = False
-        rights_all[ns_id] = ns_rights
+    group_all = UserGroup(
+        GROUP_ALL,
+        rights=[
+            RIGHT_CREATE_ACCOUNT,
+            RIGHT_CREATE_PAGES,
+            RIGHT_CREATE_TOPICS,
+            RIGHT_EDIT_TOPICS,
+            RIGHT_POST_MESSAGES,
+            RIGHT_EDIT_OWN_MESSAGES,
+            RIGHT_READ_PAGES,
+            RIGHT_EDIT_PAGES,
+        ],
+        editable=False
+    )
+    group_users = UserGroup(
+        GROUP_USERS,
+        rights=[
+            RIGHT_EDIT_MY_PREFERENCES,
+            RIGHT_EDIT_MY_WATCHLIST,
+            RIGHT_WRITE_API,
+            RIGHT_IP_BLOCK_EXEMPT,
+            RIGHT_SEND_EMAILS,
+            RIGHT_EDIT_MY_INTERFACE,
+            RIGHT_PURGE_CACHE,
+        ],
+        editable=False
+    )
+    group_email_confirmed = UserGroup(
+        GROUP_EMAIL_CONFIRMED,
+        rights=[
+            RIGHT_RENAME_PAGES,
+        ],
+        editable=False
+    )
+    group_autopatrolled = UserGroup(
+        GROUP_AUTOPATROLLED,
+        rights=[
+            RIGHT_AUTOPATROLLED,
+            RIGHT_PIN_TOPICS,
+        ],
+        editable=True
+    )
+    group_patrollers = UserGroup(
+        GROUP_PATROLLERS,
+        rights=[
+            RIGHT_PATROL,
+            RIGHT_ROLLBACK,
+        ],
+        editable=True
+    )
+    group_administrators = UserGroup(
+        GROUP_ADMINISTRATORS,
+        rights=[
+            RIGHT_VIEW_DELETED_TOPICS,
+            RIGHT_VIEW_DELETED_MESSAGES,
+            RIGHT_PROTECT_PAGES,
+            RIGHT_EDIT_USER_PAGES,
+            RIGHT_RENAME_USERS,
+            RIGHT_RENAME_FILES,
+            RIGHT_DELETE_PAGES,
+            RIGHT_RESTORE_PAGES,
+            RIGHT_DELETE_REVISIONS,
+            RIGHT_RESTORE_REVISIONS,
+            RIGHT_VIEW_DELETED_REVISIONS,
+            RIGHT_VIEW_DELETED_LOG_ENTRIES,
+            RIGHT_DELETE_LOG_ENTRIES,
+            RIGHT_VIEW_TITLES_BLACKLIST,
+            RIGHT_EDIT_TITLES_BLACKLIST,
+            RIGHT_BLOCK_USERS,
+            RIGHT_EDIT_PAGE_LANGUAGE,
+            RIGHT_BLOCK_EMAILS,
+            RIGHT_MERGE_PAGES,
+            RIGHT_EDIT_PAGE_CONTENT_MODEL,
+            RIGHT_MASS_DELETE_PAGES,
+        ],
+        editable=True
+    )
+    group_message_admins = UserGroup(
+        GROUP_MESSAGE_ADMINISTRATORS,
+        rights=[
+            RIGHT_DELETE_TOPICS,
+            RIGHT_RESTORE_TOPICS,
+            RIGHT_VIEW_DELETED_TOPICS,
+            RIGHT_EDIT_MESSAGES,
+            RIGHT_DELETE_MESSAGES,
+            RIGHT_RESTORE_MESSAGES,
+            RIGHT_VIEW_DELETED_MESSAGES,
+        ],
+        editable=True
+    )
+    group_interface_admins = UserGroup(
+        GROUP_INTERFACE_ADMINISTRATORS,
+        rights=[
+            RIGHT_EDIT_SITE_INTERFACE,
+            RIGHT_EDIT_GADGETS,
+            RIGHT_EDIT_USER_INTERFACE,
+        ],
+        editable=True
+    )
+    group_groups_managers = UserGroup(
+        GROUP_GROUPS_MANAGERS,
+        rights=[
+            RIGHT_EDIT_USERS_GROUPS,
+        ],
+        editable=True
+    )
+    group_user_checkers = UserGroup(
+        GROUP_USER_CHECKERS,
+        rights=[
+            RIGHT_VIEW_USER_PRIVATE_DETAILS,
+        ],
+        editable=True
+    )
+    group_file_managers = UserGroup(
+        GROUP_FILE_MANAGERS,
+        rights=[
+            RIGHT_RENAME_FILES,
+            RIGHT_UPLOAD_FILES,
+            RIGHT_REUPLOAD_FILES,
+        ],
+        editable=True
+    )
+    group_abuse_filter_modifiers = UserGroup(
+        GROUP_ABUSE_FILTER_MODIFIERS,
+        rights=[  # TODO abuse filter managers rights
+        ],
+        editable=True
+    )
+    group_bots = UserGroup(
+        GROUP_BOTS,
+        rights=[
+            RIGHT_NO_RATE_LIMIT,
+            RIGHT_BOT,
+        ],
+        editable=True
+    )
 
-    edit_rights = {
-        GROUP_ALL: {
-            'editable': False,
-            'namespaces': rights_all,
-            'needs_validation': True,
-            'hide_from_RC': False,
-        },
-        GROUP_USERS: {
-            'inherits': GROUP_ALL,
-        },
-        GROUP_EMAIL_CONFIRMED: {
-            'inherits': GROUP_USERS,
-        },
-        GROUP_AUTOPATROLLED: {
-            'editable': True,
-            'inherits': GROUP_EMAIL_CONFIRMED,
-            'needs_validation': False,
-            'global': {
-                RIGHT_PIN_TOPICS: True,
-                RIGHT_RENAME_PAGES: True,
-            },
-        },
-        GROUP_PATROLLERS: {
-            'inherits': GROUP_AUTOPATROLLED,
-            'global': {
-                RIGHT_REVOKE: True,
-                RIGHT_VALIDATE_CHANGES: True,
-            },
-        },
-        GROUP_ADMINISTRATORS: {
-            'inherits': GROUP_PATROLLERS,
-            'namespaces': {
-                WIKIPY_NS.id: {k: True for k in NAMESPACE_RIGHTS},
-                GADGET_NS.id: {k: True for k in NAMESPACE_RIGHTS},
-            },
-            'global': {
-                RIGHT_DELETE_PAGES: True,
-                RIGHT_PROTECT_PAGES: True,
-                RIGHT_HIDE_REVISIONS: True,
-                RIGHT_BLOCK_USERS: True,
-                RIGHT_RENAME_USERS: True,
-                RIGHT_EDIT_USER_PAGES: True,
-            },
-        },
-        GROUP_BOTS: {
-            'inherits': GROUP_AUTOPATROLLED,
-            'hide_from_RC': True,
-        },
-        GROUP_RIGHTS_MANAGERS: {
-            'inherits': GROUP_AUTOPATROLLED,
-            'global': {
-                RIGHT_EDIT_USERS_GROUPS: True,
-            },
-        },
+    GROUPS = {
+        GROUP_ALL: group_all,
+        GROUP_USERS: group_users,
+        GROUP_EMAIL_CONFIRMED: group_email_confirmed,
+        GROUP_AUTOPATROLLED: group_autopatrolled,
+        GROUP_PATROLLERS: group_patrollers,
+        GROUP_ADMINISTRATORS: group_administrators,
+        GROUP_INTERFACE_ADMINISTRATORS: group_interface_admins,
+        GROUP_MESSAGE_ADMINISTRATORS: group_message_admins,
+        GROUP_GROUPS_MANAGERS: group_groups_managers,
+        GROUP_USER_CHECKERS: group_user_checkers,
+        GROUP_FILE_MANAGERS: group_file_managers,
+        GROUP_ABUSE_FILTER_MODIFIERS: group_abuse_filter_modifiers,
+        GROUP_BOTS: group_bots,
     }
-
-    def _get_global_rights(group_rights, inherited_rights, local_global_rights):
-        r = []
-
-        for right in GLOBAL_RIGHTS:
-            has_right = group_rights.get(right, False)
-            inherits = right in inherited_rights
-            if local_global_rights.get(right, has_right or inherits):
-                r.append(right)
-
-        return r
-
-    def _get_namespace_rights(group_rights, inherited_rights, local_namespace_rights):
-        r = {}
-
-        for ns_id_ in NAMESPACES:
-            r[ns_id_] = []
-            group_ns_rights = group_rights.get(ns_id_, {})
-            for right in NAMESPACE_RIGHTS:
-                has_right = group_ns_rights.get(right, False) and (ns_id_ != SPECIAL_NS.id or right == RIGHT_READ_PAGES)
-                inherits = right in inherited_rights.get(ns_id_, [])
-                if local_namespace_rights.get(str(ns_id_), {}).get(right, has_right or inherits):
-                    r[ns_id_].append(right)
-
-        return r
-
-    GROUPS = {}
-    for group_name, rights in edit_rights.items():
-        inherited_group_name: _typ.Optional[str] = rights.get('inherits', None)
-        if inherited_group_name:
-            inherited_group = GROUPS[inherited_group_name]
-        else:
-            inherited_group = UserGroup('', False, True, [], {}, False)
-        editable = rights.get('editable', inherited_group.editable)
-        hide_rc = rights.get('hide_from_RC', inherited_group.hide_from_recent_changes)
-        needs_validation = rights.get('needs_validation', inherited_group.needs_validation)
-        local_group_rights = local_rights.get(group_name, {})
-        namespace_rights = _get_namespace_rights(rights.get('namespaces', {}), inherited_group.namespace_edit_rights,
-                                                 local_group_rights.get('namespaces', {}))
-        global_rights = _get_global_rights(rights.get('global', {}), inherited_group.global_rights,
-                                           local_group_rights.get('global', {}))
-
-        GROUPS[group_name] = UserGroup(group_name, hide_rc, needs_validation, global_rights, namespace_rights, editable)
 
     _media_backends.register_default()
     if not _media_backends.get_backend(MEDIA_BACKEND_ID):

@@ -46,10 +46,12 @@ def send_email_change_confirmation_email(user: models.User, pending_email: str) 
     """
     user = users.update_user_data(
         user,
-        email_pending_confirmation=pending_email
+        email_pending_confirmation=pending_email,
+        performer=None,
+        auto=True
     )
     confirmation_code = generate_email_confirmation_code()
-    users.update_user_data(user, email_confirmation_code=confirmation_code)
+    users.update_user_data(user, email_confirmation_code=confirmation_code, performer=None, auto=True)
     link = titles.get_page_url(settings.SPECIAL_NS.id,
                                special_pages.get_special_page_for_id('change_email').get_title(),
                                confirm_code=confirmation_code, user=user.username)

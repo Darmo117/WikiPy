@@ -52,7 +52,7 @@ def _create_page(request: dj_wsgi.WSGIRequest, namespace_id: int, title: str, us
         redirect_enabled=False
     ).get_page_context()
     # No need to check for errors
-    api_pages.submit_page_content(context, namespace_id, title, content, _COMMENT, False)
+    api_pages.submit_page_content(context, namespace_id, title, content, _COMMENT, False, performer=user)
 
 
 def setup(request: dj_wsgi.WSGIRequest, username: str, password: str, email: str, secret_key: str) -> str:
@@ -78,10 +78,18 @@ def setup(request: dj_wsgi.WSGIRequest, username: str, password: str, email: str
     except api_errors.InvalidEmailError:
         return INVALID_EMAIL
 
-    api_users.add_user_to_group(admin, settings.GROUP_AUTOPATROLLED, auto=True, reason=_COMMENT)
-    api_users.add_user_to_group(admin, settings.GROUP_PATROLLERS, auto=True, reason=_COMMENT)
-    api_users.add_user_to_group(admin, settings.GROUP_ADMINISTRATORS, auto=True, reason=_COMMENT)
-    api_users.add_user_to_group(admin, settings.GROUP_RIGHTS_MANAGERS, auto=True, reason=_COMMENT)
+    api_users.add_user_to_group(admin, settings.GROUP_AUTOPATROLLED, performer=None, auto=True, reason=_COMMENT)
+    api_users.add_user_to_group(admin, settings.GROUP_PATROLLERS, performer=None, auto=True, reason=_COMMENT)
+    api_users.add_user_to_group(admin, settings.GROUP_ADMINISTRATORS, performer=None, auto=True, reason=_COMMENT)
+    api_users.add_user_to_group(admin, settings.GROUP_INTERFACE_ADMINISTRATORS, performer=None, auto=True,
+                                reason=_COMMENT)
+    api_users.add_user_to_group(admin, settings.GROUP_MESSAGE_ADMINISTRATORS, performer=None, auto=True,
+                                reason=_COMMENT)
+    api_users.add_user_to_group(admin, settings.GROUP_FILE_MANAGERS, performer=None, auto=True, reason=_COMMENT)
+    api_users.add_user_to_group(admin, settings.GROUP_USER_CHECKERS, performer=None, auto=True, reason=_COMMENT)
+    api_users.add_user_to_group(admin, settings.GROUP_ABUSE_FILTER_MODIFIERS, performer=None, auto=True,
+                                reason=_COMMENT)
+    api_users.add_user_to_group(admin, settings.GROUP_GROUPS_MANAGERS, performer=None, auto=True, reason=_COMMENT)
 
     logging.info('Done.')
 
@@ -89,8 +97,8 @@ def setup(request: dj_wsgi.WSGIRequest, username: str, password: str, email: str
 
     password = dj_auth.get_user_model().objects.make_random_password(length=100)
     wiki_user = api_users.create_user(WIKI_USER_NAME, password=password, ignore_email=True)
-    api_users.add_user_to_group(wiki_user, settings.GROUP_ADMINISTRATORS, auto=True, reason=_COMMENT)
-    api_users.add_user_to_group(wiki_user, settings.GROUP_BOTS, auto=True, reason=_COMMENT)
+    api_users.add_user_to_group(wiki_user, settings.GROUP_ADMINISTRATORS, performer=None, auto=True, reason=_COMMENT)
+    api_users.add_user_to_group(wiki_user, settings.GROUP_BOTS, performer=None, auto=True, reason=_COMMENT)
 
     # TODO translate default texts
 

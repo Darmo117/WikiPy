@@ -216,7 +216,7 @@ class WikicodeParser:
                 root_node = _nodes.RedirectNode(target_page=page_title, anchor=anchor)
             else:
                 ns, title = api_titles.extract_namespace_and_title(page_title, ns_as_id=True)
-                revision = api_pages.get_page_revision(ns, title, current_user=context.user)
+                revision = api_pages.get_page_revision(ns, title, performer=context.user)
                 if revision:
                     root_node = self._parse_wikicode_impl(revision.content, context, depth + 1, no_redirect=False,
                                                           variables_values=variables_values)
@@ -398,7 +398,7 @@ class WikicodeParser:
                         f'<span class="wpy-parser-error wpy-circular-transclusion">{text}</span>'
                     )
 
-                revision = api_pages.get_page_revision(ns_id, title, current_user=context.user)
+                revision = api_pages.get_page_revision(ns_id, title, performer=context.user)
                 if revision:
                     redirect = self.get_redirect(revision.content)
                     if redirect:

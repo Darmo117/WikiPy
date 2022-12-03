@@ -250,7 +250,7 @@ class ActionHandler(abc.ABC):
             page_exists=self._page_exists,
             user_can_read=self._can_read,
             user_can_edit=self._can_edit,
-            user_can_hide=self._user.has_right(settings.RIGHT_HIDE_REVISIONS),
+            user_can_hide=self._user.has_right(settings.RIGHT_DELETE_REVISIONS),
             date_time=now,
             user_date_time=user_now,
             date=now.date(),
@@ -314,13 +314,13 @@ class _ReadActionHandler(ActionHandler):
         if not self._page_exists:
             status = STATUS_NOT_FOUND
             if self._page.namespace_id == settings.SPECIAL_NS.id:
-                wikicode, page_lang = api_pages.get_message('NoSpecialPage')
+                wikicode, page_lang = api_pages.get_message('NoSpecialPage', performer=self._user)
             else:
-                wikicode, page_lang = api_pages.get_message('NoPage')
+                wikicode, page_lang = api_pages.get_message('NoPage', performer=self._user)
 
         elif not self._can_read:
             status = STATUS_FORBIDDEN
-            wikicode, page_lang = api_pages.get_message('ReadForbidden')
+            wikicode, page_lang = api_pages.get_message('ReadForbidden', performer=self._user)
 
         else:
             status = STATUS_FOUND
@@ -328,7 +328,7 @@ class _ReadActionHandler(ActionHandler):
             wikicode = ''
             try:
                 revision = api_pages.get_page_revision(self._page.namespace_id, self._page.title,
-                                                       current_user=self._user, revision_id=self._revision_id)
+                                                       performer=self._user, revision_id=self._revision_id)
                 if not revision:
                     redirect = self._page.full_title
                 elif self._revision_id is None:
@@ -340,7 +340,7 @@ class _ReadActionHandler(ActionHandler):
                         if redirect in (self._redirects_list or []):
                             self._redirect_enabled = False
             except api_errors.RevisionDoesNotExistError:
-                wikicode, page_lang = api_pages.get_message('InvalidRevisionID')
+                wikicode, page_lang = api_pages.get_message('InvalidRevisionID', performer=self._user)
                 wikicode = self._format_message(wikicode, revision_id=self._revision_id)
 
         self._content_language = page_lang or self._language
@@ -375,7 +375,7 @@ class _TalkActionHandler(ActionHandler):
             self._redirected_from = self._redirects_list[0] if self._redirects_list else None
             base_context = self._get_base_page_context()
             # Display redirection if necessary
-            if revision := api_pages.get_page_revision(self._page.namespace_id, self._page.title, self._user):
+            if revision := api_pages.get_page_revision(self._page.namespace_id, self._page.title, performer=self._user):
                 if redir := api_pages.get_redirect(revision.content):
                     display_redirect = True
                     redirect, redirect_anchor = redir
@@ -421,7 +421,7 @@ class _TalkActionHandler(ActionHandler):
         else:
             self._mode = MODE_READ
             status = STATUS_FORBIDDEN
-            self._wikicode, _ = api_pages.get_message('ReadForbidden')
+            self._wikicode, _ = api_pages.get_message('ReadForbidden', performer=self._user)
             context = self._get_read_page_context()
 
         if not redirect or not self._redirect_enabled:
@@ -438,28 +438,31 @@ class _EditActionHandler(ActionHandler):
         if self._can_edit or self._can_read:
             if not self._can_edit and not self._page_exists:
                 self._wikicode, page_lang = api_pages.get_page_message(
-                    self._page.namespace_id, self._page.title, 'CreateForbidden', no_per_title_notice=True)
+                    self._page.namespace_id, self._page.title, 'CreateForbidden', performer=self._user,
+                    no_per_title_notice=True)
                 self._content_language = page_lang or self._language
                 self._noindex = True
                 self._mode = MODE_READ
                 return self._get_read_page_context(), STATUS_FORBIDDEN
 
             if self._can_edit:
-                edit_notice = api_pages.get_page_message(self._page.namespace_id, self._page.title, 'EditNotice')[0]
+                edit_notice = api_pages.get_page_message(self._page.namespace_id, self._page.title, 'EditNotice',
+                                                         performer=self._user)[0]
             else:
                 # TODO prendre en compte les blocages
-                edit_notice = api_pages.get_page_message(self._page.namespace_id, self._page.title, 'EditForbidden')[0]
+                edit_notice = api_pages.get_page_message(self._page.namespace_id, self._page.title, 'EditForbidden',
+                                                         performer=self._user)[0]
 
             try:
                 revision = api_pages.get_page_revision(self._page.namespace_id, self._page.title,
-                                                       current_user=self._user, revision_id=self._revision_id)
+                                                       performer=self._user, revision_id=self._revision_id)
                 if revision:
                     wikicode = revision.content
                 else:
                     wikicode = ''
                 status = STATUS_FOUND
             except api_errors.RevisionDoesNotExistError:
-                message, _ = api_pages.get_message('InvalidRevisionID')
+                message, _ = api_pages.get_message('InvalidRevisionID', performer=self._user)
                 if message:
                     wikicode = self._format_message(message, revision_id=self._revision_id)
                 else:
@@ -517,7 +520,7 @@ class _EditActionHandler(ActionHandler):
 
         else:
             self._wikicode, page_lang = api_pages.get_page_message(self._page.namespace_id, self._page.title,
-                                                                   'ReadForbidden')
+                                                                   'ReadForbidden', performer=self._user)
             self._content_language = page_lang or self._language
             self._noindex = True
             self._mode = MODE_READ
@@ -532,10 +535,10 @@ class _EditActionHandler(ActionHandler):
         try:
             ns_id = self._page.namespace_id
             title = self._page.title
-            current_revision_id = api_pages.get_page_revision(ns_id, title, self._user)
+            current_revision_id = api_pages.get_page_revision(ns_id, title, performer=self._user)
             api_pages.submit_page_content(context, ns_id, title, self._wikicode, comment, minor,
                                           section_id=section_id, maintenance_category=maintenance_category,
-                                          current_revision_id=current_revision_id)
+                                          current_revision_id=current_revision_id, performer=context.user)
         except api_errors.PageEditForbiddenError:
             return False
         except api_errors.PageEditConflictError:
@@ -600,14 +603,14 @@ class _HistoryActionHandler(ActionHandler):
         self._noindex = True
         if self._can_read:
             if self._page_exists:
-                revisions = api_pages.get_page_revisions(self._page, self._user)
+                revisions = api_pages.get_page_revisions(self._page, performer=self._user)
                 paginator, paginator_page = api_pages.paginate(self._user, revisions, self._get)
                 return self._get_page_history_context(paginator=paginator, paginator_page=paginator_page), STATUS_FOUND
             else:
                 return self._get_page_history_context(paginator=None, paginator_page=0), STATUS_NOT_FOUND
         else:
             self._wikicode, page_lang = api_pages.get_page_message(self._page.namespace_id, self._page.title,
-                                                                   'ReadForbidden')
+                                                                   'ReadForbidden', performer=self._user)
             self._content_language = page_lang or self._language
             self._mode = MODE_READ
             return self._get_read_page_context(), STATUS_FORBIDDEN
@@ -625,8 +628,9 @@ class _SetupActionHandler(ActionHandler):
         if not setup.are_pages_setup():
             if self._method == 'POST':
                 form = forms.SetupPageForm(self._post)
-                if form.is_valid():
-                    errors = []
+                errors = []
+                is_valid = form.is_valid()
+                if is_valid:
                     if form.passwords_match():
                         username = form.cleaned_data['username']
                         password = form.cleaned_data['password']
@@ -641,8 +645,8 @@ class _SetupActionHandler(ActionHandler):
                     else:
                         errors.append('passwords_mismatch')
 
-                    if errors:
-                        return self._get_setup_page_context(form, errors)
+                if errors or not is_valid:
+                    return self._get_setup_page_context(form, errors)
             else:
                 setup.generate_secret_key_file()
                 return self._get_setup_page_context(forms.SetupPageForm())

@@ -9,7 +9,7 @@ import typing as typ
 import django.core.paginator as dj_page
 import django.db.transaction as dj_db_trans
 
-from . import _diff, errors, titles, logs, users
+from . import _diff, errors, titles, logs, _action
 from .. import settings, models, special_pages, parser, media_backends, util
 
 page_title_validator = models.page_title_validator
@@ -30,7 +30,7 @@ def page_exists(namespace_id: int, title: str, talk: bool = False) -> bool:
     """
     if namespace_id != settings.SPECIAL_NS.id:
         if talk:
-            return len(get_messages_for_page(namespace_id, title, ignore_hidden_topics=True)) != 0
+            return len(get_messages_for_page(namespace_id, title, performer=None, ignore_hidden_topics=True)) != 0
         else:
             try:
                 page = models.Page.objects.get(namespace_id=namespace_id, title=title)
@@ -282,7 +282,8 @@ def get_default_content_model(namespace_id: int, title: str):
 # region Revisions
 
 
-def get_diff(revision_id1: int, revision_id2: int, current_user: models.User, escape_html: bool, keep_lines: int) \
+@_action.api_action(settings.RIGHT_READ_PAGES)
+def get_diff(revision_id1: int, revision_id2: int, escape_html: bool, keep_lines: int, *, performer: models.User) \
         -> typ.Tuple[_diff.DiffType, models.PageRevision, models.PageRevision, int]:
     """
     Computes the difference between two page revisions.
@@ -290,9 +291,9 @@ def get_diff(revision_id1: int, revision_id2: int, current_user: models.User, es
 
     :param revision_id1: First revision ID.
     :param revision_id2: Second revision ID.
-    :param current_user: Current user.
     :param escape_html: If true, HTML tags will be escaped in the result.
     :param keep_lines: If true, all unchanged lines will be kept.
+    :param performer: The user performing this action.
     :return: A tuple containing the actual diff, the two revisions and the number of diffs not shown between these two
              (if the two revisions are from the same page).
     :raises WikiPy.api.errors.RevisionDoesNotExistError: If at least one of the two revision IDs does not exist.
@@ -311,9 +312,9 @@ def get_diff(revision_id1: int, revision_id2: int, current_user: models.User, es
     page1 = revision1.page
     page2 = revision2.page
 
-    if not current_user.can_read_page(page1.namespace_id, page1.title):
+    if not performer.can_read_page(page1.namespace_id, page1.title):
         raise errors.PageReadForbiddenError(page1)
-    if not current_user.can_read_page(page2.namespace_id, page2.title):
+    if not performer.can_read_page(page2.namespace_id, page2.title):
         raise errors.PageReadForbiddenError(page2)
 
     if revision1.page.id == revision2.page.id:
@@ -332,7 +333,8 @@ def get_diff(revision_id1: int, revision_id2: int, current_user: models.User, es
     return diff, revision1, revision2, nb_not_shown
 
 
-def get_page_revision(namespace_id: int, title: str, current_user: models.User = None, *, revision_id: int = None) \
+@_action.api_action(settings.RIGHT_READ_PAGES)
+def get_page_revision(namespace_id: int, title: str, *, performer: models.User = None, revision_id: int = None) \
         -> typ.Optional[models.PageRevision]:
     """
     Returns a revision for the given page. If revision_id is not specified, the latest non-hidden revision is returned.
@@ -341,11 +343,11 @@ def get_page_revision(namespace_id: int, title: str, current_user: models.User =
 
     :param namespace_id: Page’s namespace ID.
     :param title: Page’s title.
-    :param current_user: The user requesting the revision. Should ALWAYS be specified.
+    :param performer: The user requesting the revision. Should ALWAYS be specified outside of API.
     :param revision_id: The optional revision ID.
     :return: The revision or None if the page does not exist or the user is not allowed to read it.
     """
-    if page_exists(namespace_id, title) and (not current_user or current_user.can_read_page(namespace_id, title)):
+    if page_exists(namespace_id, title) and (not performer or performer.can_read_page(namespace_id, title)):
         page = models.Page.objects.get(namespace_id=namespace_id, title=title)
         if revision_id is not None:
             revision = page.get_revision(revision_id)
@@ -353,11 +355,11 @@ def get_page_revision(namespace_id: int, title: str, current_user: models.User =
             revision = page.latest_revision
 
         if not revision or (
-                revision.hidden and (not current_user or not current_user.has_right(settings.RIGHT_HIDE_REVISIONS))):
+                revision.hidden and (not performer or not performer.has_right(settings.RIGHT_DELETE_REVISIONS))):
             raise errors.RevisionDoesNotExistError(revision_id)
 
         revision.lock()
-        if current_user and not current_user.has_right(settings.RIGHT_HIDE_REVISIONS):
+        if performer and not performer.has_right(settings.RIGHT_DELETE_REVISIONS):
             if revision.author_hidden:
                 revision.author = None
             if revision.comment_hidden:
@@ -368,25 +370,26 @@ def get_page_revision(namespace_id: int, title: str, current_user: models.User =
         return None
 
 
-def get_page_revisions(page: models.Page, current_user: models.User) -> typ.List[models.PageRevision]:
+@_action.api_action(settings.RIGHT_READ_PAGES)
+def get_page_revisions(page: models.Page, *, performer: models.User) -> typ.List[models.PageRevision]:
     """
     Returns all revisions for the given page that the given user is allowed to see.
 
     :param page: The page.
-    :param current_user: The current user.
+    :param performer: The current user.
     :return: The revisions.
     """
-    if page_exists(page.namespace_id, page.title) and current_user.can_read_page(page.namespace_id, page.title):
+    if page_exists(page.namespace_id, page.title) and performer.can_read_page(page.namespace_id, page.title):
         args = {
             'page': page,
         }
-        if not current_user.has_right(settings.RIGHT_HIDE_REVISIONS):
+        if not performer.has_right(settings.RIGHT_DELETE_REVISIONS):
             args['hidden'] = False
 
         res = []
         for r in models.PageRevision.objects.filter(**args).order_by('-date'):
             r.lock()
-            if not current_user.has_right(settings.RIGHT_HIDE_REVISIONS):
+            if not performer.has_right(settings.RIGHT_DELETE_REVISIONS):
                 if r.author_hidden:
                     r.author = None
                 if r.comment_hidden:
@@ -513,10 +516,11 @@ def render_wikicode(wikicode: str, context, no_redirect: bool = False, enable_co
 
 
 # TODO handle conflicts
+@_action.api_action(settings.RIGHT_EDIT_PAGES)
 @dj_db_trans.atomic
 def submit_page_content(context, namespace_id: int, title: str,
                         wikicode: str, comment: typ.Optional[str], minor: bool, section_id: int = None,
-                        maintenance_category: bool = False, current_revision_id: int = None):
+                        maintenance_category: bool = False, current_revision_id: int = None, *, performer: models.User):
     """
     Submits new content for the given page.
 
@@ -530,6 +534,7 @@ def submit_page_content(context, namespace_id: int, title: str,
     :param section_id: The ID of the section that was edited. If specified, only this section will be edited.
     :param maintenance_category: If true and the page is a category, marks it as a maintenance category.
     :param current_revision_id: ID of the revision this edit was made from, should be None if this is the first edit.
+    :param performer: The user performing this action.
     :raises PageEditForbiddenError: If the user is not allowed to edit the page.
     :raises PageEditConflictError: If another user already edited the same page or section from the same revision.
     """
@@ -612,10 +617,10 @@ def submit_page_content(context, namespace_id: int, title: str,
                                page_title=page.title, reason=comment)
 
 
-# TODO abstraire le concept d’action sous forme de classes ?
+@_action.api_action(settings.RIGHT_READ_PAGES)
 @dj_db_trans.atomic
 def rename_page(context, old_namespace_id: int, old_title: str, new_namespace_id: int, new_title: str,
-                reason: str, create_redirection: bool, move_talks: bool):
+                reason: str, create_redirection: bool, move_talks: bool, *, performer: models.User):
     """
     Renames the given page. Revision history of the old page will be copied to the new page’s.
     Talks will be optionally moved to the new page.
@@ -630,6 +635,7 @@ def rename_page(context, old_namespace_id: int, old_title: str, new_namespace_id
     :param create_redirection: If true or the user is not allowed to delete pages,
     a redirection from the old to the new page will be created.
     :param move_talks: If true, all talks will be moved to the new page.
+    :param performer: The user performing this action.
     :raises PageRenameForbiddenError: If one of the following situations occured:
     - the user is not allowed to rename pages
     - both the old and new page have the same title
@@ -637,7 +643,6 @@ def rename_page(context, old_namespace_id: int, old_title: str, new_namespace_id
     - the new page already exists
     - the user is not allowed to edit the new page
     """
-    current_user = context.user
     current_page, _ = get_page(old_namespace_id, old_title)
     new_page, _ = get_page(new_namespace_id, new_title)
 
@@ -648,13 +653,11 @@ def rename_page(context, old_namespace_id: int, old_title: str, new_namespace_id
         raise errors.PageRenameForbiddenError(current_page, 'origin page does not exist')
     if new_page.exists:
         raise errors.PageRenameForbiddenError(current_page, 'target page already exists')
-    if not current_user.can_rename_page(current_page.namespace_id, current_page.title):
-        raise errors.PageRenameForbiddenError(current_page, 'rename forbidden')
-    if not current_user.can_edit_page(new_page.namespace_id, new_page.title)[0]:
+    if not performer.can_edit_page(new_page.namespace_id, new_page.title)[0]:
         raise errors.PageRenameForbiddenError(current_page, 'target edit forbidden')
 
     # Copy page revisions
-    for revision in get_page_revisions(current_page, current_user):
+    for revision in get_page_revisions(current_page, performer=performer):
         # Set id to None then save to clone model instance
         revision.id = None
         revision.page = new_page
@@ -665,19 +668,19 @@ def rename_page(context, old_namespace_id: int, old_title: str, new_namespace_id
         pass
 
     # Create redirection if necessary
-    if create_redirection or not current_user.has_right(settings.RIGHT_DELETE_PAGES):
+    if create_redirection or not performer.has_right(settings.RIGHT_DELETE_PAGES):
         wikicode = f'@REDIRECT[[{new_page.full_title}]]'
         comment = reason
-        current_revision_id = get_page_revision(current_page.namespace_id, current_page.title, current_user)
+        current_revision_id = get_page_revision(current_page.namespace_id, current_page.title, performer=performer)
         submit_page_content(context, current_page.namespace_id, current_page.title, wikicode, comment,
-                            current_revision_id=current_revision_id)
+                            current_revision_id=current_revision_id, performer=performer)
     else:
         # TODO delete the old page
         pass
 
     logs.add_log_entry(
         models.LOG_PAGE_RENAME,
-        performer=current_user,
+        performer=performer,
         page_namespace_id=current_page.namespace_id,
         page_title=current_page.title,
         new_page_namespace_id=new_page.namespace_id,
@@ -687,9 +690,10 @@ def rename_page(context, old_namespace_id: int, old_title: str, new_namespace_id
     )
 
 
+@_action.api_action(settings.RIGHT_PROTECT_PAGES)
 @dj_db_trans.atomic
-def protect_page(namespace_id: int, title: str, performer: models.User, protection_level: str, reason: str,
-                 apply_to_talk: bool, apply_to_subpages: bool, expiration_date: datetime.datetime):
+def protect_page(namespace_id: int, title: str, protection_level: str, reason: str, apply_to_talk: bool,
+                 apply_to_subpages: bool, expiration_date: datetime.datetime, *, performer: models.User):
     """
     Sets the protection level for the given pages. Any previous protection level will be overriden.
 
@@ -708,7 +712,7 @@ def protect_page(namespace_id: int, title: str, performer: models.User, protecti
     """
     current_page, _ = get_page(namespace_id, title)
 
-    if not performer.has_right(settings.RIGHT_PROTECT_PAGES) or namespace_id == settings.SPECIAL_NS.id:
+    if namespace_id == settings.SPECIAL_NS.id:
         raise errors.PageProtectionForbiddenError(current_page)
 
     pages = [current_page]
@@ -772,12 +776,14 @@ def get_page_protection(namespace_id: int, title: str) \
 MessageList = typ.Dict[models.TalkTopic, typ.List[typ.Union[models.Message, 'MessageList']]]
 
 
-def get_messages_for_page(namespace_id: int, title: str, current_user: models.User = None,
+@_action.api_action(settings.RIGHT_READ_PAGES)
+def get_messages_for_page(namespace_id: int, title: str, *, performer: models.User = None,
                           ignore_hidden_topics: bool = True) -> MessageList:
     return {}  # TODO
 
 
-def create_topic(performer: models.User, title: str, parent_topic_id: int, page_namespace_id: int, page_title: str):
+@_action.api_action(settings.RIGHT_CREATE_TOPICS)
+def create_topic(title: str, parent_topic_id: int, page_namespace_id: int, page_title: str, *, performer: models.User):
     if not performer.can_edit_page(page_namespace_id, page_title)[1]:
         raise errors.PageEditForbiddenError(get_page(page_namespace_id, page_title))
 
@@ -792,36 +798,44 @@ def create_topic(performer: models.User, title: str, parent_topic_id: int, page_
     ).save()
 
 
-def pin_topic(performer: models.User, topic_id: int, pin: bool):
-    users.check_rights(performer, settings.RIGHT_PIN_TOPICS)
+@_action.api_action(settings.RIGHT_PIN_TOPICS)
+def pin_topic(topic_id: int, pin: bool, *, performer: models.User):
+    _action.check_rights(performer, settings.RIGHT_PIN_TOPICS)
     topic = models.TalkTopic.objects.get(id=topic_id)
     topic.pinned = pin
     topic.save()
 
 
-def submit_message(performer: models.User, content: str, comment: str = None, minor_edit: bool = False,
-                   topic_id: int = None, reply_to: int = None):
+@_action.api_action(settings.RIGHT_POST_MESSAGES)
+def submit_message(content: str, comment: str = None, minor_edit: bool = False, topic_id: int = None,
+                   reply_to: int = None, *, performer: models.User):
     pass  # TODO
 
 
-def edit_message(performer: models.User, message_id: int, content: str, comment: str = None,
-                 minor_edit: bool = False):
+@_action.api_action()
+def edit_message(message_id: int, content: str, comment: str = None,
+                 minor_edit: bool = False, *, performer: models.User):
+    # TODO check if message is own or not and associated rights
     pass  # TODO
 
 
-def delete_topic(performer: models.User, topic_id: int):
+@_action.api_action(settings.RIGHT_DELETE_TOPICS)
+def delete_topic(topic_id: int, *, performer: models.User):
     pass  # TODO
 
 
-def restore_topic(performer: models.User, topic_id: int):
+@_action.api_action(settings.RIGHT_RESTORE_TOPICS)
+def restore_topic(topic_id: int, *, performer: models.User):
     pass  # TODO
 
 
-def delete_message(performer: models.User, message_id: int):
+@_action.api_action(settings.RIGHT_DELETE_MESSAGES)
+def delete_message(message_id: int, *, performer: models.User):
     pass  # TODO
 
 
-def restore_message(performer: models.User, message_id: int):
+@_action.api_action(settings.RIGHT_RESTORE_MESSAGES)
+def restore_message(message_id: int, *, performer: models.User):
     pass  # TODO
 
 
@@ -829,38 +843,43 @@ def restore_message(performer: models.User, message_id: int):
 # region Utility
 
 
-def get_page_content(ns_id: int, title: str) -> typ.Optional[str]:
+@_action.api_action(settings.RIGHT_READ_PAGES)
+def get_page_content(ns_id: int, title: str, *, performer: models.User = None) -> typ.Optional[str]:
     """
     Returns the content of the last non-deleted revision of the given page.
 
     :param ns_id: Page’s namespace ID.
     :param title: Page’s title.
+    :param performer: The user performing this action. May be None for menus.
     :return: The page’s content or None if the page does not exits.
     """
-    revision = get_page_revision(ns_id, title)
+    revision = get_page_revision(ns_id, title, performer=performer)
     if revision:
         return revision.content
     return None
 
 
-def get_message(notice_name: str) -> typ.Tuple[str, typ.Optional[settings.i18n.Language]]:
+@_action.api_action(settings.RIGHT_READ_PAGES)
+def get_message(notice_name: str, *, performer: models.User) -> typ.Tuple[str, typ.Optional[settings.i18n.Language]]:
     """
     Returns the message with the given name.
     Returned message will be fetched from the page named WikiPy:Message-<notice_name>.
 
     :param notice_name: Name of the message.
+    :param performer: The user performing this action.
     :return: The message and its language, or an empty string and None if the message page does not exist.
     """
-    revision = get_page_revision(settings.WIKIPY_NS.id, f'Message-{notice_name}')
+    revision = get_page_revision(settings.WIKIPY_NS.id, f'Message-{notice_name}', performer=performer)
     if revision:
         return revision.content, revision.page.content_language
     return '', None
 
 
-def get_page_message(namespace_id: int, title: str, notice_name: str, no_per_title_notice: bool = False) \
+@_action.api_action(settings.RIGHT_READ_PAGES)
+def get_page_message(namespace_id: int, title: str, notice_name: str, *, performer: models.User,
+                     no_per_title_notice: bool = False) \
         -> typ.Tuple[str, typ.Optional[settings.i18n.Language]]:
-    """
-    Returns the message with the given name for the given page.
+    """Returns the message with the given name for the given page.
     Returned message will be fetched from the following pages (in that order):
         - WikiPy:Message-<notice_name>-<namespace_id>-<title> (if enabled)
         - WikiPy:Message-<notice_name>-<namespace_id>
@@ -869,16 +888,19 @@ def get_page_message(namespace_id: int, title: str, notice_name: str, no_per_tit
     :param namespace_id: Page’s namespace ID.
     :param title: Page’s title.
     :param notice_name: Name of the message.
+    :param performer: The user performing this action.
     :param no_per_title_notice: If true, the function will not try to fetch the page-specific message.
     :return: The message and its language, or an empty string and None if the message page does not exist.
     """
     if namespace_id != settings.SPECIAL_NS.id:
-        message_revision = get_page_revision(settings.WIKIPY_NS.id, f'Message-{notice_name}')
-        ns_message_revision = get_page_revision(settings.WIKIPY_NS.id, f'Message-{notice_name}-{namespace_id}')
+        message_revision = get_page_revision(settings.WIKIPY_NS.id, f'Message-{notice_name}', performer=performer)
+        ns_message_revision = get_page_revision(settings.WIKIPY_NS.id, f'Message-{notice_name}-{namespace_id}',
+                                                performer=performer)
         if not no_per_title_notice:
             # TODO fetch page *beginning* with the title
             page_message_revision = get_page_revision(settings.WIKIPY_NS.id,
-                                                      f'Message-{notice_name}-{namespace_id}-{title}')
+                                                      f'Message-{notice_name}-{namespace_id}-{title}',
+                                                      performer=performer)
         else:
             page_message_revision = None
 

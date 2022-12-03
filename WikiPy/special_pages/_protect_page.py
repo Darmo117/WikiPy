@@ -168,8 +168,8 @@ class ProtectPage(SpecialPage):
             else:
                 exp_date = datetime.date.fromisoformat(pred_exp_date)
             try:
-                api_pages.protect_page(namespace_id, title, base_context.user, protection_level, reason, apply_to_talk,
-                                       apply_to_subpages, exp_date)
+                api_pages.protect_page(namespace_id, title, protection_level, reason, apply_to_talk,
+                                       apply_to_subpages, exp_date, performer=base_context.user)
             except (api_errors.PageProtectionForbiddenError, api_errors.MissingRightError):
                 errors.append('protect_forbidden')
             else:

@@ -115,7 +115,7 @@ class RenamePage(SpecialPage):
             create_redirection = form.cleaned_data['create_redirection']
             try:
                 api_pages.rename_page(base_context, current_namespace_id, current_title, new_namespace_id, new_title,
-                                      reason, create_redirection)
+                                      reason, create_redirection, performer=base_context.user)
             except api_errors.PageRenameForbiddenError as e:
                 errors.append(
                     {

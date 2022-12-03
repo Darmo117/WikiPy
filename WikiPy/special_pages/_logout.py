@@ -34,7 +34,7 @@ class LogoutPage(SpecialPage):
                 page_title = 'LoggedOut'
 
             logout_notice = dj_safe.mark_safe(api_pages.render_wikicode(
-                api_pages.get_message(page_title)[0],
+                api_pages.get_message(page_title, performer=context.user)[0],
                 base_context
             ))
             context = LogoutPageContext(context, logout_notice=logout_notice)

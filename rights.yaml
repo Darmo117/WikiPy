@@ -1,0 +1,145 @@
+group restrictions:
+  users:
+    needs: all
+  email_confirmed:
+    needs: users
+  autopatrolled:
+    needs: email_confirmed
+  patrollers:
+    needs: autopatrolled
+  administrators:
+    needs: autopatrolled
+  message_administrators:
+    needs: autopatrolled
+  interface_administrators:
+    needs: autopatrolled
+  groups_managers:
+    needs: autopatrolled
+  user_checkers:
+    needs: autopatrolled
+  file_managers:
+    needs: autopatrolled
+  bots:
+    needs: users
+  abuse_filter_modifiers:
+    needs: autopatrolled
+
+rights:
+  autopatrolled:
+    groups: autopatrolled
+  create_account:
+    groups: all
+  create_pages:
+    groups: all
+  create_topics:
+    groups: all
+  edit_topics:
+    groups: all
+  pin_topics:
+    groups: autopatrolled
+  delete_topics:
+    groups: message_administrators
+  restore_topics:
+    groups: message_administrators
+  view_deleted_topics:
+    groups: message_administrators, administrators
+  post_messages:
+    groups: all
+  edit_messages:
+    groups: message_administrators
+  edit_own_messages:
+    groups: all
+  delete_messages:
+    groups: message_administrators
+  restore_messages:
+    groups: message_administrators
+  view_deleted_messages:
+    groups: message_administrators, administrators
+  read:
+    groups: all
+  edit:
+    groups: all
+  edit_my_preferences:
+    groups: users
+  edit_my_watchlist:
+    groups: users
+  write_api:
+    groups: users
+  no_rate_limit:
+    groups: bots
+  bot:
+    groups: bots
+  patrol:
+    groups: patrollers
+  rename_pages:
+    groups: email_confirmed
+  protect_pages:
+    groups: administrators
+  edit_user_pages:
+    groups: administrators
+  rename_users:
+    groups: administrators
+  rename_files:
+    groups: file_managers, administrators
+  delete_pages:
+    groups: administrators
+  restore_pages:
+    groups: administrators
+  rollback:
+    groups: patrollers
+  delete_revisions:
+    groups: administrators
+  restore_revisions:
+    groups: administrators
+  view_deleted_revisions:
+    groups: administrators
+  reupload_files:
+    groups: file_managers
+  edit_users_groups:
+    groups: groups_managers
+  view_user_private_details:
+    groups: user_checkers
+  edit_site_interface:
+    groups: interface_administrators
+  edit_gadgets:
+    groups: interface_administrators
+  edit_user_interface: # CSS, JS, JSON
+    groups: interface_administrators
+  ip_block_exempt:
+    groups: users
+  view_deleted_log_entries:
+    groups: administrators
+  delete_log_entries:
+    groups: administrators
+  view_titles_blacklist:
+    groups: administrators
+  edit_titles_blacklist:
+    groups: administrators
+  block_users:
+    groups: administrators
+  edit_page_language:
+    groups: administrators
+  block_emails: # prevent user from sending emails to others
+    groups: administrators
+  merge_pages:
+    groups: administrators
+  edit_page_content_model:
+    groups: administrators
+  mass_delete_pages:
+    groups: administrators
+  upload_files:
+    groups: file_managers
+  send_emails:
+    groups: users
+  edit_my_interface: # CSS, JS, JSON
+    groups: users
+  purge_cache:
+    groups: users
+  abuse_filter_edit:
+    groups: abuse_filter_modifiers
+  abuse_filter_view:
+    groups: abuse_filter_modifiers, patrollers, administrators
+  abuse_filter_revert:
+    groups: abuse_filter_modifiers
+  abuse_filter_view_log:
+    groups: abuse_filter_modifiers, patrollers, administrators

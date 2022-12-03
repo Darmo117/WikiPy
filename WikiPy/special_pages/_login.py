@@ -52,7 +52,7 @@ class LoginPage(SpecialPage):
         context = self._get_return_to_context(request, base_context)
 
         login_notice = dj_safe.mark_safe(api_pages.render_wikicode(
-            api_pages.get_message('LoginDisclaimer')[0],
+            api_pages.get_message('LoginDisclaimer', performer=context.user)[0],
             base_context
         ))
 
@@ -70,7 +70,7 @@ class LoginPage(SpecialPage):
 
         if user.is_logged_in:
             login_warning = dj_safe.mark_safe(api_pages.render_wikicode(
-                api_pages.get_message('AlreadyLoggedIn')[0],
+                api_pages.get_message('AlreadyLoggedIn', performer=base_context.user)[0],
                 base_context
             ))
         else:

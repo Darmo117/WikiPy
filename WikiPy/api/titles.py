@@ -240,7 +240,7 @@ def title_from_url(url_title: str) -> str:
 
 def get_wiki_url_path() -> str:
     """Returns the wiki’s URL path."""
-    return dj_scut.reverse('wikipy:page', kwargs={'raw_page_title': ''})
+    return dj_scut.reverse('wikipy:main_page')
 
 
 def get_api_url_path() -> str:

@@ -7,7 +7,7 @@ import typing as typ
 class Namespace:
     def __init__(self, ident: int, canonical_name: str, has_talks: bool, can_be_main: bool, is_content: bool,
                  allows_subpages: bool, name: str = None, alias: str = None, feminine_name: str = None,
-                 masculine_name: str = None):
+                 masculine_name: str = None, requires_rights: typ.Iterable[str] = None):
         """
         This class represents a namespace. Each namespace has an integer ID,
         a canonical name, an optional local name and an optional alias.
@@ -25,6 +25,7 @@ class Namespace:
             Mainly intended for the User namespace in languages that have grammatical genders.
         :param masculine_name: The masculine variant of the namespace name.
             Mainly intended for the User namespace in languages that have grammatical genders.
+        :param requires_rights: An optional list of rights users must have to be able to edit pages in this namespace.
         """
         self.__id = ident
         self.__canonical_name = canonical_name
@@ -36,6 +37,7 @@ class Namespace:
         self.__can_be_main = can_be_main
         self.__is_content = is_content
         self.__allows_subpages = allows_subpages
+        self.__requires_rights = tuple(requires_rights) if requires_rights else ()
 
     @property
     def id(self) -> int:
@@ -86,6 +88,11 @@ class Namespace:
     def allows_subpages(self) -> bool:
         """Indicates whether pages in this namespace can have subpages."""
         return self.__allows_subpages
+
+    @property
+    def requires_rights(self) -> typ.Tuple[str]:
+        """List of rights users must have to be able to edit pages in this namespace."""
+        return self.__requires_rights
 
     def get_name(self, local: bool, gender=None, as_url: bool = False) -> str:
         """
